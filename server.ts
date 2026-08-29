@@ -134,8 +134,95 @@ app.post('/api/news/refresh', async (req, res) => {
 });
 
 // ============================================================================
-// Incremental Content Synchronization Endpoints & Status
+// Game Catalog API — Serves steamGamesCatalog.json directly from disk
+// Incremental sync updates are instantly visible without rebuilding the client.
 // ============================================================================
+
+const CATALOG_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'steamGamesCatalog.json');
+let cachedCatalog: any[] | null = null;
+let lastCatalogReadTime = 0;
+const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000; // Refresh from disk at most every 5 minutes
+
+function loadCatalogFromFile(): any[] {
+  const now = Date.now();
+  if (cachedCatalog && (now - lastCatalogReadTime) < CATALOG_CACHE_TTL_MS) {
+    return cachedCatalog;
+  }
+  try {
+    if (fs.existsSync(CATALOG_FILE_PATH)) {
+      const data = fs.readFileSync(CATALOG_FILE_PATH, 'utf8');
+      cachedCatalog = JSON.parse(data);
+      lastCatalogReadTime = now;
+      return cachedCatalog || [];
+    }
+  } catch (err) {
+    console.error('[Catalog] Error reading steamGamesCatalog.json:', err);
+  }
+  return cachedCatalog || [];
+}
+
+// GET /api/catalog - Query, filter, and paginate the game catalog
+app.get('/api/catalog', (req, res) => {
+  try {
+    const { category, search, deckVerified, sort, page = '1', limit = '100' } = req.query;
+    let games = loadCatalogFromFile();
+
+    // Category filter (basic string match - client-side matchesGameCategory handles full logic)
+    if (category && category !== 'all') {
+      const catLower = String(category).toLowerCase();
+      games = games.filter((g: any) =>
+        g.category?.toLowerCase() === catLower ||
+        (g.tags && g.tags.some((t: string) => t.toLowerCase().includes(catLower)))
+      );
+    }
+
+    // Steam Deck Verified filter
+    if (deckVerified === 'true') {
+      games = games.filter((g: any) => g.steamDeckStatus === 'Verified');
+    }
+
+    // Search filter
+    if (search && typeof search === 'string' && search.trim()) {
+      const q = search.trim().toLowerCase();
+      games = games.filter((g: any) =>
+        g.title?.toLowerCase().includes(q) ||
+        g.developer?.toLowerCase().includes(q) ||
+        g.shortDescription?.toLowerCase().includes(q) ||
+        (g.tags && g.tags.some((t: string) => t.toLowerCase().includes(q)))
+      );
+    }
+
+    // Sort
+    if (sort === 'rating') games = games.sort((a: any, b: any) => (b.ratingScore || 0) - (a.ratingScore || 0));
+    else if (sort === 'cozy') games = games.sort((a: any, b: any) => (b.cozyScore || 0) - (a.cozyScore || 0));
+
+    const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
+    const limitNum = Math.max(1, Math.min(500, parseInt(String(limit), 10) || 100));
+    const startIndex = (pageNum - 1) * limitNum;
+    const paginated = games.slice(startIndex, startIndex + limitNum);
+
+    return res.json({
+      success: true,
+      total: games.length,
+      page: pageNum,
+      limit: limitNum,
+      games: paginated
+    });
+  } catch (error: any) {
+    console.error('[Catalog] Error serving catalog:', error);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve catalog.' });
+  }
+});
+
+// POST /api/catalog/invalidate - Force catalog cache flush (called after incremental sync)
+app.post('/api/catalog/invalidate', (req, res) => {
+  cachedCatalog = null;
+  lastCatalogReadTime = 0;
+  console.log('[Catalog] Cache invalidated — next request will reload from disk.');
+  return res.json({ success: true, message: 'Catalog cache cleared.' });
+});
+
+
 
 // GET /api/sync/status - Inspect sync metadata, timestamps & error states
 app.get('/api/sync/status', async (req, res) => {
@@ -247,6 +334,33 @@ function saveSessions(sessions: Record<string, any>) {
 
 function hashPassword(password: string, salt: string): string {
   return crypto.scryptSync(password, salt, 64).toString('hex');
+}
+
+/**
+ * Prune sessions older than `maxAgeDays` days to prevent unbounded file growth.
+ * Called on server startup and after each login.
+ */
+function pruneExpiredSessions(maxAgeDays = 30): void {
+  try {
+    const sessions = getSessions();
+    const cutoff = Date.now() - maxAgeDays * 24 * 60 * 60 * 1000;
+    const pruned: Record<string, any> = {};
+    let removed = 0;
+    for (const [token, session] of Object.entries(sessions)) {
+      const lastActive = session.lastActiveAt ? new Date(session.lastActiveAt).getTime() : 0;
+      if (lastActive >= cutoff) {
+        pruned[token] = session;
+      } else {
+        removed++;
+      }
+    }
+    if (removed > 0) {
+      saveSessions(pruned);
+      console.log(`[Sessions] Pruned ${removed} expired session(s) older than ${maxAgeDays} days.`);
+    }
+  } catch (err) {
+    console.error('[Sessions] Error pruning expired sessions:', err);
+  }
 }
 
 function createSession(userId: string): string {
@@ -394,6 +508,9 @@ app.post('/api/auth/login', (req, res) => {
     user.profile.isLoggedIn = true;
     user.profile.email = user.email;
     saveUsers(users);
+
+    // Opportunistically prune stale sessions on each login
+    pruneExpiredSessions(30);
 
     const token = createSession(user.id);
     return res.json({
@@ -938,6 +1055,8 @@ async function setupViteMiddleware() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Cozy Indie Dispatch server running on port ${PORT}`);
+    // Prune stale sessions on startup
+    pruneExpiredSessions(30);
     startScheduledSyncJobs();
   });
 }
@@ -977,6 +1096,9 @@ function startScheduledSyncJobs() {
       console.log('[Scheduler] Executing scheduled incremental catalog discovery...');
       const { syncCatalogIncremental } = await import('./src/services/incrementalSyncService');
       await syncCatalogIncremental();
+      // Invalidate in-memory catalog cache so /api/catalog serves fresh data immediately
+      cachedCatalog = null;
+      lastCatalogReadTime = 0;
     } catch (err: any) {
       console.error('[Scheduler] Scheduled catalog update error:', err.message);
     }

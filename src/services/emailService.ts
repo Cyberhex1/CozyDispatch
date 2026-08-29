@@ -1,3 +1,19 @@
+/**
+ * @server-only
+ *
+ * This module uses Node.js built-ins (fs, path, crypto) and the `axios` HTTP
+ * client. It MUST only be imported from server-side code (server.ts or scripts/).
+ * It is intentionally excluded from Vite's client bundle via dynamic import()
+ * in server.ts — do NOT add static imports of this file anywhere in src/.
+ */
+// Guard: fail fast if accidentally loaded in a browser environment
+if (typeof window !== 'undefined') {
+  throw new Error(
+    '[emailService] This module is server-only and cannot be imported in the browser. ' +
+    'Use the /api/newsletter endpoints from the client instead.'
+  );
+}
+
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';

@@ -1,3 +1,13 @@
+/**
+ * @server-only
+ *
+ * Uses Node.js built-ins (fs, path, crypto) and network clients.
+ * Must only be imported via dynamic import() from server.ts or scripts/.
+ */
+if (typeof window !== 'undefined') {
+  throw new Error('[incrementalSyncService] This module is server-only.');
+}
+
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';

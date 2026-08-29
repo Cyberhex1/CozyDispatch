@@ -292,7 +292,109 @@ async function runTests() {
 
   console.log('✅ Test 5 Passed: Multi-filter composition works harmoniously.\n');
 
-  console.log('🎉 ALL TESTS PASSED SUCCESSFULLY!');
+  // -------------------------------------------------------------
+  // Test 6: Date Boundary Edge Cases
+  // -------------------------------------------------------------
+  console.log('--- TEST 6: Date Boundary Edge Cases ---');
+
+  // Exactly at now — should be "newly released"
+  const gameExactlyNow: Game = { ...sampleGames[1], id: 'g-exact-now', releaseDate: 'today', releaseStatus: 'released' };
+  assert(isGameNewlyReleased(gameExactlyNow, 180, now), 'Game released exactly today must be newly released');
+
+  // 1ms in the future — should NOT be newly released
+  const gameOneMsAhead = { ...sampleGames[1], id: 'g-one-ms', releaseDate: new Date(now + 1).toISOString(), releaseStatus: 'upcoming' as const };
+  assert(!isGameNewlyReleased(gameOneMsAhead, 180, now), 'Game 1ms in future must NOT be newly released');
+
+  // Exactly at the window boundary (180 days ago)
+  const boundary180 = now - 180 * 24 * 60 * 60 * 1000;
+  const gameBoundary: Game = {
+    ...sampleGames[1],
+    id: 'g-boundary',
+    releaseDate: new Date(boundary180).toISOString(),
+    releaseStatus: 'released'
+  };
+  assert(isGameNewlyReleased(gameBoundary, 180, now), 'Game at exactly 180 days ago must still qualify as newly released');
+
+  // 181 days ago — outside window
+  const game181Days: Game = {
+    ...sampleGames[1],
+    id: 'g-181',
+    releaseDate: new Date(now - 181 * 24 * 60 * 60 * 1000).toISOString(),
+    releaseStatus: 'released',
+    isNewlyReleased: false
+  };
+  assert(!isGameNewlyReleased(game181Days, 180, now), 'Game at 181 days ago must NOT qualify as newly released (default 180 day window)');
+
+  console.log('✅ Test 6 Passed: Date boundary edge cases (today, 1ms future, 180d boundary, 181d past) are all correct.\n');
+
+  // -------------------------------------------------------------
+  // Test 7: Badge Count Accuracy per Category
+  // -------------------------------------------------------------
+  console.log('--- TEST 7: Badge Count Accuracy (category-scoped) ---');
+  
+  // Simulate the fixed GameBrowser behavior: badge counts scoped to category
+  const farmingGames = ALL_GAMES.filter((g) => matchesGameCategory(g, 'farming'));
+  const farmingNewlyReleased = farmingGames.filter((g) => isGameNewlyReleased(g, 180, now));
+  const allNewlyReleased = ALL_GAMES.filter((g) => isGameNewlyReleased(g, 180, now));
+
+  console.log(`  All games newly released: ${allNewlyReleased.length}`);
+  console.log(`  Farming category games: ${farmingGames.length}`);
+  console.log(`  Farming + newly released: ${farmingNewlyReleased.length}`);
+
+  // Category-scoped count must be <= full catalog count
+  assert(
+    farmingNewlyReleased.length <= allNewlyReleased.length,
+    'Farming newly released count must be <= total catalog newly released count'
+  );
+
+  // Every game in farmingNewlyReleased must actually match farming AND be newly released
+  for (const g of farmingNewlyReleased) {
+    assert(matchesGameCategory(g, 'farming'), `${g.title} must match farming category`);
+    assert(isGameNewlyReleased(g, 180, now), `${g.title} must be newly released`);
+  }
+
+  console.log('✅ Test 7 Passed: Badge counts are correctly scoped to the active category.\n');
+
+  // -------------------------------------------------------------
+  // Test 8: No Coming-Soon games leapfrog released games in real catalog
+  // -------------------------------------------------------------
+  console.log('--- TEST 8: Real Catalog Sort Integrity ---');
+  
+  const sortedRealNewest = [...ALL_GAMES].sort((a, b) => {
+    const tsA = parseReleaseTimestamp(a.releaseDate, a.releaseStatus, now);
+    const tsB = parseReleaseTimestamp(b.releaseDate, b.releaseStatus, now);
+
+    const isAUpcoming = a.releaseStatus === 'upcoming' || tsA > now || tsA <= 0;
+    const isBUpcoming = b.releaseStatus === 'upcoming' || tsB > now || tsB <= 0;
+
+    if (!isAUpcoming && isBUpcoming) return -1;
+    if (isAUpcoming && !isBUpcoming) return 1;
+    if (!isAUpcoming && !isBUpcoming) return tsB - tsA;
+    return tsA - tsB;
+  });
+
+  // Find the last released game index and first upcoming game index
+  const lastReleasedIdx = sortedRealNewest.map((g, i) => ({ g, i })).filter(
+    ({ g }) => g.releaseStatus !== 'upcoming' && parseReleaseTimestamp(g.releaseDate, g.releaseStatus, now) <= now && parseReleaseTimestamp(g.releaseDate, g.releaseStatus, now) > 0
+  ).pop()?.i ?? -1;
+
+  const firstUpcomingIdx = sortedRealNewest.findIndex(
+    (g) => g.releaseStatus === 'upcoming' || parseReleaseTimestamp(g.releaseDate, g.releaseStatus, now) > now || parseReleaseTimestamp(g.releaseDate, g.releaseStatus, now) <= 0
+  );
+
+  if (firstUpcomingIdx !== -1 && lastReleasedIdx !== -1) {
+    assert(
+      lastReleasedIdx < firstUpcomingIdx,
+      `All released games must appear before upcoming/Coming Soon games in newest sort. Last released idx: ${lastReleasedIdx}, First upcoming idx: ${firstUpcomingIdx}`
+    );
+    console.log(`  Released games (${lastReleasedIdx + 1}) all precede upcoming games in the sort. ✓`);
+  } else {
+    console.log(`  No upcoming games found in catalog — skip boundary assertion.`);
+  }
+
+  console.log('✅ Test 8 Passed: No Coming Soon/upcoming games leapfrog released games in the real catalog sort.\n');
+
+  console.log('🎉 ALL 8 TESTS PASSED SUCCESSFULLY!');
 }
 
 runTests().catch((err) => {

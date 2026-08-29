@@ -105,5 +105,112 @@
       }
     ],
     "lastSyncedAt": "2026-08-29T21:28:11.594Z"
+  },
+  {
+    "id": "usr_13abc51c-b922-4871-ac56-05876610f1c2",
+    "email": "player_1788041086518@cozytest.com",
+    "passwordHash": "b1f87f1c958ce962f737ff2f72d4faffa70d55a9515870291f7f936d413c15399401df25c0930c7882384f4bc72a83a0d0cde6d89fa51c9b70cf6a4ec78d1ca8",
+    "salt": "97286939c8e6243c6d1f71716812e1c6",
+    "createdAt": "2026-08-29T22:04:46.577Z",
+    "profile": {
+      "id": "usr_13abc51c-b922-4871-ac56-05876610f1c2",
+      "email": "player_1788041086518@cozytest.com",
+      "isLoggedIn": true,
+      "username": "FernTester",
+      "gamerTag": "FernTester#1804",
+      "avatarIcon": "sprout",
+      "bio": "Modified from Steam Deck (Device B)",
+      "favoriteVibe": "Deck Verified 60FPS",
+      "memberSince": "August 2026",
+      "preferences": {
+        "notifyOnPriceDrops": true,
+        "notifyOnReleases": true,
+        "notifyOnPatches": true,
+        "preferredGenres": [
+          "Farming Sim",
+          "Gridless Builder",
+          "Atmospheric",
+          "Cozy Castle",
+          "Roguelike Deckbuilder"
+        ],
+        "preferredStore": "all",
+        "steamDeckOnly": false,
+        "minCozyScore": 8.5,
+        "dailyDigestOptIn": true
+      }
+    },
+    "wishlistedGameIds": [
+      "fields-of-mistria",
+      "tiny-glade",
+      "haunted-chocolatier",
+      "balatro",
+      "roots-of-pacha"
+    ],
+    "wishlistItems": [],
+    "bookmarkedArticleIds": [
+      "art-1",
+      "art-new-release-radar"
+    ],
+    "notifications": [
+      {
+        "id": "notif-welcome",
+        "type": "wishlist",
+        "title": "Welcome to Cozy Dispatch Cloud!",
+        "message": "Your profile and wishlist are now securely synchronized across all your devices.",
+        "timestamp": "Just now",
+        "isRead": false
+      }
+    ],
+    "lastSyncedAt": "2026-08-29T22:04:46.643Z"
+  },
+  {
+    "id": "usr_abfe960b-216e-4c08-9380-967241075e96",
+    "email": "user2_1788041086653@cozytest.com",
+    "passwordHash": "424cfc244f109d85fc7744211c9d89ae40a3ce831e88b8f0886b3fe0a1e2cb2d5f30cf0d3bda8519baf0ee5ef18e07f44fcec0c9bbf4f663d6632d6a2b8cf82f",
+    "salt": "5d45114a660366887475c12d6ffaf75b",
+    "createdAt": "2026-08-29T22:04:46.695Z",
+    "profile": {
+      "id": "usr_abfe960b-216e-4c08-9380-967241075e96",
+      "email": "user2_1788041086653@cozytest.com",
+      "isLoggedIn": true,
+      "username": "SecondUser",
+      "gamerTag": "SecondUser#3783",
+      "avatarIcon": "sprout",
+      "bio": "Cozy indie gamer and Steam Deck explorer.",
+      "favoriteVibe": "Pastel Watercolor & Zero Combat",
+      "memberSince": "August 2026",
+      "preferences": {
+        "notifyOnPriceDrops": true,
+        "notifyOnReleases": true,
+        "notifyOnPatches": true,
+        "preferredGenres": [
+          "Farming Sim",
+          "Gridless Builder",
+          "Atmospheric",
+          "Cozy Castle",
+          "Roguelike Deckbuilder"
+        ],
+        "preferredStore": "all",
+        "steamDeckOnly": false,
+        "minCozyScore": 8.5,
+        "dailyDigestOptIn": true
+      }
+    },
+    "wishlistedGameIds": [
+      "dave-the-diver"
+    ],
+    "wishlistItems": [],
+    "bookmarkedArticleIds": [],
+    "notifications": [
+      {
+        "id": "notif-welcome",
+        "type": "wishlist",
+        "title": "Welcome to Cozy Dispatch Cloud!",
+        "message": "Your profile and wishlist are now securely synchronized across all your devices.",
+        "timestamp": "Just now",
+        "isRead": false
+      }
+    ],
+    "lastSyncedAt": "2026-08-29T22:04:46.695Z"
   }
 ]

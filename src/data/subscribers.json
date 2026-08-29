@@ -9,5 +9,16 @@
     "welcomeEmailSentAt": "2026-08-29T21:39:28.342Z",
     "unsubscribeToken": "697272382648572401d4ee74344ad914",
     "lastNewsletterSentAt": "2026-08-29T21:39:28.369Z"
+  },
+  {
+    "id": "sub_d8bb8af4-6e66-4c00-935f-3d70e7d2b198",
+    "email": "cozy_reader_1788041088407@example.com",
+    "subscribedAt": "2026-08-29T22:04:48.463Z",
+    "source": "footer_signup",
+    "status": "unsubscribed",
+    "welcomeEmailSent": true,
+    "welcomeEmailSentAt": "2026-08-29T22:04:48.468Z",
+    "unsubscribeToken": "e2a6301ccd72f1de75c1a07db8b50ceb",
+    "lastNewsletterSentAt": "2026-08-29T22:04:48.502Z"
   }
 ]

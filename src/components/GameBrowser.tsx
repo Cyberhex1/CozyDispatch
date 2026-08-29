@@ -121,19 +121,29 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
     setVisibleCount(PAGE_SIZE);
   }, [games, selectedCategory, filterType, deckOnly, minCozyScore, selectedTag, searchQuery, sortBy]);
 
-  // Extract top unique tags
+  // Extract top unique tags (from full catalog regardless of category)
   const allTags = useMemo(() => {
     const set = new Set<string>();
     games.forEach((g) => g.tags.forEach((t) => set.add(t)));
     return Array.from(set).slice(0, 16);
   }, [games]);
 
-  // Pre-calculate badge counts for tabs
-  const newlyReleasedCount = useMemo(() => games.filter((g) => isGameNewlyReleased(g)).length, [games]);
-  const newlyUpdatedCount = useMemo(() => games.filter(isGameNewlyUpdated).length, [games]);
-  const popularCount = useMemo(() => games.filter((g) => g.isPopular).length, [games]);
-  const highlyRatedCount = useMemo(() => games.filter((g) => g.isHighlyRated || g.ratingScore >= 90).length, [games]);
-  const hiddenGemsCount = useMemo(() => games.filter((g) => g.isHiddenGem).length, [games]);
+  // Category-pre-filtered set for accurate tab badge counts
+  // Counts reflect the selected category so the badge matches actual results
+  const categoryFilteredGames = useMemo(() => {
+    if (selectedCategory === 'all') return games;
+    return games.filter((g) => matchesGameCategory(g, selectedCategory));
+  }, [games, selectedCategory]);
+
+  // Stable now reference — computed once per render cycle, not per game
+  const nowRef = useMemo(() => Date.now(), []);
+
+  // Pre-calculate badge counts scoped to the current category
+  const newlyReleasedCount = useMemo(() => categoryFilteredGames.filter((g) => isGameNewlyReleased(g, 180, nowRef)).length, [categoryFilteredGames, nowRef]);
+  const newlyUpdatedCount = useMemo(() => categoryFilteredGames.filter(isGameNewlyUpdated).length, [categoryFilteredGames]);
+  const popularCount = useMemo(() => categoryFilteredGames.filter((g) => g.isPopular).length, [categoryFilteredGames]);
+  const highlyRatedCount = useMemo(() => categoryFilteredGames.filter((g) => g.isHighlyRated || g.ratingScore >= 90).length, [categoryFilteredGames]);
+  const hiddenGemsCount = useMemo(() => categoryFilteredGames.filter((g) => g.isHiddenGem).length, [categoryFilteredGames]);
 
   // Filtered & Sorted list
   const filteredGames = useMemo(() => {
