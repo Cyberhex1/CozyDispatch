@@ -27,25 +27,25 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-      <div className="relative bg-white text-[#4A4A40] rounded-3xl border border-[#E6E2D3] shadow-xl max-w-2xl w-full overflow-hidden my-8">
+      <div className="relative bg-white text-text-main rounded-3xl border border-border shadow-xl max-w-2xl w-full overflow-hidden my-8">
         {/* Header */}
-        <div className="p-6 bg-[#FDFBF7] border-b border-[#E6E2D3] flex items-start justify-between gap-4">
+        <div className="p-6 bg-base border-b border-border flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <img
               src={patch.gameCover}
               alt={patch.gameTitle}
-              className="w-16 h-16 rounded-2xl object-cover border border-[#E6E2D3] shadow-xs"
+              className="w-16 h-16 rounded-2xl object-cover border border-border shadow-xs"
             />
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/30">
+                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-surface-brand text-text-heading border border-brand/30">
                   {patch.version}
                 </span>
-                <span className="text-xs text-[#707060]">
+                <span className="text-xs text-text-muted">
                   {patch.releaseDate}
                 </span>
               </div>
-              <h2 className="font-serif-natural text-2xl font-normal text-[#5A5A40] mt-1">
+              <h2 className="font-serif-natural text-2xl font-normal text-text-heading mt-1">
                 {patch.gameTitle}
               </h2>
             </div>
@@ -53,7 +53,7 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white hover:bg-[#F5F5F0] text-[#707060] hover:text-[#4A4A40] transition-colors cursor-pointer border border-[#E6E2D3] shadow-xs"
+            className="p-2 rounded-full bg-white hover:bg-surface text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
           >
             <X className="w-5 h-5" />
           </button>
@@ -62,17 +62,17 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
         {/* Body */}
         <div className="p-6 sm:p-8 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Summary */}
-          <div className="text-sm text-[#707060] leading-relaxed bg-[#FDFBF7] p-4 rounded-2xl border border-[#E6E2D3]">
-            <strong className="text-[#5A5A40] block mb-1">Update Overview:</strong>
+          <div className="text-sm text-text-muted leading-relaxed bg-base p-4 rounded-2xl border border-border">
+            <strong className="text-text-heading block mb-1">Update Overview:</strong>
             {patch.summary}
           </div>
 
           {/* Steam Deck Notes */}
           {patch.deckImprovements && (
-            <div className="bg-[#EBF0EA] border border-[#8BA888]/40 rounded-2xl p-4 text-xs text-[#5A5A40] flex items-start gap-2.5">
-              <Tv className="w-4 h-4 text-[#8BA888] shrink-0 mt-0.5" />
+            <div className="bg-surface-brand border border-brand/40 rounded-2xl p-4 text-xs text-text-heading flex items-start gap-2.5">
+              <Tv className="w-4 h-4 text-brand shrink-0 mt-0.5" />
               <div>
-                <strong className="text-[#5A5A40] font-bold block mb-0.5">Steam Deck Performance Polish:</strong>
+                <strong className="text-text-heading font-bold block mb-0.5">Steam Deck Performance Polish:</strong>
                 {patch.deckImprovements}
               </div>
             </div>
@@ -80,7 +80,7 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
 
           {/* Key Feature Highlights */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#8BA888] flex items-center gap-1.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
               <Sparkles className="w-4 h-4" />
               <span>Major Feature Highlights</span>
             </h3>
@@ -88,17 +88,17 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
               {patch.highlights.map((h, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#FDFBF7] p-3.5 rounded-xl border border-[#E6E2D3] space-y-1"
+                  className="bg-base p-3.5 rounded-xl border border-border space-y-1"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-[#5A5A40]">{h.title}</span>
+                    <span className="font-bold text-sm text-text-heading">{h.title}</span>
                     {h.badge && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EBF0EA] text-[#5A5A40]">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-surface-brand text-text-heading">
                         {h.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-[#707060] leading-relaxed">
+                  <p className="text-xs text-text-muted leading-relaxed">
                     {h.description}
                   </p>
                 </div>
@@ -108,13 +108,13 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
 
           {/* Detailed Changelog */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#707060]">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted">
               Detailed Fixes & Balance Notes
             </h3>
-            <ul className="space-y-2 text-xs text-[#707060]">
+            <ul className="space-y-2 text-xs text-text-muted">
               {patch.detailedNotes.map((note, idx) => (
-                <li key={idx} className="flex items-start gap-2 bg-[#F5F5F0] p-2.5 rounded-xl border border-[#E6E2D3]">
-                  <CheckCircle2 className="w-4 h-4 text-[#8BA888] shrink-0 mt-0.5" />
+                <li key={idx} className="flex items-start gap-2 bg-surface p-2.5 rounded-xl border border-border">
+                  <CheckCircle2 className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                   <span>{note}</span>
                 </li>
               ))}
@@ -123,12 +123,12 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-5 bg-[#FDFBF7] border-t border-[#E6E2D3] flex items-center justify-between">
+        <div className="p-5 bg-base border-t border-border flex items-center justify-between">
           <a
             href={patch.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-[#707060] hover:text-[#4A4A40] flex items-center gap-1 font-medium"
+            className="text-xs text-text-muted hover:text-text-main flex items-center gap-1 font-medium"
           >
             <span>Official Developer Post</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -136,7 +136,7 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
 
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+            className="px-5 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
           >
             Done Reading
           </button>

@@ -47,23 +47,23 @@ export const FooterNewsletter: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-[#E6E2D3] shadow-xs space-y-3">
+    <div className="bg-white rounded-2xl p-5 border border-border shadow-xs space-y-3">
       <div className="flex items-center gap-2">
-        <div className="p-2 rounded-xl bg-[#8BA888]/15 text-[#4A6B47]">
+        <div className="p-2 rounded-xl bg-brand/15 text-[#4A6B47]">
           <Mail className="w-4 h-4" />
         </div>
         <div>
           <h4 className="text-sm font-bold text-[#2C2C24] font-serif">
             The Weekly Cozy Dispatch
           </h4>
-          <p className="text-[11px] text-[#707060]">
+          <p className="text-[11px] text-text-muted">
             Weekly recap of Steam discounts, cozy indie releases, and Steam Deck gems.
           </p>
         </div>
       </div>
 
       {status === 'success' ? (
-        <div className="bg-[#8BA888]/10 border border-[#8BA888]/30 rounded-xl p-3 text-xs text-[#2C2C24] space-y-1 animate-fade-in">
+        <div className="bg-brand/10 border border-brand/30 rounded-xl p-3 text-xs text-[#2C2C24] space-y-1 animate-fade-in">
           <div className="flex items-center gap-2 font-bold text-[#4A6B47]">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>You're on the list!</span>
@@ -90,12 +90,12 @@ export const FooterNewsletter: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address..."
               disabled={status === 'loading'}
-              className="w-full pl-3 pr-24 py-2 bg-[#FAF9F5] border border-[#E6E2D3] rounded-xl text-xs text-[#2C2C24] placeholder-[#A0A090] focus:outline-none focus:border-[#8BA888] focus:ring-1 focus:ring-[#8BA888] transition-all disabled:opacity-50"
+              className="w-full pl-3 pr-24 py-2 bg-[#FAF9F5] border border-border rounded-xl text-xs text-[#2C2C24] placeholder-[#A0A090] focus:outline-none focus:border-brand focus:ring-1 focus:ring-[#8BA888] transition-all disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="absolute right-1 top-1 bottom-1 px-3 bg-[#2C2C24] hover:bg-[#4A6B47] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1 shadow-xs cursor-pointer disabled:opacity-50"
+              className="absolute right-1 top-1 bottom-1 px-3 bg-inverse hover:bg-[#4A6B47] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1 shadow-xs cursor-pointer disabled:opacity-50"
             >
               {status === 'loading' ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -115,7 +115,7 @@ export const FooterNewsletter: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between text-[10px] text-[#888870] pt-0.5">
+          <div className="flex items-center justify-between text-[10px] text-text-alt pt-0.5">
             <span>No spam. Unsubscribe anytime.</span>
             <span className="font-semibold text-[#4A6B47]">
               {subCount ? `${subCount} subscribers` : 'Free weekly recap'}

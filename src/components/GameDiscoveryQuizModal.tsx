@@ -145,19 +145,19 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-[#FDFBF7] rounded-3xl border border-[#E6E2D3] w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+      <div className="bg-base rounded-3xl border border-border w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         
         {/* Modal Top Header */}
-        <div className="px-6 py-4 border-b border-[#E6E2D3] bg-[#F5F5F0]/70 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-border bg-surface/70 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#8BA888]/20 flex items-center justify-center text-[#8BA888]">
+            <div className="w-8 h-8 rounded-xl bg-brand/20 flex items-center justify-center text-brand">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-serif-natural text-lg font-normal text-[#5A5A40] leading-tight">
+              <h2 className="font-serif-natural text-lg font-normal text-text-heading leading-tight">
                 Cozy & Indie PC Discovery Quiz
               </h2>
-              <p className="text-[11px] text-[#707060]">
+              <p className="text-[11px] text-text-muted">
                 {isCompleted ? 'Your Tailored PC Recommendations' : `Step ${currentStep + 1} of ${totalSteps} • ${currentQuestion.category}`}
               </p>
             </div>
@@ -165,7 +165,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-[#707060] hover:text-[#5A5A40] hover:bg-[#E6E2D3]/50 transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-text-muted hover:text-text-heading hover:bg-border/50 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -179,11 +179,11 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
               <div className="space-y-2">
                 <div className="w-full bg-[#E6E2D3] h-2 rounded-full overflow-hidden">
                   <div 
-                    className="bg-[#8BA888] h-full transition-all duration-300 rounded-full"
+                    className="bg-brand h-full transition-all duration-300 rounded-full"
                     style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[11px] text-[#707060] font-medium">
+                <div className="flex justify-between text-[11px] text-text-muted font-medium">
                   <span>Question {currentStep + 1} / {totalSteps}</span>
                   <span>{Math.round(((currentStep + 1) / totalSteps) * 100)}% Complete</span>
                 </div>
@@ -191,10 +191,10 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
 
               {/* Question Header */}
               <div className="space-y-1">
-                <h3 className="font-serif-natural text-xl sm:text-2xl text-[#5A5A40]">
+                <h3 className="font-serif-natural text-xl sm:text-2xl text-text-heading">
                   {currentQuestion.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-[#707060]">
+                <p className="text-xs sm:text-sm text-text-muted">
                   {currentQuestion.subtitle}
                 </p>
               </div>
@@ -212,20 +212,20 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                       onClick={() => handleOptionToggle(currentQuestion.id as keyof DiscoveryQuizAnswers, option.id, currentQuestion.isMultiSelect)}
                       className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 cursor-pointer ${
                         isSelected
-                          ? 'bg-[#EBF0EA] border-[#8BA888] ring-2 ring-[#8BA888]/30 shadow-xs'
-                          : 'bg-[#FDFBF7] border-[#E6E2D3] hover:border-[#8BA888]/60 hover:bg-[#F5F5F0]'
+                          ? 'bg-surface-brand border-brand ring-2 ring-[#8BA888]/30 shadow-xs'
+                          : 'bg-base border-border hover:border-brand/60 hover:bg-surface'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-[#8BA888] text-white' : 'bg-[#E6E2D3]/60 text-[#5A5A40]'}`}>
+                          <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-brand text-white' : 'bg-[#E6E2D3]/60 text-text-heading'}`}>
                             {renderQuizIcon(option.iconName)}
                           </div>
                           <div>
-                            <div className="text-sm font-bold text-[#5A5A40] flex items-center gap-2">
+                            <div className="text-sm font-bold text-text-heading flex items-center gap-2">
                               <span>{option.label}</span>
                               {option.badge && (
-                                <span className="bg-[#E6A07D] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                <span className="bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                                   {option.badge}
                                 </span>
                               )}
@@ -234,13 +234,13 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                         </div>
 
                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                          isSelected ? 'bg-[#8BA888] border-[#8BA888] text-white' : 'border-[#C4C0B0]'
+                          isSelected ? 'bg-brand border-brand text-white' : 'border-[#C4C0B0]'
                         }`}>
                           {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                         </div>
                       </div>
 
-                      <p className="text-xs text-[#707060] leading-relaxed">
+                      <p className="text-xs text-text-muted leading-relaxed">
                         {option.description}
                       </p>
                     </button>
@@ -251,16 +251,16 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
           ) : (
             /* Results Screen */
             <div className="space-y-6">
-              <div className="bg-[#EBF0EA] border border-[#8BA888]/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="bg-surface-brand border border-brand/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase text-[#8BA888]">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand">
                     <Sparkles className="w-4 h-4" />
                     <span>Your Personalized PC Matches</span>
                   </div>
-                  <h3 className="font-serif-natural text-xl text-[#5A5A40]">
+                  <h3 className="font-serif-natural text-xl text-text-heading">
                     We found {recommendations.length} PC games tailored to your mood!
                   </h3>
-                  <p className="text-xs text-[#707060]">
+                  <p className="text-xs text-text-muted">
                     Ranked by compatibility with your preferred art style, pacing, and Steam / PC setup.
                   </p>
                 </div>
@@ -268,7 +268,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                 <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <button
                     onClick={handleReset}
-                    className="px-3.5 py-2 rounded-xl bg-[#F5F5F0] hover:bg-[#E6E2D3] text-xs font-bold text-[#5A5A40] transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl bg-surface hover:bg-border text-xs font-bold text-text-heading transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Retake Quiz</span>
@@ -279,7 +279,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                     disabled={savedToProfile}
                     className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       savedToProfile
-                        ? 'bg-[#8BA888] text-white'
+                        ? 'bg-brand text-white'
                         : 'bg-[#5A5A40] text-white hover:bg-[#4A4A40]'
                     }`}
                   >
@@ -298,12 +298,12 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                   return (
                     <div
                       key={game.id}
-                      className="bg-[#FDFBF7] rounded-2xl border border-[#E6E2D3] hover:border-[#8BA888] p-4 sm:p-5 transition-all flex flex-col sm:flex-row gap-4 sm:items-center justify-between"
+                      className="bg-base rounded-2xl border border-border hover:border-brand p-4 sm:p-5 transition-all flex flex-col sm:flex-row gap-4 sm:items-center justify-between"
                     >
                       <div className="flex items-start gap-4 flex-1">
                         {/* Cover Image */}
                         <div 
-                          className="relative w-20 h-24 sm:w-24 sm:h-28 rounded-xl overflow-hidden bg-[#F5F5F0] shrink-0 cursor-pointer shadow-xs"
+                          className="relative w-20 h-24 sm:w-24 sm:h-28 rounded-xl overflow-hidden bg-surface shrink-0 cursor-pointer shadow-xs"
                           onClick={() => {
                             onClose();
                             onSelectGame(game);
@@ -322,19 +322,19 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                         {/* Details */}
                         <div className="space-y-1.5 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="bg-[#8BA888] text-white font-bold text-xs px-2.5 py-0.5 rounded-full">
+                            <span className="bg-brand text-white font-bold text-xs px-2.5 py-0.5 rounded-full">
                               {rec.matchScore}% Match
                             </span>
 
                             {game.isOnSale && (
-                              <span className="bg-[#E6A07D] text-white font-bold text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <span className="bg-accent text-white font-bold text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
                                 <TrendingDown className="w-3 h-3" />
                                 -{game.discountPercent}% Sale
                               </span>
                             )}
 
                             {game.steamDeckStatus === 'Verified' && (
-                              <span className="bg-[#EBF0EA] text-[#5A5A40] font-bold text-[10px] px-2 py-0.5 rounded-full border border-[#8BA888]">
+                              <span className="bg-surface-brand text-text-heading font-bold text-[10px] px-2 py-0.5 rounded-full border border-brand">
                                 Deck Verified
                               </span>
                             )}
@@ -345,19 +345,19 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                               onClose();
                               onSelectGame(game);
                             }}
-                            className="font-serif-natural text-lg font-normal text-[#5A5A40] hover:text-[#8BA888] transition-colors cursor-pointer"
+                            className="font-serif-natural text-lg font-normal text-text-heading hover:text-brand transition-colors cursor-pointer"
                           >
                             {game.title}
                           </h4>
 
-                          <p className="text-xs text-[#707060] line-clamp-2">
+                          <p className="text-xs text-text-muted line-clamp-2">
                             {rec.vibeRationale}
                           </p>
 
                           {/* Match tags highlights */}
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {rec.matchHighlights.map((hl, i) => (
-                              <span key={i} className="text-[10px] bg-[#F5F5F0] text-[#5A5A40] px-2 py-0.5 rounded-md border border-[#E6E2D3]">
+                              <span key={i} className="text-[10px] bg-surface text-text-heading px-2 py-0.5 rounded-md border border-border">
                                 ✓ {hl}
                               </span>
                             ))}
@@ -366,13 +366,13 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                       </div>
 
                       {/* Price & Action Buttons */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-[#E6E2D3]">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
                         <div className="text-left sm:text-right">
-                          <div className="text-base font-bold text-[#5A5A40]">
+                          <div className="text-base font-bold text-text-heading">
                             {game.salePrice || game.price}
                           </div>
                           {game.originalPrice && game.originalPrice !== game.price && (
-                            <div className="text-[10px] text-[#A0A090] line-through">
+                            <div className="text-[10px] text-text-faint line-through">
                               {game.originalPrice}
                             </div>
                           )}
@@ -383,8 +383,8 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                             onClick={() => onToggleWishlist(game.id)}
                             className={`p-2 rounded-xl transition-all cursor-pointer ${
                               isWish
-                                ? 'bg-[#E6A07D] text-white shadow-xs'
-                                : 'bg-[#F5F5F0] text-[#707060] hover:text-[#E6A07D]'
+                                ? 'bg-accent text-white shadow-xs'
+                                : 'bg-surface text-text-muted hover:text-accent'
                             }`}
                             title={isWish ? 'Wishlisted' : 'Add to Wishlist & Enable Sale Alerts'}
                           >
@@ -395,7 +395,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                             href={game.steamStoreUrl || game.storeUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-3 py-2 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                            className="px-3 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             <span>Steam</span>
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -412,14 +412,14 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
 
         {/* Modal Bottom Footer Navigation */}
         {!isCompleted && (
-          <div className="px-6 py-4 border-t border-[#E6E2D3] bg-[#F5F5F0]/70 flex items-center justify-between">
+          <div className="px-6 py-4 border-t border-border bg-surface/70 flex items-center justify-between">
             <button
               onClick={handleBack}
               disabled={currentStep === 0}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer ${
                 currentStep === 0
                   ? 'text-[#B0B0A0] cursor-not-allowed'
-                  : 'text-[#5A5A40] hover:bg-[#E6E2D3]'
+                  : 'text-text-heading hover:bg-border'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -428,7 +428,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
 
             <button
               onClick={handleNext}
-              className="px-5 py-2.5 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
               <span>{currentStep === totalSteps - 1 ? 'Show My Recommendations' : 'Next Question'}</span>
               <ChevronRight className="w-4 h-4" />

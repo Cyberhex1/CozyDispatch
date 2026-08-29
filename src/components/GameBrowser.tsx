@@ -137,28 +137,28 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
   return (
     <div className="space-y-6">
       {/* Section Title & Subtitle */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E6E2D3] pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs uppercase font-bold text-[#8BA888] tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-xs uppercase font-bold text-brand tracking-wider mb-1">
             <Gamepad2 className="w-4 h-4" />
             <span>Curated Relaxing & Indie Games Directory</span>
           </div>
-          <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-[#5A5A40] tracking-tight">
+          <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading tracking-tight">
             Steam Game Browser & Sub-Genre Discovery
           </h2>
-          <p className="text-[#707060] text-sm mt-1">
+          <p className="text-text-muted text-sm mt-1">
             Explore indie horror, cozy cooking, job simulators, driving sims, RPGs, and roguelikes with official Steam links and release dates.
           </p>
         </div>
 
         {/* View mode toggle */}
         <div className="flex items-center gap-2 self-start md:self-center">
-          <div className="bg-[#F5F5F0] p-1 rounded-xl flex items-center gap-1 text-[#707060] border border-[#E6E2D3]">
+          <div className="bg-surface p-1 rounded-xl flex items-center gap-1 text-text-muted border border-border">
             <button
               id="browser-view-grid-btn"
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                viewMode === 'grid' ? 'bg-white text-[#5A5A40] shadow-xs' : 'hover:text-[#4A4A40]'
+                viewMode === 'grid' ? 'bg-white text-text-heading shadow-xs' : 'hover:text-text-main'
               }`}
               title="Grid View"
             >
@@ -168,7 +168,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               id="browser-view-list-btn"
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                viewMode === 'list' ? 'bg-white text-[#5A5A40] shadow-xs' : 'hover:text-[#4A4A40]'
+                viewMode === 'list' ? 'bg-white text-text-heading shadow-xs' : 'hover:text-text-main'
               }`}
               title="Compact List View"
             >
@@ -196,14 +196,14 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               onClick={() => setFilterType(tab.id as BrowserFilterType)}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                 isActive
-                  ? 'bg-[#8BA888] text-white shadow-xs scale-[1.02]'
-                  : 'bg-white hover:bg-[#F5F5F0] text-[#707060] border border-[#E6E2D3]'
+                  ? 'bg-brand text-white shadow-xs scale-[1.02]'
+                  : 'bg-white hover:bg-surface text-text-muted border border-border'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-[#FDFBF7]' : 'text-[#8BA888]'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-inverse' : 'text-brand'}`} />
               <span>{tab.label}</span>
               <span className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${
-                isActive ? 'bg-[#7A9977] text-white' : 'bg-[#F5F5F0] text-[#707060]'
+                isActive ? 'bg-[#7A9977] text-white' : 'bg-surface text-text-muted'
               }`}>
                 {tab.badge}
               </span>
@@ -213,11 +213,11 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
       </div>
 
       {/* Sub-genre Categories & Search */}
-      <div className="bg-white p-4 rounded-2xl border border-[#E6E2D3] shadow-xs space-y-4">
+      <div className="bg-white p-4 rounded-2xl border border-border shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           {/* Expanded Sub-Genre Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
-            <span className="text-xs font-bold text-[#707060] uppercase tracking-wider mr-1 whitespace-nowrap">
+            <span className="text-xs font-bold text-text-muted uppercase tracking-wider mr-1 whitespace-nowrap">
               Sub-Genre:
             </span>
             {[
@@ -239,7 +239,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedCategory === cat.id
                     ? 'bg-[#5A5A40] text-white font-bold'
-                    : 'bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060]'
+                    : 'bg-surface hover:bg-border text-text-muted'
                 }`}
               >
                 {cat.label}
@@ -249,18 +249,18 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
           {/* Search Bar */}
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-[#A0A090] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-text-faint absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search title, developer, tag, horror, cooking, etc..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 rounded-xl text-xs sm:text-sm bg-[#FDFBF7] border border-[#E6E2D3] focus:outline-hidden focus:border-[#8BA888] focus:ring-2 focus:ring-[#8BA888]/20 text-[#4A4A40]"
+              className="w-full pl-9 pr-8 py-2 rounded-xl text-xs sm:text-sm bg-base border border-border focus:outline-hidden focus:border-brand focus:ring-2 focus:ring-[#8BA888]/20 text-text-main"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#A0A090] hover:text-[#4A4A40] font-bold cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-faint hover:text-text-main font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -277,23 +277,23 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               onClick={() => setDeckOnly(!deckOnly)}
               className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
                 deckOnly
-                  ? 'bg-[#EBF0EA] text-[#5A5A40] border-[#8BA888]'
-                  : 'bg-[#FDFBF7] text-[#707060] border-[#E6E2D3] hover:bg-[#F5F5F0]'
+                  ? 'bg-surface-brand text-text-heading border-brand'
+                  : 'bg-base text-text-muted border-border hover:bg-surface'
               }`}
             >
-              <Tv className={`w-3.5 h-3.5 ${deckOnly ? 'text-[#8BA888]' : 'text-[#A0A090]'}`} />
+              <Tv className={`w-3.5 h-3.5 ${deckOnly ? 'text-brand' : 'text-text-faint'}`} />
               <span>Steam Deck Verified Only</span>
-              {deckOnly && <Check className="w-3 h-3 text-[#8BA888]" />}
+              {deckOnly && <Check className="w-3 h-3 text-brand" />}
             </button>
 
             {/* Cozy Scale Selector */}
-            <div className="flex items-center gap-1.5 bg-[#FDFBF7] px-3 py-1.5 rounded-lg border border-[#E6E2D3]">
-              <Star className="w-3.5 h-3.5 text-[#E6A07D] fill-[#E6A07D]" />
-              <span className="font-semibold text-[#707060]">Min Cozy Score:</span>
+            <div className="flex items-center gap-1.5 bg-base px-3 py-1.5 rounded-lg border border-border">
+              <Star className="w-3.5 h-3.5 text-accent fill-[#E6A07D]" />
+              <span className="font-semibold text-text-muted">Min Cozy Score:</span>
               <select
                 value={minCozyScore}
                 onChange={(e) => setMinCozyScore(Number(e.target.value))}
-                className="bg-transparent font-bold text-[#4A4A40] focus:outline-hidden cursor-pointer"
+                className="bg-transparent font-bold text-text-main focus:outline-hidden cursor-pointer"
               >
                 <option value={0}>Any</option>
                 <option value={8}>8.0+ (Very Cozy)</option>
@@ -304,11 +304,11 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
             {/* Active Tag Filter */}
             {selectedTag && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#EBF0EA] text-[#5A5A40] font-bold border border-[#8BA888]/40">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-brand text-text-heading font-bold border border-brand/40">
                 <span>Tag: #{selectedTag}</span>
                 <button
                   onClick={() => setSelectedTag(null)}
-                  className="hover:text-[#4A4A40] font-bold ml-1 cursor-pointer"
+                  className="hover:text-text-main font-bold ml-1 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -319,11 +319,11 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
           {/* Sort By Dropdown & Reset */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <span className="text-[#707060] font-medium">Sort:</span>
+              <span className="text-text-muted font-medium">Sort:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-[#FDFBF7] border border-[#E6E2D3] px-2.5 py-1.5 rounded-lg font-semibold text-[#4A4A40] focus:outline-hidden cursor-pointer"
+                className="bg-base border border-border px-2.5 py-1.5 rounded-lg font-semibold text-text-main focus:outline-hidden cursor-pointer"
               >
                 <option value="rating">Top Review Score (%)</option>
                 <option value="cozy">Highest Cozy Scale</option>
@@ -336,7 +336,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
             {(filterType !== 'all' || deckOnly || minCozyScore > 0 || selectedTag || searchQuery || selectedCategory !== 'all') && (
               <button
                 onClick={resetFilters}
-                className="text-[#8BA888] hover:text-[#5A5A40] font-bold flex items-center gap-1 cursor-pointer"
+                className="text-brand hover:text-text-heading font-bold flex items-center gap-1 cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset</span>
@@ -347,7 +347,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
         {/* Quick Tag Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
-          <span className="text-[11px] font-semibold text-[#707060] whitespace-nowrap">
+          <span className="text-[11px] font-semibold text-text-muted whitespace-nowrap">
             Popular Tags:
           </span>
           {allTags.map((tag) => (
@@ -356,8 +356,8 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
               className={`px-2 py-0.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 selectedTag === tag
-                  ? 'bg-[#8BA888] text-white font-bold'
-                  : 'bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060]'
+                  ? 'bg-brand text-white font-bold'
+                  : 'bg-surface hover:bg-border text-text-muted'
               }`}
             >
               #{tag}
@@ -367,13 +367,13 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
       </div>
 
       {/* Results Header */}
-      <div className="flex items-center justify-between text-xs text-[#707060] px-1 font-medium">
+      <div className="flex items-center justify-between text-xs text-text-muted px-1 font-medium">
         <span>
           Showing <strong>{Math.min(visibleCount, filteredGames.length)}</strong>
           {filteredGames.length > visibleCount ? ` of ${filteredGames.length}` : ''} title{filteredGames.length === 1 ? '' : 's'}
         </span>
         {selectedCategory !== 'all' && (
-          <span className="capitalize font-semibold text-[#8BA888]">
+          <span className="capitalize font-semibold text-brand">
             Sub-genre: {selectedCategory}
           </span>
         )}
@@ -381,19 +381,19 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
       {/* Empty State */}
       {filteredGames.length === 0 && (
-        <div className="bg-white rounded-2xl p-12 text-center border border-[#E6E2D3] shadow-xs max-w-lg mx-auto">
-          <div className="w-14 h-14 rounded-full bg-[#EBF0EA] text-[#8BA888] flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white rounded-2xl p-12 text-center border border-border shadow-xs max-w-lg mx-auto">
+          <div className="w-14 h-14 rounded-full bg-surface-brand text-brand flex items-center justify-center mx-auto mb-4">
             <Search className="w-6 h-6" />
           </div>
-          <h3 className="font-serif-natural text-lg font-normal text-[#5A5A40]">
+          <h3 className="font-serif-natural text-lg font-normal text-text-heading">
             No games matched your exact filters
           </h3>
-          <p className="text-[#707060] text-sm mt-1.5 mb-5">
+          <p className="text-text-muted text-sm mt-1.5 mb-5">
             Try resetting your sub-genre selection or clearing your search query.
           </p>
           <button
             onClick={resetFilters}
-            className="px-5 py-2.5 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white font-bold text-sm transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-sm transition-colors cursor-pointer"
           >
             Clear All Filters
           </button>
@@ -408,10 +408,10 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
             return (
               <div
                 key={game.id}
-                className="group bg-white rounded-2xl border border-[#E6E2D3] overflow-hidden shadow-xs hover:shadow-md hover:border-[#8BA888] transition-all duration-300 flex flex-col"
+                className="group bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col"
               >
                 {/* Cover Image & Overlay Badges */}
-                <div className="relative aspect-[16/10] bg-[#F5F5F0] overflow-hidden">
+                <div className="relative aspect-[16/10] bg-surface overflow-hidden">
                   <img
                     src={game.coverImage}
                     alt={game.title}
@@ -420,8 +420,8 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   />
 
                   {/* Top Left: Cozy Scale Pill */}
-                  <div className="absolute top-2.5 left-2.5 bg-[#5A5A40]/90 backdrop-blur-xs text-[#FDFBF7] text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 z-10">
-                    <Star className="w-3 h-3 fill-[#E6A07D] text-[#E6A07D]" />
+                  <div className="absolute top-2.5 left-2.5 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 z-10">
+                    <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
                     <span>{game.cozyScore} / 10</span>
                   </div>
 
@@ -434,7 +434,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                     }}
                     className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-xs shadow-xs transition-all cursor-pointer z-10 ${
                       isSaved
-                        ? 'bg-[#E6A07D] text-white'
+                        ? 'bg-accent text-white'
                         : 'bg-black/60 hover:bg-black/80 text-white'
                     }`}
                     title={isSaved ? 'Remove from Cozy Shelf' : 'Save to Cozy Shelf'}
@@ -445,20 +445,20 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   {/* Bottom Left: Status / Category Tag */}
                   <div className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-1">
                     {game.isNewlyReleased ? (
-                      <span className="bg-[#8BA888] text-white font-bold text-[10px] uppercase px-2 py-0.5 rounded-md shadow-xs">
+                      <span className="bg-brand text-white font-bold text-[10px] uppercase px-2 py-0.5 rounded-md shadow-xs">
                         New Release
                       </span>
                     ) : game.steamDeckStatus === 'Verified' ? (
-                      <span className="bg-[#EBF0EA] text-[#5A5A40] font-bold text-[10px] px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 border border-[#8BA888]/40">
-                        <Tv className="w-3 h-3 text-[#8BA888]" />
+                      <span className="bg-surface-brand text-text-heading font-bold text-[10px] px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 border border-brand/40">
+                        <Tv className="w-3 h-3 text-brand" />
                         Deck Verified
                       </span>
                     ) : null}
                   </div>
 
                   {/* Bottom Right: Release Date (USER REQUIREMENT) */}
-                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-xs text-[#FDFBF7] text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 border border-white/20 z-10">
-                    <Calendar className="w-3 h-3 text-[#8BA888]" />
+                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-xs text-inverse text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 border border-white/20 z-10">
+                    <Calendar className="w-3 h-3 text-brand" />
                     <span>{game.releaseDate}</span>
                   </div>
                 </div>
@@ -469,20 +469,20 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                     <div className="flex items-start justify-between gap-2">
                       <h3
                         onClick={() => onSelectGame(game)}
-                        className="font-display text-base font-bold text-[#4A4A40] group-hover:text-[#8BA888] transition-colors line-clamp-1 cursor-pointer"
+                        className="font-display text-base font-bold text-text-main group-hover:text-brand transition-colors line-clamp-1 cursor-pointer"
                       >
                         {game.title}
                       </h3>
-                      <span className="font-bold text-[#5A5A40] text-sm whitespace-nowrap">
+                      <span className="font-bold text-text-heading text-sm whitespace-nowrap">
                         {game.price}
                       </span>
                     </div>
 
-                    <p className="text-xs text-[#707060] mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       by {game.developer}
                     </p>
 
-                    <p className="text-xs text-[#707060] line-clamp-2 mt-2 leading-relaxed">
+                    <p className="text-xs text-text-muted line-clamp-2 mt-2 leading-relaxed">
                       {game.shortDescription}
                     </p>
                   </div>
@@ -490,12 +490,12 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   {/* Review Score & Tag list */}
                   <div className="pt-2 border-t border-[#F5F5F0] space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#8BA888] font-bold flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-[#8BA888]" />
+                      <span className="text-brand font-bold flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-brand" />
                         {formatRating(game.ratingScore, ' Positive')} ({game.totalReviews})
                       </span>
-                      <span className="text-[#707060] font-medium flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-[#A0A090]" />
+                      <span className="text-text-muted font-medium flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-text-faint" />
                         {game.releaseDate}
                       </span>
                     </div>
@@ -505,7 +505,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                       {game.tags.slice(0, 3).map((t) => (
                         <span
                           key={t}
-                          className="text-[10px] px-1.5 py-0.5 rounded bg-[#F5F5F0] text-[#707060] font-medium"
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-surface text-text-muted font-medium"
                         >
                           #{t}
                         </span>
@@ -551,7 +551,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               <div
                 key={game.id}
                 onClick={() => onSelectGame(game)}
-                className="group bg-white p-4 rounded-2xl border border-[#E6E2D3] shadow-xs hover:shadow-md hover:border-[#8BA888] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
+                className="group bg-white p-4 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative shrink-0">
@@ -567,36 +567,36 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display font-bold text-base text-[#4A4A40] group-hover:text-[#8BA888] transition-colors">
+                      <h3 className="font-display font-bold text-base text-text-main group-hover:text-brand transition-colors">
                         {game.title}
                       </h3>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#EBF0EA] text-[#5A5A40]">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-surface-brand text-text-heading">
                         {game.price}
                       </span>
                       {game.steamDeckStatus === 'Verified' && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EBF0EA] text-[#5A5A40] flex items-center gap-1 border border-[#8BA888]/40">
-                          <Tv className="w-3 h-3 text-[#8BA888]" />
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-surface-brand text-text-heading flex items-center gap-1 border border-brand/40">
+                          <Tv className="w-3 h-3 text-brand" />
                           Deck Verified
                         </span>
                       )}
                     </div>
 
-                    <p className="text-xs text-[#707060] line-clamp-1 mt-1">
+                    <p className="text-xs text-text-muted line-clamp-1 mt-1">
                       {game.shortDescription}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#707060] mt-2">
-                      <span className="text-[#8BA888] font-bold flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-[#E6A07D] text-[#E6A07D]" />
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted mt-2">
+                      <span className="text-brand font-bold flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
                         Cozy Score: {game.cozyScore}/10
                       </span>
                       <span>•</span>
-                      <span className="text-[#8BA888] font-semibold">
+                      <span className="text-brand font-semibold">
                         {formatRating(game.ratingScore, ' Positive')}
                       </span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-[#A0A090]" />
+                        <Calendar className="w-3 h-3 text-text-faint" />
                         Released {game.releaseDate}
                       </span>
                       <span>•</span>
@@ -613,11 +613,11 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                     }}
                     className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                       isSaved
-                        ? 'bg-[#E6A07D]/20 border-[#E6A07D]/50 text-[#5A5A40]'
-                        : 'bg-[#F5F5F0] border-[#E6E2D3] hover:bg-[#E6E2D3] text-[#707060]'
+                        ? 'bg-accent/20 border-[#E6A07D]/50 text-text-heading'
+                        : 'bg-surface border-border hover:bg-border text-text-muted'
                     }`}
                   >
-                    <Heart className={`w-4 h-4 ${isSaved ? 'fill-[#E6A07D] text-[#E6A07D]' : ''}`} />
+                    <Heart className={`w-4 h-4 ${isSaved ? 'fill-[#E6A07D] text-accent' : ''}`} />
                   </button>
 
                   <a
@@ -649,7 +649,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
         <div className="flex justify-center pt-6">
           <button
             onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-            className="px-8 py-3 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white font-bold text-sm transition-colors shadow-xs cursor-pointer"
+            className="px-8 py-3 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-sm transition-colors shadow-xs cursor-pointer"
           >
             Show More Games ({filteredGames.length - visibleCount} remaining)
           </button>

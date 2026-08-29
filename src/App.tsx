@@ -292,7 +292,7 @@ export default function App() {
   const savedArticleObjects = MOCK_NEWS_ARTICLES.filter((a) => bookmarkedArticleIds.includes(a.id));
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FDFBF7] text-[#4A4A40] selection:bg-[#8BA888]/20 selection:text-[#5A5A40]">
+    <div className="min-h-screen flex flex-col bg-base text-text-main selection:bg-brand/20 selection:text-text-heading">
       {/* Top Main Navigation Bar */}
       <Navbar
         currentView={currentView}
@@ -332,16 +332,16 @@ export default function App() {
             />
 
             {/* Quick Interactive Discovery Banner & Discovery Quiz CTA */}
-            <section className="bg-gradient-to-r from-[#EBF0EA] via-[#F5F5F0] to-[#FDFBF7] p-6 sm:p-8 rounded-3xl border border-[#E6E2D3] shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+            <section className="bg-gradient-to-r from-[#EBF0EA] via-[#F5F5F0] to-[#FDFBF7] p-6 sm:p-8 rounded-3xl border border-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="space-y-2 max-w-xl">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8BA888] text-white text-xs font-bold shadow-xs">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand text-white text-xs font-bold shadow-xs">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Personalized PC Recommendations</span>
                 </div>
-                <h3 className="font-serif-natural text-2xl sm:text-3xl font-normal text-[#5A5A40]">
+                <h3 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading">
                   Unsure what cozy PC game to play next?
                 </h3>
-                <p className="text-xs sm:text-sm text-[#707060] leading-relaxed">
+                <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
                   Take our 4-step <strong>Game Discovery Quiz</strong>. Tell us your favorite art styles, preferred stress level, and hardware targets (Desktop vs. Steam Deck) to receive your tailored match.
                 </p>
               </div>
@@ -350,7 +350,7 @@ export default function App() {
                 <button
                   id="home-start-quiz-btn"
                   onClick={() => setIsQuizOpen(true)}
-                  className="px-6 py-3.5 rounded-2xl bg-[#8BA888] hover:bg-[#7A9977] text-white font-bold text-sm shadow-md hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-3.5 rounded-2xl bg-brand hover:bg-brand-hover text-white font-bold text-sm shadow-md hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <Compass className="w-4 h-4" />
                   <span>Start Discovery Quiz</span>
@@ -358,9 +358,9 @@ export default function App() {
                 <button
                   id="home-view-deals-btn"
                   onClick={() => handleNavigate('deals')}
-                  className="px-5 py-3.5 rounded-2xl bg-white hover:bg-[#F5F5F0] text-[#5A5A40] border border-[#E6E2D3] font-bold text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                  className="px-5 py-3.5 rounded-2xl bg-white hover:bg-surface text-text-heading border border-border font-bold text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                 >
-                  <Percent className="w-4 h-4 text-[#E6A07D]" />
+                  <Percent className="w-4 h-4 text-accent" />
                   <span>Browse Deals & Sales</span>
                 </button>
               </div>
@@ -406,22 +406,22 @@ export default function App() {
                 return (
                   <div
                     key={pillar.id}
-                    className="bg-white p-5 rounded-2xl border border-[#E6E2D3] shadow-xs hover:shadow-md hover:border-[#8BA888] transition-all group flex flex-col justify-between"
+                    className="bg-white p-5 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all group flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${pillar.color} text-white flex items-center justify-center shadow-xs`}>
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F5F5F0] text-[#707060] border border-[#E6E2D3]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface text-text-muted border border-border">
                           {pillar.badge}
                         </span>
                       </div>
 
-                      <h3 className="font-serif-natural text-lg font-normal text-[#5A5A40] group-hover:text-[#8BA888] transition-colors">
+                      <h3 className="font-serif-natural text-lg font-normal text-text-heading group-hover:text-brand transition-colors">
                         {pillar.title}
                       </h3>
-                      <p className="text-xs text-[#707060] mt-1 leading-relaxed">
+                      <p className="text-xs text-text-muted mt-1 leading-relaxed">
                         {pillar.desc}
                       </p>
                     </div>
@@ -429,7 +429,7 @@ export default function App() {
                     <div className="flex items-center gap-2 pt-4 mt-2 border-t border-[#F5F5F0] text-xs font-bold">
                       <button
                         onClick={() => handleNavigate('browser', pillar.id as GameCategory)}
-                        className="text-[#8BA888] hover:text-[#5A5A40] cursor-pointer flex items-center gap-1 transition-colors"
+                        className="text-brand hover:text-text-heading cursor-pointer flex items-center gap-1 transition-colors"
                       >
                         <span>Games</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -437,7 +437,7 @@ export default function App() {
                       <span className="text-[#D6D2C4]">•</span>
                       <button
                         onClick={() => handleNavigate('news', pillar.id as GameCategory)}
-                        className="text-[#707060] hover:text-[#4A4A40] cursor-pointer transition-colors"
+                        className="text-text-muted hover:text-text-main cursor-pointer transition-colors"
                       >
                         News
                       </button>
@@ -449,13 +449,13 @@ export default function App() {
 
             {/* Daily Morning Dispatch & Trending News Highlights */}
             <section className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E6E2D3] pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                 <div>
-                  <div className="flex items-center gap-2 text-xs uppercase font-bold text-[#8BA888] tracking-wider">
+                  <div className="flex items-center gap-2 text-xs uppercase font-bold text-brand tracking-wider">
                     <Newspaper className="w-4 h-4" />
                     <span>Aggregated Outlets & Reports</span>
                   </div>
-                  <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-[#5A5A40] tracking-tight">
+                  <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading tracking-tight">
                     Today's Top Headlines & Coverage
                   </h2>
                 </div>
@@ -476,33 +476,33 @@ export default function App() {
                   <article
                     key={article.id}
                     onClick={() => setSelectedArticle(article)}
-                    className="group bg-white rounded-2xl border border-[#E6E2D3] overflow-hidden shadow-xs hover:shadow-md hover:border-[#8BA888] transition-all duration-300 flex flex-col cursor-pointer"
+                    className="group bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
                   >
-                    <div className="relative aspect-[16/9] bg-[#F5F5F0] overflow-hidden">
+                    <div className="relative aspect-[16/9] bg-surface overflow-hidden">
                       <img
                         src={article.imageUrl}
                         alt={article.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-3 left-3 bg-[#5A5A40]/90 backdrop-blur-xs text-[#FDFBF7] text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs">
+                      <div className="absolute top-3 left-3 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs">
                         {article.source}
                       </div>
                     </div>
 
                     <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
                       <div>
-                        <div className="text-[11px] text-[#707060] mb-1">
+                        <div className="text-[11px] text-text-muted mb-1">
                           {article.publishedAt} • {article.readTimeMinutes} min read
                         </div>
-                        <h3 className="font-display text-sm font-bold text-[#4A4A40] group-hover:text-[#8BA888] transition-colors leading-snug line-clamp-2">
+                        <h3 className="font-display text-sm font-bold text-text-main group-hover:text-brand transition-colors leading-snug line-clamp-2">
                           {article.title}
                         </h3>
-                        <p className="text-xs text-[#707060] line-clamp-2 mt-1.5 leading-relaxed">
+                        <p className="text-xs text-text-muted line-clamp-2 mt-1.5 leading-relaxed">
                           {article.summary}
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-[#F5F5F0] flex items-center justify-between text-xs text-[#8BA888] font-bold">
+                      <div className="pt-2 border-t border-[#F5F5F0] flex items-center justify-between text-xs text-brand font-bold">
                         <span>Read Takeaway</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </div>
@@ -514,13 +514,13 @@ export default function App() {
 
             {/* Hidden Gems & Highly Rated Spotlight Preview */}
             <section className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E6E2D3] pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                 <div>
-                  <div className="flex items-center gap-2 text-xs uppercase font-bold text-[#E6A07D] tracking-wider">
-                    <Star className="w-4 h-4 fill-[#E6A07D] text-[#E6A07D]" />
+                  <div className="flex items-center gap-2 text-xs uppercase font-bold text-accent tracking-wider">
+                    <Star className="w-4 h-4 fill-[#E6A07D] text-accent" />
                     <span>Hand-Picked PC Gems</span>
                   </div>
-                  <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-[#5A5A40] tracking-tight">
+                  <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading tracking-tight">
                     Relaxing Gems & Community Favorites
                   </h2>
                 </div>
@@ -528,7 +528,7 @@ export default function App() {
                 <button
                   id="home-view-all-browser-btn"
                   onClick={() => handleNavigate('browser')}
-                  className="px-4 py-2 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
                 >
                   <span>Explore Full Game Browser ({ALL_GAMES.length} Titles)</span>
                   <ArrowRight className="w-4 h-4" />
@@ -542,25 +542,25 @@ export default function App() {
                     <div
                       key={game.id}
                       onClick={() => setSelectedGame(game)}
-                      className="group bg-white rounded-2xl border border-[#E6E2D3] overflow-hidden shadow-xs hover:shadow-md hover:border-[#8BA888] transition-all cursor-pointer flex flex-col justify-between"
+                      className="group bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
                     >
-                      <div className="relative aspect-[16/10] bg-[#F5F5F0] overflow-hidden">
+                      <div className="relative aspect-[16/10] bg-surface overflow-hidden">
                         <img
                           src={game.coverImage}
                           alt={game.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute top-2.5 left-2.5 bg-[#5A5A40]/90 backdrop-blur-xs text-[#FDFBF7] text-[10px] font-bold px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-[#E6A07D] text-[#E6A07D]" />
+                        <div className="absolute top-2.5 left-2.5 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-[10px] font-bold px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
                           <span>{game.cozyScore}/10</span>
                         </div>
                         {game.steamDeckStatus === 'Verified' && (
-                          <div className="absolute top-2.5 right-2.5 bg-[#EBF0EA] text-[#5A5A40] text-[10px] font-bold px-2 py-0.5 rounded shadow-xs border border-[#8BA888]/40">
+                          <div className="absolute top-2.5 right-2.5 bg-surface-brand text-text-heading text-[10px] font-bold px-2 py-0.5 rounded shadow-xs border border-brand/40">
                             Deck ✓
                           </div>
                         )}
                         {game.isOnSale && (
-                          <div className="absolute bottom-2.5 left-2.5 bg-[#E6A07D] text-white text-[10px] font-black px-2 py-0.5 rounded shadow-xs">
+                          <div className="absolute bottom-2.5 left-2.5 bg-accent text-white text-[10px] font-black px-2 py-0.5 rounded shadow-xs">
                             -{game.discountPercent}% OFF
                           </div>
                         )}
@@ -569,23 +569,23 @@ export default function App() {
                       <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
                         <div>
                           <div className="flex items-start justify-between gap-1">
-                            <h3 className="font-display text-sm font-bold text-[#4A4A40] group-hover:text-[#8BA888] transition-colors line-clamp-1">
+                            <h3 className="font-display text-sm font-bold text-text-main group-hover:text-brand transition-colors line-clamp-1">
                               {game.title}
                             </h3>
-                            <span className="text-xs font-bold text-[#5A5A40] whitespace-nowrap">
+                            <span className="text-xs font-bold text-text-heading whitespace-nowrap">
                               {game.salePrice || game.price}
                             </span>
                           </div>
-                          <p className="text-xs text-[#707060] line-clamp-2 mt-1">
+                          <p className="text-xs text-text-muted line-clamp-2 mt-1">
                             {game.shortDescription}
                           </p>
                         </div>
 
                         <div className="pt-2 border-t border-[#F5F5F0] flex items-center justify-between text-xs">
-                          <span className="text-[#8BA888] font-bold">
+                          <span className="text-brand font-bold">
                             {formatRating(game.ratingScore, ' Pos')}
                           </span>
-                          <span className="text-[#A0A090] capitalize">
+                          <span className="text-text-faint capitalize">
                             {game.category}
                           </span>
                         </div>
@@ -744,55 +744,55 @@ export default function App() {
       />
 
       {/* Elegant Footer in Natural Tones */}
-      <footer className="mt-16 bg-[#F5F5F0] text-[#707060] border-t border-[#E6E2D3]">
+      <footer className="mt-16 bg-surface text-text-muted border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#8BA888] flex items-center justify-center text-white font-bold shadow-xs">
+                <div className="w-8 h-8 rounded-xl bg-brand flex items-center justify-center text-white font-bold shadow-xs">
                   🌱
                 </div>
-                <span className="font-serif-natural text-lg font-normal text-[#5A5A40]">
+                <span className="font-serif-natural text-lg font-normal text-text-heading">
                   Cozy & Indie Dispatch
                 </span>
               </div>
-              <p className="text-xs text-[#707060] leading-relaxed">
+              <p className="text-xs text-text-muted leading-relaxed">
                 A daily sanctuary for wholesome, relaxing, and handcrafted indie PC games. Daily news summaries, Steam discounts, Steam Deck optimization notes, and community patch updates.
               </p>
             </div>
 
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A5A40] mb-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-text-heading mb-3">
                 Core PC Sections
               </h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button onClick={() => handleNavigate('home')} className="hover:text-[#5A5A40] transition-colors">
+                  <button onClick={() => handleNavigate('home')} className="hover:text-text-heading transition-colors">
                     Weekly Featured Releases
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('deals')} className="hover:text-[#5A5A40] text-[#E6A07D] font-bold transition-colors">
+                  <button onClick={() => handleNavigate('deals')} className="hover:text-text-heading text-accent font-bold transition-colors">
                     🏷️ Steam Deals & Sales
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setIsQuizOpen(true)} className="hover:text-[#5A5A40] text-[#8BA888] font-bold transition-colors">
+                  <button onClick={() => setIsQuizOpen(true)} className="hover:text-text-heading text-brand font-bold transition-colors">
                     ✨ Game Discovery Quiz
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('browser', 'cozy')} className="hover:text-[#5A5A40] transition-colors">
+                  <button onClick={() => handleNavigate('browser', 'cozy')} className="hover:text-text-heading transition-colors">
                     Cozy & Wholesome Games
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('browser', 'indie')} className="hover:text-[#5A5A40] transition-colors">
+                  <button onClick={() => handleNavigate('browser', 'indie')} className="hover:text-text-heading transition-colors">
                     Indie Art & Roguelikes
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('browser', 'steam-deck')} className="hover:text-[#5A5A40] transition-colors">
+                  <button onClick={() => handleNavigate('browser', 'steam-deck')} className="hover:text-text-heading transition-colors">
                     Steam Deck Verified Radar
                   </button>
                 </li>
@@ -800,27 +800,27 @@ export default function App() {
             </div>
 
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A5A40] mb-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-text-heading mb-3">
                 News & Dispatches
               </h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button onClick={() => handleNavigate('news')} className="hover:text-[#5A5A40] transition-colors">
+                  <button onClick={() => handleNavigate('news')} className="hover:text-text-heading transition-colors">
                     Latest IGN, GameSpot & Eurogamer Coverage
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('news')} className="hover:text-[#5A5A40] transition-colors">
+                  <button onClick={() => handleNavigate('news')} className="hover:text-text-heading transition-colors">
                     Stardew Valley & Balatro PC Patch Notes
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('news')} className="hover:text-[#5A5A40] transition-colors">
+                  <button onClick={() => handleNavigate('news')} className="hover:text-text-heading transition-colors">
                     Upcoming PC Release Calendar
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setIsProfileOpen(true)} className="hover:text-[#5A5A40] transition-colors text-[#5A5A40] font-bold">
+                  <button onClick={() => setIsProfileOpen(true)} className="hover:text-text-heading transition-colors text-text-heading font-bold">
                     👤 User Profile & Price Alerts
                   </button>
                 </li>

@@ -47,11 +47,11 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
       {/* Page Title & Intro */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E6E2D3] shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-[#8BA888]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5F5F0] text-[#707060] text-xs font-semibold uppercase tracking-wider border border-[#E6E2D3]">
-            <Compass className="w-3.5 h-3.5 text-[#8BA888]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface text-text-muted text-xs font-semibold uppercase tracking-wider border border-border">
+            <Compass className="w-3.5 h-3.5 text-brand" />
             <span>Curated Showcases & Publishers</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2C2C24] tracking-tight font-serif">
@@ -64,7 +64,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
       </div>
 
       {/* Showcase Selection Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[#E6E2D3] scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-border scrollbar-none">
         {CATALOG_SHOWCASES.map((catalog) => {
           const isActive = catalog.id === activeCatalogId;
           return (
@@ -73,8 +73,8 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
               onClick={() => setActiveCatalogId(catalog.id)}
               className={`shrink-0 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer border ${
                 isActive
-                  ? 'bg-[#2C2C24] text-white border-[#2C2C24] shadow-xs'
-                  : 'bg-white text-[#707060] hover:text-[#2C2C24] border-[#E6E2D3] hover:border-[#8BA888]'
+                  ? 'bg-inverse text-white border-[#2C2C24] shadow-xs'
+                  : 'bg-white text-text-muted hover:text-[#2C2C24] border-border hover:border-brand'
               }`}
             >
               <span>{catalog.logoBadge || catalog.name}</span>
@@ -97,7 +97,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
         <div className="relative z-10 p-6 sm:p-10 space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
-              <span className="px-3 py-1 rounded-full bg-[#8BA888]/20 text-[#A3C2A0] text-xs font-bold border border-[#8BA888]/30">
+              <span className="px-3 py-1 rounded-full bg-brand/20 text-[#A3C2A0] text-xs font-bold border border-brand/30">
                 Est. {activeCatalog.establishedYear} • {activeCatalog.catalogCount}+ Featured Titles
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold font-serif text-white pt-2">
@@ -112,7 +112,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                 rel="noopener noreferrer"
                 className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/20 flex items-center gap-2 backdrop-blur-xs"
               >
-                <Globe className="w-4 h-4 text-[#8BA888]" />
+                <Globe className="w-4 h-4 text-brand" />
                 <span>Official Site</span>
                 <ExternalLink className="w-3.5 h-3.5 text-white/70" />
               </a>
@@ -159,13 +159,13 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
           <h3 className="text-2xl font-bold text-[#2C2C24] font-serif">
             {activeCatalog.name} Titles on Steam
           </h3>
-          <span className="text-xs font-bold text-[#707060] bg-white px-3 py-1.5 rounded-xl border border-[#E6E2D3]">
+          <span className="text-xs font-bold text-text-muted bg-white px-3 py-1.5 rounded-xl border border-border">
             {catalogGames.length} Games Shown
           </span>
         </div>
 
         {catalogGames.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-[#E6E2D3] space-y-3">
+          <div className="bg-white rounded-2xl p-12 text-center border border-border space-y-3">
             <p className="text-[#505045] font-medium">No titles matched for this showcase in current filter view.</p>
           </div>
         ) : (
@@ -176,7 +176,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
               return (
                 <div
                   key={game.id}
-                  className="group bg-white rounded-2xl overflow-hidden border border-[#E6E2D3] hover:border-[#8BA888] shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+                  className="group bg-white rounded-2xl overflow-hidden border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
                 >
                   <div>
                     {/* Cover Header Image */}
@@ -211,8 +211,8 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                       </div>
 
                       {/* Bottom Right: Release Date */}
-                      <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-[#FDFBF7] text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
-                        <Calendar className="w-3.5 h-3.5 text-[#8BA888]" />
+                      <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
+                        <Calendar className="w-3.5 h-3.5 text-brand" />
                         <span>{game.releaseDate}</span>
                       </div>
                     </div>
@@ -227,13 +227,13 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                           >
                             {game.title}
                           </h4>
-                          <p className="text-xs text-[#707060]">
+                          <p className="text-xs text-text-muted">
                             by <span className="font-semibold text-[#505045]">{game.developer}</span>
                           </p>
                         </div>
 
                         {/* Rating % */}
-                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#F5F5F0] border border-[#E6E2D3]">
+                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface border border-border">
                           <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                           <span className="text-xs font-bold text-[#2C2C24]">{formatRating(game.ratingScore)}</span>
                         </div>
@@ -248,7 +248,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                         {game.tags.slice(0, 3).map((tag) => (
                           <span 
                             key={tag}
-                            className="px-2 py-0.5 rounded-md bg-[#F5F5F0] text-[#707060] text-[10px] font-medium border border-[#E6E2D3]"
+                            className="px-2 py-0.5 rounded-md bg-surface text-text-muted text-[10px] font-medium border border-border"
                           >
                             {tag}
                           </span>
@@ -258,7 +258,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                   </div>
 
                   {/* Card Footer */}
-                  <div className="px-5 py-4 bg-[#FAF9F5] border-t border-[#E6E2D3] flex items-center justify-between">
+                  <div className="px-5 py-4 bg-[#FAF9F5] border-t border-border flex items-center justify-between">
                     <div>
                       <span className="text-xs font-extrabold text-[#2C2C24] block">
                         {game.price}
@@ -274,7 +274,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => onSelectGame(game)}
-                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#F5F5F0] text-[#2C2C24] text-xs font-bold transition-all border border-[#E6E2D3] cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-surface text-[#2C2C24] text-xs font-bold transition-all border border-border cursor-pointer"
                       >
                         Details
                       </button>

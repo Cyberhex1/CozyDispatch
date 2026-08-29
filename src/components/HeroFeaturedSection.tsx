@@ -48,7 +48,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
   const isSaved = isWishlisted(activeGame.id);
 
   return (
-    <section className="relative overflow-hidden bg-white text-[#4A4A40] rounded-3xl border border-[#E6E2D3] shadow-xs my-6">
+    <section className="relative overflow-hidden bg-white text-text-main rounded-3xl border border-border shadow-xs my-6">
       {/* Background Ambient Glow & Image */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <img
@@ -63,14 +63,14 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
         {/* Section Header with Week Badge */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/40 flex items-center justify-center">
-              <Flame className="w-4 h-4 text-[#8BA888]" />
+            <div className="w-8 h-8 rounded-xl bg-surface-brand text-text-heading border border-brand/40 flex items-center justify-center">
+              <Flame className="w-4 h-4 text-brand" />
             </div>
             <div>
-              <span className="text-xs uppercase tracking-wider font-bold text-[#8BA888]">
+              <span className="text-xs uppercase tracking-wider font-bold text-brand">
                 Weekly Spotlight
               </span>
-              <h2 className="font-serif-natural text-xl sm:text-2xl font-normal text-[#5A5A40] tracking-tight">
+              <h2 className="font-serif-natural text-xl sm:text-2xl font-normal text-text-heading tracking-tight">
                 Top 5 Most Talked-About Indie & Cozy Releases
               </h2>
             </div>
@@ -78,13 +78,13 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
 
           {/* Quick Pagination indicator */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#707060] font-medium mr-2">
+            <span className="text-xs text-text-muted font-medium mr-2">
               Featured {activeIndex + 1} of {featuredGames.length}
             </span>
             <button
               id="hero-prev-btn"
               onClick={() => setActiveIndex((prev) => (prev - 1 + featuredGames.length) % featuredGames.length)}
-              className="p-2 rounded-full bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060] hover:text-[#4A4A40] transition-colors cursor-pointer border border-[#E6E2D3]"
+              className="p-2 rounded-full bg-surface hover:bg-border text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border"
               title="Previous featured title"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -92,7 +92,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
             <button
               id="hero-next-btn"
               onClick={() => setActiveIndex((prev) => (prev + 1) % featuredGames.length)}
-              className="p-2 rounded-full bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060] hover:text-[#4A4A40] transition-colors cursor-pointer border border-[#E6E2D3]"
+              className="p-2 rounded-full bg-surface hover:bg-border text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border"
               title="Next featured title"
             >
               <ChevronRight className="w-4 h-4" />
@@ -104,7 +104,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left Column: Game Image & Steam Deck Badge */}
           <div className="lg:col-span-5 relative group">
-            <div className="relative rounded-2xl overflow-hidden shadow-md border border-[#E6E2D3] aspect-[16/10] bg-[#F5F5F0]">
+            <div className="relative rounded-2xl overflow-hidden shadow-md border border-border aspect-[16/10] bg-surface">
               <img
                 src={activeGame.coverImage}
                 alt={activeGame.title}
@@ -112,14 +112,14 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
               />
               
               {/* Cozy Score Pill */}
-              <div className="absolute top-3 left-3 bg-[#5A5A40]/90 backdrop-blur-xs text-[#FDFBF7] text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5 fill-[#E6A07D] text-[#E6A07D]" />
+              <div className="absolute top-3 left-3 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
+                <Star className="w-3.5 h-3.5 fill-[#E6A07D] text-accent" />
                 <span>Cozy Scale: {activeGame.cozyScore} / 10</span>
               </div>
 
               {/* Steam Deck Badge */}
-              <div className="absolute top-3 right-3 bg-[#EBF0EA]/95 backdrop-blur-xs border border-[#8BA888]/50 text-[#5A5A40] text-xs font-bold px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5">
-                <Tv className="w-3.5 h-3.5 text-[#8BA888]" />
+              <div className="absolute top-3 right-3 bg-surface-brand/95 backdrop-blur-xs border border-brand/50 text-text-heading text-xs font-bold px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5">
+                <Tv className="w-3.5 h-3.5 text-brand" />
                 <span>Deck: {activeGame.steamDeckStatus}</span>
               </div>
 
@@ -129,15 +129,15 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
                   {activeGame.price}
                 </span>
                 {activeGame.demoAvailable && (
-                  <span className="bg-[#8BA888] text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-xs backdrop-blur-xs">
+                  <span className="bg-brand text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-xs backdrop-blur-xs">
                     Free Demo Available
                   </span>
                 )}
               </div>
 
               {/* Bottom Right: Release Date (USER REQUIREMENT) */}
-              <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-[#FDFBF7] text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
-                <Calendar className="w-3.5 h-3.5 text-[#8BA888]" />
+              <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
+                <Calendar className="w-3.5 h-3.5 text-brand" />
                 <span>{activeGame.releaseDate}</span>
               </div>
             </div>
@@ -147,24 +147,24 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
           <div className="lg:col-span-7 space-y-4">
             {/* Why it's trending highlight quote */}
             {activeGame.featuredReason && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#EBF0EA] border border-[#8BA888]/40 text-[#5A5A40] text-xs font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-[#8BA888] shrink-0" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-brand border border-brand/40 text-text-heading text-xs font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-brand shrink-0" />
                 <span><strong>Why it's buzzing:</strong> {activeGame.featuredReason}</span>
               </div>
             )}
 
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <h3 className="font-serif-natural text-2xl sm:text-3xl lg:text-4xl font-normal text-[#5A5A40] tracking-tight">
+                <h3 className="font-serif-natural text-2xl sm:text-3xl lg:text-4xl font-normal text-text-heading tracking-tight">
                   {activeGame.title}
                 </h3>
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#F5F5F0] text-[#707060] border border-[#E6E2D3]">
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-surface text-text-muted border border-border">
                   {activeGame.developer}
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-[#707060] mt-2">
-                <span className="text-[#8BA888] font-bold flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted mt-2">
+                <span className="text-brand font-bold flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   {formatRating(activeGame.ratingScore, ` ${activeGame.reviewSentiment}`)}
                 </span>
@@ -175,7 +175,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
               </div>
             </div>
 
-            <p className="text-sm sm:text-base text-[#707060] line-clamp-3 leading-relaxed">
+            <p className="text-sm sm:text-base text-text-muted line-clamp-3 leading-relaxed">
               {activeGame.shortDescription}
             </p>
 
@@ -184,20 +184,20 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
               {activeGame.vibes.map((vibe) => (
                 <span
                   key={vibe}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-[#F5F5F0] text-[#5A5A40] border border-[#E6E2D3] flex items-center gap-1 font-medium"
+                  className="text-xs px-2.5 py-1 rounded-lg bg-surface text-text-heading border border-border flex items-center gap-1 font-medium"
                 >
-                  <Tag className="w-3 h-3 text-[#8BA888]" />
+                  <Tag className="w-3 h-3 text-brand" />
                   {vibe}
                 </span>
               ))}
             </div>
 
             {/* Steam Deck Notes Highlight */}
-            <div className="p-3 rounded-xl bg-[#F5F5F0] border border-[#E6E2D3] text-xs text-[#5A5A40] flex items-start gap-2.5">
-              <Tv className="w-4 h-4 text-[#8BA888] shrink-0 mt-0.5" />
+            <div className="p-3 rounded-xl bg-surface border border-border text-xs text-text-heading flex items-start gap-2.5">
+              <Tv className="w-4 h-4 text-brand shrink-0 mt-0.5" />
               <div>
-                <strong className="text-[#5A5A40] font-bold">Steam Deck Experience: </strong>
-                <span className="text-[#707060]">{activeGame.steamDeckNotes}</span>
+                <strong className="text-text-heading font-bold">Steam Deck Experience: </strong>
+                <span className="text-text-muted">{activeGame.steamDeckNotes}</span>
               </div>
             </div>
 
@@ -206,7 +206,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
               <button
                 id={`featured-inspect-${activeGame.id}-btn`}
                 onClick={() => onSelectGame(activeGame)}
-                className="px-5 py-2.5 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white font-bold text-sm transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-sm transition-all shadow-xs flex items-center gap-2 cursor-pointer"
               >
                 <Info className="w-4 h-4" />
                 <span>Read Full Dispatch & Specs</span>
@@ -217,18 +217,18 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
                 onClick={() => onToggleWishlist(activeGame.id)}
                 className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border flex items-center gap-2 cursor-pointer ${
                   isSaved
-                    ? 'bg-[#E6A07D]/20 text-[#5A5A40] border-[#E6A07D]/50'
-                    : 'bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#5A5A40] border-[#E6E2D3]'
+                    ? 'bg-accent/20 text-text-heading border-[#E6A07D]/50'
+                    : 'bg-surface hover:bg-border text-text-heading border-border'
                 }`}
               >
                 {isSaved ? (
                   <>
-                    <Check className="w-4 h-4 text-[#8BA888]" />
+                    <Check className="w-4 h-4 text-brand" />
                     <span>On Cozy Shelf</span>
                   </>
                 ) : (
                   <>
-                    <Heart className="w-4 h-4 text-[#E6A07D]" />
+                    <Heart className="w-4 h-4 text-accent" />
                     <span>Save to Shelf</span>
                   </>
                 )}
@@ -249,7 +249,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
         </div>
 
         {/* Thumbnail Selector for the 5 titles */}
-        <div className="mt-8 pt-6 border-t border-[#E6E2D3] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="mt-8 pt-6 border-t border-border grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {featuredGames.map((game, idx) => {
             const isSelected = idx === activeIndex;
             return (
@@ -259,8 +259,8 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
                 onClick={() => setActiveIndex(idx)}
                 className={`text-left p-2.5 rounded-xl transition-all border cursor-pointer ${
                   isSelected
-                    ? 'bg-[#EBF0EA] border-[#8BA888] shadow-xs'
-                    : 'bg-[#FDFBF7] border-[#E6E2D3] hover:bg-[#F5F5F0]'
+                    ? 'bg-surface-brand border-brand shadow-xs'
+                    : 'bg-base border-border hover:bg-surface'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -270,14 +270,14 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
                     className="w-10 h-10 rounded-lg object-cover shrink-0"
                   />
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#8BA888] flex items-center gap-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-brand flex items-center gap-1">
                       <span>#{idx + 1}</span>
                       <span className="truncate">{game.category}</span>
                     </div>
-                    <div className={`text-xs font-bold truncate ${isSelected ? 'text-[#5A5A40]' : 'text-[#707060]'}`}>
+                    <div className={`text-xs font-bold truncate ${isSelected ? 'text-text-heading' : 'text-text-muted'}`}>
                       {game.title}
                     </div>
-                    <div className="text-[10px] text-[#A0A090] truncate">
+                    <div className="text-[10px] text-text-faint truncate">
                       {game.price} • {formatRating(game.ratingScore, ' Pos')}
                     </div>
                   </div>

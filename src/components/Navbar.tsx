@@ -26,7 +26,9 @@ import {
   Percent,
   Bell,
   User,
-  Heart
+  Heart,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -123,6 +125,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isAudioMenuOpen, setIsAudioMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cozy_theme');
+      if (stored) return stored === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+      return false;
+    }
+  });
   
   const navRef = useRef<HTMLDivElement>(null);
   const audioMenuRef = useRef<HTMLDivElement>(null);
@@ -131,6 +142,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   const safeProfile = userProfile || DEFAULT_USER_PROFILE;
   const unreadNotifCount = (notifications || []).filter((n) => !n.isRead).length;
   const avatarObj = AVATAR_OPTIONS.find((a) => a.id === safeProfile?.avatarIcon) || AVATAR_OPTIONS[0];
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('cozy_theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('cozy_theme', 'light');
+    }
+  }, [isDarkMode]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -150,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   return (
-    <header ref={navRef} className="sticky top-0 z-40 bg-[#FDFBF7]/95 backdrop-blur-md text-[#4A4A40] border-b border-[#E6E2D3] shadow-xs">
+    <header ref={navRef} className="sticky top-0 z-40 bg-base/95 backdrop-blur-md text-text-main border-b border-border shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Brand Logo & Name */}
@@ -160,14 +182,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onNavigate('home')}
               className="flex items-center gap-3 text-left group cursor-pointer shrink-0"
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#8BA888] flex items-center justify-center text-white font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-brand flex items-center justify-center text-white font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
                 🌱
               </div>
               <div>
-                <div className="font-serif-natural text-lg sm:text-xl font-normal text-[#5A5A40] tracking-tight leading-none group-hover:text-[#8BA888] transition-colors">
+                <div className="font-serif-natural text-lg sm:text-xl font-normal text-text-heading tracking-tight leading-none group-hover:text-brand transition-colors">
                   Cozy & Indie Dispatch
                 </div>
-                <div className="text-[10px] text-[#8BA888] font-bold uppercase tracking-wider mt-0.5">
+                <div className="text-[10px] text-brand font-bold uppercase tracking-wider mt-0.5">
                   PC & Steam Deck Gaming
                 </div>
               </div>
@@ -181,11 +203,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onNavigate('browser', 'all')}
                 className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   currentView === 'browser'
-                    ? 'bg-[#8BA888] text-white shadow-xs'
-                    : 'text-[#707060] hover:text-[#4A4A40] hover:bg-[#F5F5F0]'
+                    ? 'bg-brand text-white shadow-xs'
+                    : 'text-text-muted hover:text-text-main hover:bg-surface'
                 }`}
               >
-                <Gamepad2 className="w-4 h-4 text-[#8BA888]" />
+                <Gamepad2 className="w-4 h-4 text-brand" />
                 <span>All Games</span>
               </button>
 
@@ -196,22 +218,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => setOpenDropdown(openDropdown === 'categories' ? null : 'categories')}
                   className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                     currentView === 'categories' || openDropdown === 'categories'
-                      ? 'bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/40'
-                      : 'text-[#707060] hover:text-[#4A4A40] hover:bg-[#F5F5F0]'
+                      ? 'bg-surface-brand text-text-heading border border-brand/40'
+                      : 'text-text-muted hover:text-text-main hover:bg-surface'
                   }`}
                 >
-                  <Layers className={`w-4 h-4 ${currentView === 'categories' || openDropdown === 'categories' ? 'text-[#8BA888]' : 'text-[#707060]'}`} />
+                  <Layers className={`w-4 h-4 ${currentView === 'categories' || openDropdown === 'categories' ? 'text-brand' : 'text-text-muted'}`} />
                   <span>Categories</span>
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openDropdown === 'categories' ? 'rotate-180 text-[#8BA888]' : 'text-[#A0A090]'}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openDropdown === 'categories' ? 'rotate-180 text-brand' : 'text-text-faint'}`} />
                 </button>
 
                 {openDropdown === 'categories' && (
-                  <div className="absolute top-full left-0 mt-2 w-80 bg-[#FDFBF7] border border-[#E6E2D3] rounded-2xl shadow-xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-3 py-2 border-b border-[#E6E2D3] mb-2 flex items-center justify-between">
-                      <div className="text-xs font-bold text-[#5A5A40] uppercase tracking-wider">
+                  <div className="absolute top-full left-0 mt-2 w-80 bg-base border border-border rounded-2xl shadow-xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-2 border-b border-border mb-2 flex items-center justify-between">
+                      <div className="text-xs font-bold text-text-heading uppercase tracking-wider">
                         Browse by Genre
                       </div>
-                      <Layers className="w-3.5 h-3.5 text-[#8BA888]" />
+                      <Layers className="w-3.5 h-3.5 text-brand" />
                     </div>
                     
                     <div className="grid grid-cols-1 gap-1">
@@ -225,41 +247,41 @@ export const Navbar: React.FC<NavbarProps> = ({
                               onNavigate('browser', category.id);
                               setOpenDropdown(null);
                             }}
-                            className="w-full text-left p-2.5 rounded-xl hover:bg-[#F5F5F0] transition-colors flex items-center justify-between group cursor-pointer"
+                            className="w-full text-left p-2.5 rounded-xl hover:bg-surface transition-colors flex items-center justify-between group cursor-pointer"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-[#EBF0EA] text-[#5A5A40] flex items-center justify-center group-hover:bg-[#8BA888] group-hover:text-white transition-colors">
+                              <div className="w-10 h-10 rounded-xl bg-surface-brand text-text-heading flex items-center justify-center group-hover:bg-brand group-hover:text-white transition-colors">
                                 <Icon className="w-5 h-5" />
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <div className="text-sm font-bold text-[#4A4A40] group-hover:text-[#8BA888]">
+                                  <div className="text-sm font-bold text-text-main group-hover:text-brand">
                                     {category.name}
                                   </div>
                                   {category.badge && (
-                                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-white text-[#707060] border border-[#E6E2D3]">
+                                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-white text-text-muted border border-border">
                                       {category.badge}
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[11px] text-[#707060] leading-snug mt-0.5 line-clamp-1">
+                                <div className="text-[11px] text-text-muted leading-snug mt-0.5 line-clamp-1">
                                   {category.description}
                                 </div>
                               </div>
                             </div>
-                            <span className="text-[#A0A090] text-sm group-hover:translate-x-0.5 transition-transform">→</span>
+                            <span className="text-text-faint text-sm group-hover:translate-x-0.5 transition-transform">→</span>
                           </button>
                         );
                       })}
                     </div>
                     
-                    <div className="mt-2 pt-2 border-t border-[#E6E2D3]">
+                    <div className="mt-2 pt-2 border-t border-border">
                        <button 
                          onClick={() => {
                            onNavigate('categories');
                            setOpenDropdown(null);
                          }}
-                         className="w-full text-center p-2 rounded-lg bg-[#F5F5F0] text-xs font-bold text-[#707060] hover:text-[#4A4A40] hover:bg-[#E6E2D3] transition-colors cursor-pointer"
+                         className="w-full text-center p-2 rounded-lg bg-surface text-xs font-bold text-text-muted hover:text-text-main hover:bg-border transition-colors cursor-pointer"
                        >
                          View All Category Overviews
                        </button>
@@ -273,11 +295,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onNavigate('catalogs')}
                 className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   currentView === 'catalogs'
-                    ? 'bg-[#2C2C24] text-white shadow-xs'
-                    : 'text-[#707060] hover:text-[#4A4A40] hover:bg-[#F5F5F0]'
+                    ? 'bg-inverse text-white shadow-xs'
+                    : 'text-text-muted hover:text-text-main hover:bg-surface'
                 }`}
               >
-                <Compass className="w-4 h-4 text-[#8BA888]" />
+                <Compass className="w-4 h-4 text-brand" />
                 <span>Showcases & Catalogs</span>
               </button>
 
@@ -286,11 +308,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onNavigate('deals')}
                 className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   currentView === 'deals'
-                    ? 'bg-[#E6A07D] text-white shadow-xs'
-                    : 'text-[#707060] hover:text-[#E6A07D] hover:bg-[#F5F5F0]'
+                    ? 'bg-accent text-white shadow-xs'
+                    : 'text-text-muted hover:text-accent hover:bg-surface'
                 }`}
               >
-                <Percent className="w-4 h-4 text-[#E6A07D]" />
+                <Percent className="w-4 h-4 text-accent" />
                 <span>Deals</span>
               </button>
             </nav>
@@ -302,20 +324,29 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="navbar-quiz-btn"
               onClick={onOpenQuiz}
-              className="px-3 py-2 rounded-xl bg-[#8BA888] hover:bg-[#7A9977] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Discovery Quiz</span>
+            </button>
+
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center border border-border cursor-pointer"
+              title="Toggle Theme"
+            >
+              {isDarkMode ? <Sun className="w-4 h-4 text-accent" /> : <Moon className="w-4 h-4 text-brand" />}
             </button>
 
             {/* Search Button */}
             <button
               id="navbar-search-btn"
               onClick={onOpenSearch}
-              className="p-2.5 rounded-xl bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060] hover:text-[#4A4A40] transition-all flex items-center gap-2 border border-[#E6E2D3] cursor-pointer"
+              className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center gap-2 border border-border cursor-pointer"
               title="Search PC games & articles"
             >
-              <Search className="w-4 h-4 text-[#8BA888]" />
+              <Search className="w-4 h-4 text-brand" />
               <span className="text-xs font-semibold hidden xl:inline">Search</span>
             </button>
 
@@ -326,25 +357,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setIsAudioMenuOpen(!isAudioMenuOpen)}
                 className={`p-2.5 rounded-xl transition-all border flex items-center gap-1.5 cursor-pointer ${
                   isPlayingAudio
-                    ? 'bg-[#8BA888] text-white border-[#8BA888] shadow-xs'
-                    : 'bg-[#F5F5F0] text-[#707060] border-[#E6E2D3] hover:text-[#4A4A40] hover:bg-[#E6E2D3]'
+                    ? 'bg-brand text-white border-brand shadow-xs'
+                    : 'bg-surface text-text-muted border-border hover:text-text-main hover:bg-border'
                 }`}
                 title="Procedural Lo-fi Ambience"
               >
                 {isPlayingAudio ? (
                   <Volume2 className="w-4 h-4 text-white animate-pulse" />
                 ) : (
-                  <VolumeX className="w-4 h-4 text-[#707060]" />
+                  <VolumeX className="w-4 h-4 text-text-muted" />
                 )}
               </button>
 
               {/* Audio Controls Popover */}
               {isAudioMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-[#FDFBF7] border border-[#E6E2D3] rounded-2xl shadow-xl p-4 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between border-b border-[#E6E2D3] pb-2">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-base border border-border rounded-2xl shadow-xl p-4 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center justify-between border-b border-border pb-2">
                     <div className="flex items-center gap-2">
-                      <Volume2 className="w-4 h-4 text-[#8BA888]" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#5A5A40]">
+                      <Volume2 className="w-4 h-4 text-brand" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-text-heading">
                         Procedural Ambience
                       </span>
                     </div>
@@ -352,8 +383,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onClick={onToggleAudio}
                       className={`text-xs px-2.5 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
                         isPlayingAudio
-                          ? 'bg-[#E6A07D]/20 text-[#5A5A40] border border-[#E6A07D]/40'
-                          : 'bg-[#8BA888] text-white'
+                          ? 'bg-accent/20 text-text-heading border border-[#E6A07D]/40'
+                          : 'bg-brand text-white'
                       }`}
                     >
                       {isPlayingAudio ? 'Mute' : 'Play'}
@@ -372,8 +403,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         onClick={() => onChangeSoundtrack(track.id as SoundscapeTrack)}
                         className={`p-2 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer ${
                           activeSoundtrack === track.id && isPlayingAudio
-                            ? 'bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/40'
-                            : 'bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060]'
+                            ? 'bg-surface-brand text-text-heading border border-brand/40'
+                            : 'bg-surface hover:bg-border text-text-muted'
                         }`}
                       >
                         {track.label}
@@ -381,8 +412,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     ))}
                   </div>
 
-                  <div className="space-y-1 pt-1 border-t border-[#E6E2D3]">
-                    <div className="flex items-center justify-between text-[10px] text-[#707060] font-bold uppercase">
+                  <div className="space-y-1 pt-1 border-t border-border">
+                    <div className="flex items-center justify-between text-[10px] text-text-muted font-bold uppercase">
                       <span>Ambience Volume</span>
                       <span>{Math.round(audioVolume * 100)}%</span>
                     </div>
@@ -405,12 +436,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="navbar-notifications-btn"
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="p-2.5 rounded-xl bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060] hover:text-[#4A4A40] transition-all flex items-center border border-[#E6E2D3] cursor-pointer relative"
+                className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center border border-border cursor-pointer relative"
                 title="Notifications & Price Alerts"
               >
-                <Bell className="w-4 h-4 text-[#8BA888]" />
+                <Bell className="w-4 h-4 text-brand" />
                 {unreadNotifCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#E6A07D] text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-accent text-white text-[9px] font-black flex items-center justify-center shadow-xs">
                     {unreadNotifCount}
                   </span>
                 )}
@@ -431,12 +462,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="navbar-wishlist-btn"
               onClick={onOpenWishlist}
-              className="p-2.5 rounded-xl bg-[#F5F5F0] hover:bg-[#E6E2D3] text-[#707060] hover:text-[#4A4A40] transition-all flex items-center gap-1.5 border border-[#E6E2D3] cursor-pointer relative"
+              className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center gap-1.5 border border-border cursor-pointer relative"
               title="My Cozy PC Wishlist & Shelf"
             >
-              <Heart className="w-4 h-4 text-[#E6A07D]" />
+              <Heart className="w-4 h-4 text-accent" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#8BA888] text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-brand text-white text-[9px] font-black flex items-center justify-center shadow-xs">
                   {wishlistCount}
                 </span>
               )}
@@ -446,7 +477,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="navbar-profile-btn"
               onClick={onOpenProfile}
-              className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-[#EBF0EA] hover:bg-[#8BA888] text-[#5A5A40] hover:text-white border border-[#8BA888]/40 transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+              className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-surface-brand hover:bg-brand text-text-heading hover:text-white border border-brand/40 transition-all flex items-center gap-2 cursor-pointer shadow-xs"
               title="User Profile & Settings"
             >
               <span className="text-base">{avatarObj.emoji}</span>
@@ -458,7 +489,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2.5 rounded-xl bg-[#F5F5F0] text-[#707060] hover:text-[#4A4A40] border border-[#E6E2D3] lg:hidden cursor-pointer"
+              className="p-2.5 rounded-xl bg-surface text-text-muted hover:text-text-main border border-border lg:hidden cursor-pointer"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -468,7 +499,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Collapsible Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-[#E6E2D3] bg-[#FDFBF7] p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+        <div className="lg:hidden border-t border-border bg-base p-4 space-y-4 max-h-[80vh] overflow-y-auto">
           {/* Quick Direct Buttons */}
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -476,7 +507,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('categories');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-[#8BA888] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className="p-2.5 rounded-xl bg-brand text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
             >
               <Layers className="w-3.5 h-3.5" />
               <span>Categories</span>
@@ -487,7 +518,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('catalogs');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-[#2C2C24] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className="p-2.5 rounded-xl bg-inverse text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
             >
               <Compass className="w-3.5 h-3.5" />
               <span>Showcases & Catalogs</span>
@@ -498,7 +529,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('deals');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-[#E6A07D] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className="p-2.5 rounded-xl bg-accent text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
             >
               <Percent className="w-3.5 h-3.5" />
               <span>Deals & Sales</span>
@@ -509,7 +540,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onOpenQuiz();
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-[#8BA888] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className="p-2.5 rounded-xl bg-brand text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Discovery Quiz</span>
@@ -517,18 +548,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="space-y-3">
-            <div className="text-xs font-bold uppercase tracking-wider text-[#5A5A40]">
+            <div className="text-xs font-bold uppercase tracking-wider text-text-heading">
               Select PC Category
             </div>
             {CATEGORIES.map((cat) => (
-              <div key={cat.id} className="bg-[#F5F5F0] p-3 rounded-2xl border border-[#E6E2D3] space-y-2">
+              <div key={cat.id} className="bg-surface p-3 rounded-2xl border border-border space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-bold text-sm text-[#4A4A40]">
-                    <cat.icon className="w-4 h-4 text-[#8BA888]" />
+                  <div className="flex items-center gap-2 font-bold text-sm text-text-main">
+                    <cat.icon className="w-4 h-4 text-brand" />
                     <span>{cat.name}</span>
                   </div>
                   {cat.badge && (
-                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-white text-[#707060] border border-[#E6E2D3]">
+                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-white text-text-muted border border-border">
                       {cat.badge}
                     </span>
                   )}
@@ -540,7 +571,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onNavigate('browser', cat.id);
                       setIsMobileMenuOpen(false);
                     }}
-                    className="p-2 rounded-xl bg-white border border-[#E6E2D3] text-xs font-bold text-[#4A4A40] hover:text-[#8BA888] text-center cursor-pointer"
+                    className="p-2 rounded-xl bg-white border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
                   >
                     🎮 Game Browser
                   </button>
@@ -549,7 +580,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onNavigate('news', cat.id);
                       setIsMobileMenuOpen(false);
                     }}
-                    className="p-2 rounded-xl bg-white border border-[#E6E2D3] text-xs font-bold text-[#4A4A40] hover:text-[#8BA888] text-center cursor-pointer"
+                    className="p-2 rounded-xl bg-white border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
                   >
                     📰 News & Updates
                   </button>
@@ -558,13 +589,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             ))}
           </div>
 
-          <div className="pt-2 border-t border-[#E6E2D3] flex items-center justify-between">
+          <div className="pt-2 border-t border-border flex items-center justify-between">
             <button
               onClick={() => {
                 onNavigate('home');
                 setIsMobileMenuOpen(false);
               }}
-              className="text-xs font-bold text-[#8BA888]"
+              className="text-xs font-bold text-brand"
             >
               Weekly Top 5 Spotlight
             </button>
@@ -574,7 +605,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onOpenProfile();
                 setIsMobileMenuOpen(false);
               }}
-              className="text-xs font-bold text-[#5A5A40]"
+              className="text-xs font-bold text-text-heading"
             >
               Profile & Wishlist ({wishlistCount})
             </button>

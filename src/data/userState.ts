@@ -92,9 +92,9 @@ export const DEFAULT_WISHLIST_ITEMS: WishlistItem[] = [
 ];
 
 export const AVATAR_OPTIONS = [
-  { id: 'sprout', label: 'Fresh Sprout', emoji: '🌱', bg: 'bg-[#8BA888]' },
+  { id: 'sprout', label: 'Fresh Sprout', emoji: '🌱', bg: 'bg-brand' },
   { id: 'tea', label: 'Steaming Tea', emoji: '🍵', bg: 'bg-[#7A9977]' },
-  { id: 'mushroom', label: 'Cozy Mushroom', emoji: '🍄', bg: 'bg-[#E6A07D]' },
+  { id: 'mushroom', label: 'Cozy Mushroom', emoji: '🍄', bg: 'bg-accent' },
   { id: 'cat', label: 'Calico Cat', emoji: '🐱', bg: 'bg-[#DDA15E]' },
   { id: 'fox', label: 'Autumn Fox', emoji: '🦊', bg: 'bg-[#C58B6D]' },
   { id: 'castle', label: 'Tiny Castle', emoji: '🏰', bg: 'bg-[#606C38]' },

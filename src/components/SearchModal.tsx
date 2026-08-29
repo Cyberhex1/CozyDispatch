@@ -78,29 +78,29 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-start justify-center p-4 sm:p-6 animate-in fade-in duration-150">
-      <div className="relative bg-white text-[#4A4A40] rounded-3xl border border-[#E6E2D3] shadow-2xl max-w-2xl w-full overflow-hidden mt-12 mb-8">
+      <div className="relative bg-white text-text-main rounded-3xl border border-border shadow-2xl max-w-2xl w-full overflow-hidden mt-12 mb-8">
         {/* Search Bar Input */}
-        <div className="p-4 sm:p-5 border-b border-[#E6E2D3] flex items-center gap-3 bg-[#FDFBF7]">
-          <Search className="w-5 h-5 text-[#8BA888] shrink-0" />
+        <div className="p-4 sm:p-5 border-b border-border flex items-center gap-3 bg-base">
+          <Search className="w-5 h-5 text-brand shrink-0" />
           <input
             ref={inputRef}
             type="text"
             placeholder="Search cozy games, indie releases, IGN/GameSpot news, patch notes..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-sm sm:text-base text-[#4A4A40] placeholder-[#A0A090] focus:outline-hidden"
+            className="w-full bg-transparent text-sm sm:text-base text-text-main placeholder-[#A0A090] focus:outline-hidden"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="text-[#707060] hover:text-[#4A4A40] text-xs font-bold px-2 py-1 cursor-pointer"
+              className="text-text-muted hover:text-text-main text-xs font-bold px-2 py-1 cursor-pointer"
             >
               Clear
             </button>
           )}
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-white hover:bg-[#F5F5F0] text-[#707060] hover:text-[#4A4A40] border border-[#E6E2D3] cursor-pointer"
+            className="p-1.5 rounded-lg bg-white hover:bg-surface text-text-muted hover:text-text-main border border-border cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -110,7 +110,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         <div className="p-5 max-h-[60vh] overflow-y-auto space-y-5">
           {!query ? (
             <div className="py-8 text-center space-y-3">
-              <p className="text-xs text-[#8BA888] uppercase tracking-wider font-bold">
+              <p className="text-xs text-brand uppercase tracking-wider font-bold">
                 Quick Suggested Searches
               </p>
               <div className="flex flex-wrap justify-center gap-1.5 max-w-md mx-auto">
@@ -118,7 +118,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                   <button
                     key={tag}
                     onClick={() => setQuery(tag)}
-                    className="text-xs px-3 py-1.5 rounded-xl bg-[#FDFBF7] hover:bg-[#EBF0EA] hover:text-[#5A5A40] text-[#707060] border border-[#E6E2D3] transition-colors cursor-pointer"
+                    className="text-xs px-3 py-1.5 rounded-xl bg-base hover:bg-surface-brand hover:text-text-heading text-text-muted border border-border transition-colors cursor-pointer"
                   >
                     {tag}
                   </button>
@@ -126,15 +126,15 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               </div>
             </div>
           ) : totalMatches === 0 ? (
-            <div className="text-center py-12 text-[#707060] text-sm">
-              No results found for "<strong className="text-[#5A5A40]">{query}</strong>". Try a broader tag like "farm", "deck", or "builder".
+            <div className="text-center py-12 text-text-muted text-sm">
+              No results found for "<strong className="text-text-heading">{query}</strong>". Try a broader tag like "farm", "deck", or "builder".
             </div>
           ) : (
             <>
               {/* Games */}
               {matchedGames.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#8BA888] flex items-center gap-1.5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
                     <Gamepad2 className="w-3.5 h-3.5" />
                     <span>Games ({matchedGames.length})</span>
                   </div>
@@ -147,19 +147,19 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           onSelectGame(game);
                           onClose();
                         }}
-                        className="bg-[#FDFBF7] hover:bg-[#F5F5F0] p-3 rounded-2xl border border-[#E6E2D3] flex items-center justify-between gap-3 cursor-pointer transition-colors"
+                        className="bg-base hover:bg-surface p-3 rounded-2xl border border-border flex items-center justify-between gap-3 cursor-pointer transition-colors"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <img
                             src={game.coverImage}
                             alt={game.title}
-                            className="w-10 h-10 rounded-lg object-cover border border-[#E6E2D3]"
+                            className="w-10 h-10 rounded-lg object-cover border border-border"
                           />
                           <div className="min-w-0">
-                            <h4 className="font-serif-natural font-normal text-xs text-[#5A5A40] truncate">
+                            <h4 className="font-serif-natural font-normal text-xs text-text-heading truncate">
                               {game.title}
                             </h4>
-                            <div className="text-[11px] text-[#707060] mt-0.5">
+                            <div className="text-[11px] text-text-muted mt-0.5">
                               {game.developer} • {game.price} • ★ {game.cozyScore}/10
                             </div>
                           </div>
@@ -167,11 +167,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
                         <div className="flex items-center gap-2 shrink-0">
                           {game.steamDeckStatus === 'Verified' && (
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/30">
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-surface-brand text-text-heading border border-brand/30">
                               Deck Verified
                             </span>
                           )}
-                          <ArrowRight className="w-4 h-4 text-[#A0A090]" />
+                          <ArrowRight className="w-4 h-4 text-text-faint" />
                         </div>
                       </div>
                     ))}
@@ -182,7 +182,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               {/* News Articles */}
               {matchedArticles.length > 0 && (
                 <div className="space-y-2 pt-2">
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#8BA888] flex items-center gap-1.5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
                     <Newspaper className="w-3.5 h-3.5" />
                     <span>News & Coverage ({matchedArticles.length})</span>
                   </div>
@@ -195,21 +195,21 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           onSelectArticle(article);
                           onClose();
                         }}
-                        className="bg-[#FDFBF7] hover:bg-[#F5F5F0] p-3 rounded-2xl border border-[#E6E2D3] flex items-center justify-between gap-3 cursor-pointer transition-colors"
+                        className="bg-base hover:bg-surface p-3 rounded-2xl border border-border flex items-center justify-between gap-3 cursor-pointer transition-colors"
                       >
                         <div className="min-w-0">
-                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/30">
+                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-surface-brand text-text-heading border border-brand/30">
                             {article.source}
                           </span>
-                          <h4 className="font-serif-natural font-normal text-xs text-[#5A5A40] line-clamp-1 mt-1">
+                          <h4 className="font-serif-natural font-normal text-xs text-text-heading line-clamp-1 mt-1">
                             {article.title}
                           </h4>
-                          <p className="text-[11px] text-[#707060] line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-text-muted line-clamp-1 mt-0.5">
                             {article.summary}
                           </p>
                         </div>
 
-                        <ArrowRight className="w-4 h-4 text-[#A0A090] shrink-0" />
+                        <ArrowRight className="w-4 h-4 text-text-faint shrink-0" />
                       </div>
                     ))}
                   </div>
@@ -219,7 +219,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               {/* Patch Notes */}
               {matchedPatches.length > 0 && (
                 <div className="space-y-2 pt-2">
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#8BA888] flex items-center gap-1.5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
                     <Wrench className="w-3.5 h-3.5" />
                     <span>Patch Notes ({matchedPatches.length})</span>
                   </div>
@@ -232,23 +232,23 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           onSelectPatch(patch);
                           onClose();
                         }}
-                        className="bg-[#FDFBF7] hover:bg-[#F5F5F0] p-3 rounded-2xl border border-[#E6E2D3] flex items-center justify-between gap-3 cursor-pointer transition-colors"
+                        className="bg-base hover:bg-surface p-3 rounded-2xl border border-border flex items-center justify-between gap-3 cursor-pointer transition-colors"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="font-serif-natural font-normal text-xs text-[#5A5A40]">
+                            <h4 className="font-serif-natural font-normal text-xs text-text-heading">
                               {patch.gameTitle}
                             </h4>
-                            <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/30">
+                            <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-surface-brand text-text-heading border border-brand/30">
                               {patch.version}
                             </span>
                           </div>
-                          <p className="text-[11px] text-[#707060] line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-text-muted line-clamp-1 mt-0.5">
                             {patch.summary}
                           </p>
                         </div>
 
-                        <ArrowRight className="w-4 h-4 text-[#A0A090] shrink-0" />
+                        <ArrowRight className="w-4 h-4 text-text-faint shrink-0" />
                       </div>
                     ))}
                   </div>

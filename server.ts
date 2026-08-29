@@ -113,7 +113,7 @@ app.post('/api/newsletter/subscribe', (req, res) => {
 app.get('/api/newsletter/stats', (req, res) => {
   res.json({
     success: true,
-    totalSubscribers: subscribers.length,
+    totalSubscribers: getSubscribers().length,
     latestEdition: 'Issue #42: Fields of Mistria Magic & Tiny Glade Zen'
   });
 });

@@ -44,7 +44,7 @@ const CATEGORY_CONFIGS: CategoryConfig[] = [
     tagline: 'Warm, low-stress worlds filled with gentle routine and heart.',
     description: 'Farming, cottagecore, wholesome town life, gentle crafting, and heartwarming relationships with no stressful death penalties.',
     icon: Coffee,
-    accentColor: 'from-[#8BA888]/20 to-[#8BA888]/5 text-[#4A6B47] border-[#8BA888]/30',
+    accentColor: 'from-[#8BA888]/20 to-[#8BA888]/5 text-[#4A6B47] border-brand/30',
     badge: 'Trending',
     topTags: ['Farming Sim', 'Pastoral', 'Wholesome', 'Cute', 'Life Sim']
   },
@@ -168,11 +168,11 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
       {/* Section Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E6E2D3] shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-[#8BA888]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5F5F0] text-[#707060] text-xs font-semibold uppercase tracking-wider border border-[#E6E2D3]">
-            <Gamepad2 className="w-3.5 h-3.5 text-[#8BA888]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface text-text-muted text-xs font-semibold uppercase tracking-wider border border-border">
+            <Gamepad2 className="w-3.5 h-3.5 text-brand" />
             <span>Genre Explorer</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2C2C24] tracking-tight font-serif">
@@ -200,7 +200,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
           return (
             <div 
               key={cat.id}
-              className="group bg-white rounded-2xl p-6 border border-[#E6E2D3] hover:border-[#8BA888] shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+              className="group bg-white rounded-2xl p-6 border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
             >
               <div className="space-y-4">
                 {/* Header row */}
@@ -208,7 +208,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                   <div className={`p-3 rounded-2xl bg-gradient-to-br ${cat.accentColor} border shadow-xs`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-[#F5F5F0] text-[#707060] text-xs font-bold border border-[#E6E2D3]">
+                  <span className="px-2.5 py-1 rounded-full bg-surface text-text-muted text-xs font-bold border border-border">
                     {cat.badge}
                   </span>
                 </div>
@@ -217,7 +217,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                   <h3 className="text-xl font-bold text-[#2C2C24] group-hover:text-[#4A6B47] transition-colors font-serif">
                     {cat.name}
                   </h3>
-                  <p className="text-xs text-[#707060] mt-1 font-medium">
+                  <p className="text-xs text-text-muted mt-1 font-medium">
                     {cat.tagline}
                   </p>
                 </div>
@@ -231,7 +231,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                   {cat.topTags.map((tag) => (
                     <span 
                       key={tag}
-                      className="px-2 py-0.5 rounded-md bg-[#F5F5F0] text-[#505045] text-[11px] font-medium border border-[#E6E2D3]"
+                      className="px-2 py-0.5 rounded-md bg-surface text-[#505045] text-[11px] font-medium border border-border"
                     >
                       #{tag}
                     </span>
@@ -240,10 +240,10 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
 
                 {/* Featured games thumbnails preview */}
                 {categoryGames.length > 0 && (
-                  <div className="pt-2 border-t border-[#E6E2D3]/60 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-[#707060]">
+                  <div className="pt-2 border-t border-border/60 space-y-2">
+                    <div className="flex items-center justify-between text-xs text-text-muted">
                       <span className="font-semibold text-[#2C2C24]">Featured Titles:</span>
-                      <span className="font-bold text-[#8BA888]">{totalGames} Games</span>
+                      <span className="font-bold text-brand">{totalGames} Games</span>
                     </div>
                     
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -252,7 +252,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                           key={g.id}
                           onClick={() => onSelectGame(g)}
                           title={`${g.title} (${formatRating(g.ratingScore, ' Positive')})`}
-                          className="shrink-0 relative group/thumb overflow-hidden rounded-lg border border-[#E6E2D3] hover:border-[#8BA888] transition-all cursor-pointer"
+                          className="shrink-0 relative group/thumb overflow-hidden rounded-lg border border-border hover:border-brand transition-all cursor-pointer"
                         >
                           <img 
                             src={g.coverImage} 
@@ -270,19 +270,19 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
               </div>
 
               {/* Action Button */}
-              <div className="pt-5 mt-4 border-t border-[#E6E2D3]/60 flex items-center justify-between">
+              <div className="pt-5 mt-4 border-t border-border/60 flex items-center justify-between">
                 {topGame ? (
-                  <div className="text-xs text-[#707060]">
-                    <span className="text-[10px] uppercase tracking-wider text-[#888870] block">Top Rated</span>
+                  <div className="text-xs text-text-muted">
+                    <span className="text-[10px] uppercase tracking-wider text-text-alt block">Top Rated</span>
                     <span className="font-bold text-[#2C2C24] truncate max-w-[130px] block">{topGame.title}</span>
                   </div>
                 ) : (
-                  <span className="text-xs text-[#888870]">Explore Catalog</span>
+                  <span className="text-xs text-text-alt">Explore Catalog</span>
                 )}
 
                 <button
                   onClick={() => onSelectCategory(cat.id)}
-                  className="px-4 py-2 rounded-xl bg-[#2C2C24] hover:bg-[#4A6B47] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A6B47] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>Browse {totalGames}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
