@@ -289,10 +289,10 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
               <article
                 key={article.id}
                 onClick={() => onSelectArticle(article)}
-                className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
+                className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
               >
                 {/* Thumbnail & Source Badge */}
-                <div className="relative aspect-[16/9] bg-surface overflow-hidden">
+                <div className="relative aspect-[16/9] bg-base overflow-hidden">
                   <img
                     src={article.imageUrl}
                     alt={article.title}
@@ -355,7 +355,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   </div>
 
                   {/* Footer & Actions */}
-                  <div className="pt-2 border-t border-[#F5F5F0] flex items-center justify-between text-xs">
+                  <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -465,7 +465,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-[#F5F5F0] flex items-center justify-between text-xs">
+                <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
                   <span className="text-text-muted font-medium">
                     {patch.detailedNotes.length} detailed changelog items
                   </span>
@@ -501,7 +501,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 onClick={() => onSelectUpcoming(item)}
                 className="bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
               >
-                <div className="relative aspect-[16/10] bg-surface">
+                <div className="relative aspect-[16/10] bg-base">
                   <img
                     src={item.coverImage}
                     alt={item.gameTitle}
@@ -531,7 +531,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-[#F5F5F0] space-y-2">
+                  <div className="pt-2 border-t border-border space-y-2">
                     <div className="flex flex-wrap gap-1">
                       {item.tags.map((t) => (
                         <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-surface text-text-muted">

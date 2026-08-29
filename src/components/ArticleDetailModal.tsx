@@ -47,7 +47,7 @@ export const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
             alt={article.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-base via-base/40 to-transparent" />
 
           {/* Close button */}
           <button

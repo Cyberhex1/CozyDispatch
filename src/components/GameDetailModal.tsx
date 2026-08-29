@@ -52,7 +52,7 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
             alt={game.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#FDFBF7] via-[#FDFBF7]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-base via-base/40 to-transparent" />
 
           {/* Close button */}
           <button

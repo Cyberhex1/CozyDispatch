@@ -56,7 +56,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
           alt={activeGame.title}
           className="w-full h-full object-cover object-center opacity-10 filter blur-xs scale-105 transition-all duration-700 ease-out"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-[#FDFBF7]/80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-base via-base/90 to-base/80" />
       </div>
 
       <div className="relative z-10 p-6 sm:p-8 lg:p-10">
@@ -104,7 +104,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left Column: Game Image & Steam Deck Badge */}
           <div className="lg:col-span-5 relative group">
-            <div className="relative rounded-2xl overflow-hidden shadow-md border border-border aspect-[16/10] bg-surface">
+            <div className="relative rounded-2xl overflow-hidden shadow-md border border-border aspect-[16/10] bg-base">
               <img
                 src={activeGame.coverImage}
                 alt={activeGame.title}

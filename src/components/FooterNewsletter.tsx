@@ -90,12 +90,12 @@ export const FooterNewsletter: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address..."
               disabled={status === 'loading'}
-              className="w-full pl-3 pr-24 py-2 bg-[#FAF9F5] border border-border rounded-xl text-xs text-[#2C2C24] placeholder-[#A0A090] focus:outline-none focus:border-brand focus:ring-1 focus:ring-[#8BA888] transition-all disabled:opacity-50"
+              className="w-full pl-3 pr-24 py-2 bg-surface border border-border rounded-xl text-xs text-[#2C2C24] placeholder-[#A0A090] focus:outline-none focus:border-brand focus:ring-1 focus:ring-[#8BA888] transition-all disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="absolute right-1 top-1 bottom-1 px-3 bg-inverse hover:bg-[#4A6B47] text-text-on-inverse text-xs font-bold rounded-lg transition-colors flex items-center gap-1 shadow-xs cursor-pointer disabled:opacity-50"
+              className="absolute right-1 top-1 bottom-1 px-3 bg-inverse hover:bg-brand-hover text-text-on-inverse text-xs font-bold rounded-lg transition-colors flex items-center gap-1 shadow-xs cursor-pointer disabled:opacity-50"
             >
               {status === 'loading' ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

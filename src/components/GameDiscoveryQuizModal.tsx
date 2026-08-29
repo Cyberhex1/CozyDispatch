@@ -177,7 +177,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
             <>
               {/* Step Progress Bar */}
               <div className="space-y-2">
-                <div className="w-full bg-[#E6E2D3] h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-border h-2 rounded-full overflow-hidden">
                   <div 
                     className="bg-brand h-full transition-all duration-300 rounded-full"
                     style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
@@ -218,7 +218,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-brand text-white' : 'bg-[#E6E2D3]/60 text-text-heading'}`}>
+                          <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-brand text-white' : 'bg-border/60 text-text-heading'}`}>
                             {renderQuizIcon(option.iconName)}
                           </div>
                           <div>
@@ -280,7 +280,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                     className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       savedToProfile
                         ? 'bg-brand text-white'
-                        : 'bg-inverse text-text-on-inverse hover:bg-[#4A4A40]'
+                        : 'bg-inverse text-text-on-inverse hover:bg-inverse/80'
                     }`}
                   >
                     {savedToProfile ? <Check className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5" />}

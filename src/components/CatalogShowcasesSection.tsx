@@ -176,7 +176,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
               return (
                 <div
                   key={game.id}
-                  className="group bg-base rounded-2xl overflow-hidden border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+                  className="group bg-surface rounded-2xl overflow-hidden border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
                 >
                   <div>
                     {/* Cover Header Image */}
@@ -258,7 +258,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                   </div>
 
                   {/* Card Footer */}
-                  <div className="px-5 py-4 bg-[#FAF9F5] border-t border-border flex items-center justify-between">
+                  <div className="px-5 py-4 bg-surface border-t border-border flex items-center justify-between">
                     <div>
                       <span className="text-xs font-extrabold text-[#2C2C24] block">
                         {game.price}

@@ -424,7 +424,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       step={0.05}
                       value={audioVolume}
                       onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                      className="w-full h-1.5 bg-[#E6E2D3] rounded-lg appearance-none cursor-pointer accent-[#8BA888]"
+                      className="w-full h-1.5 bg-border rounded-lg appearance-none cursor-pointer accent-[#8BA888]"
                     />
                   </div>
                 </div>

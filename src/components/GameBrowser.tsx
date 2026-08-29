@@ -203,7 +203,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               <Icon className={`w-4 h-4 ${isActive ? 'text-text-on-inverse' : 'text-brand'}`} />
               <span>{tab.label}</span>
               <span className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${
-                isActive ? 'bg-[#7A9977] text-white' : 'bg-surface text-text-muted'
+                isActive ? 'bg-brand-hover text-white' : 'bg-surface text-text-muted'
               }`}>
                 {tab.badge}
               </span>
@@ -269,7 +269,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
         </div>
 
         {/* Sub-Filters: Deck Verified Toggle, Cozy Scale, Sort By */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#F5F5F0] text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border text-xs">
           <div className="flex flex-wrap items-center gap-3">
             {/* Steam Deck Verified Toggle */}
             <button
@@ -408,10 +408,10 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
             return (
               <div
                 key={game.id}
-                className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col"
+                className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col"
               >
                 {/* Cover Image & Overlay Badges */}
-                <div className="relative aspect-[16/10] bg-surface overflow-hidden">
+                <div className="relative aspect-[16/10] bg-base overflow-hidden">
                   <img
                     src={game.coverImage}
                     alt={game.title}
@@ -488,7 +488,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   </div>
 
                   {/* Review Score & Tag list */}
-                  <div className="pt-2 border-t border-[#F5F5F0] space-y-2">
+                  <div className="pt-2 border-t border-border space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-brand font-bold flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3 text-brand" />
@@ -517,7 +517,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                       <button
                         id={`game-card-details-${game.id}-btn`}
                         onClick={() => onSelectGame(game)}
-                        className="flex-1 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-text-on-inverse font-bold text-xs transition-colors text-center cursor-pointer shadow-xs"
+                        className="flex-1 py-2 rounded-xl bg-inverse hover:bg-inverse/80 text-text-on-inverse font-bold text-xs transition-colors text-center cursor-pointer shadow-xs"
                       >
                         View Details
                       </button>
@@ -633,7 +633,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
                   <button
                     onClick={() => onSelectGame(game)}
-                    className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-text-on-inverse font-bold text-xs transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-xl bg-inverse hover:bg-inverse/80 text-text-on-inverse font-bold text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     Specs
                   </button>

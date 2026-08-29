@@ -149,7 +149,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <h2 className="font-serif-natural text-lg font-normal text-text-heading">
                   {currentProfile.username}
                 </h2>
-                <span className="text-[11px] font-mono bg-[#E6E2D3] text-text-heading px-2 py-0.5 rounded-md">
+                <span className="text-[11px] font-mono bg-border text-text-heading px-2 py-0.5 rounded-md">
                   {currentProfile.gamerTag}
                 </span>
               </div>

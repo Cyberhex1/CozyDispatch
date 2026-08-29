@@ -332,7 +332,7 @@ export default function App() {
             />
 
             {/* Quick Interactive Discovery Banner & Discovery Quiz CTA */}
-            <section className="bg-gradient-to-r from-[#EBF0EA] via-[#F5F5F0] to-[#FDFBF7] p-6 sm:p-8 rounded-3xl border border-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+            <section className="bg-gradient-to-r from-surface-brand via-surface to-base p-6 sm:p-8 rounded-3xl border border-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="space-y-2 max-w-xl">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand text-white text-xs font-bold shadow-xs">
                   <Sparkles className="w-3.5 h-3.5" />
@@ -426,7 +426,7 @@ export default function App() {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-4 mt-2 border-t border-[#F5F5F0] text-xs font-bold">
+                    <div className="flex items-center gap-2 pt-4 mt-2 border-t border-border text-xs font-bold">
                       <button
                         onClick={() => handleNavigate('browser', pillar.id as GameCategory)}
                         className="text-brand hover:text-text-heading cursor-pointer flex items-center gap-1 transition-colors"
@@ -463,7 +463,7 @@ export default function App() {
                 <button
                   id="home-view-all-news-btn"
                   onClick={() => handleNavigate('news')}
-                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-text-on-inverse font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-inverse/80 text-text-on-inverse font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
                 >
                   <span>View All News & Patch Notes</span>
                   <ArrowRight className="w-4 h-4" />
@@ -476,9 +476,9 @@ export default function App() {
                   <article
                     key={article.id}
                     onClick={() => setSelectedArticle(article)}
-                    className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
+                    className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
                   >
-                    <div className="relative aspect-[16/9] bg-surface overflow-hidden">
+                    <div className="relative aspect-[16/9] bg-base overflow-hidden">
                       <img
                         src={article.imageUrl}
                         alt={article.title}
@@ -502,7 +502,7 @@ export default function App() {
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-[#F5F5F0] flex items-center justify-between text-xs text-brand font-bold">
+                      <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-brand font-bold">
                         <span>Read Takeaway</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </div>
@@ -542,9 +542,9 @@ export default function App() {
                     <div
                       key={game.id}
                       onClick={() => setSelectedGame(game)}
-                      className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
+                      className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
                     >
-                      <div className="relative aspect-[16/10] bg-surface overflow-hidden">
+                      <div className="relative aspect-[16/10] bg-base overflow-hidden">
                         <img
                           src={game.coverImage}
                           alt={game.title}
@@ -581,7 +581,7 @@ export default function App() {
                           </p>
                         </div>
 
-                        <div className="pt-2 border-t border-[#F5F5F0] flex items-center justify-between text-xs">
+                        <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
                           <span className="text-brand font-bold">
                             {formatRating(game.ratingScore, ' Pos')}
                           </span>

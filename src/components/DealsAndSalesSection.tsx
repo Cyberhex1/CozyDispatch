@@ -212,7 +212,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
             <button
               onClick={() => setDiscountFilter('all')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                discountFilter === 'all' ? 'bg-[#E6E2D3] text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
+                discountFilter === 'all' ? 'bg-border text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
               }`}
             >
               All Discounts
@@ -220,7 +220,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
             <button
               onClick={() => setDiscountFilter('50plus')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                discountFilter === '50plus' ? 'bg-[#E6E2D3] text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
+                discountFilter === '50plus' ? 'bg-border text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
               }`}
             >
               50%+ Off
@@ -228,7 +228,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
             <button
               onClick={() => setDiscountFilter('30plus')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                discountFilter === '30plus' ? 'bg-[#E6E2D3] text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
+                discountFilter === '30plus' ? 'bg-border text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
               }`}
             >
               30%+ Off
@@ -236,7 +236,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
             <button
               onClick={() => setDiscountFilter('under10')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                discountFilter === 'under10' ? 'bg-[#E6E2D3] text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
+                discountFilter === 'under10' ? 'bg-border text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
               }`}
             >
               Under $10
@@ -244,7 +244,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
             <button
               onClick={() => setDiscountFilter('under5')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                discountFilter === 'under5' ? 'bg-[#E6E2D3] text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
+                discountFilter === 'under5' ? 'bg-border text-text-heading font-bold' : 'text-text-muted hover:text-text-main'
               }`}
             >
               Under $5 (Budget Sanctuary)

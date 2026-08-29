@@ -200,7 +200,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
           return (
             <div 
               key={cat.id}
-              className="group bg-base rounded-2xl p-6 border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+              className="group bg-surface rounded-2xl p-6 border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
             >
               <div className="space-y-4">
                 {/* Header row */}
@@ -282,7 +282,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
 
                 <button
                   onClick={() => onSelectCategory(cat.id)}
-                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A6B47] text-text-on-inverse text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-brand-hover text-text-on-inverse text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>Browse {totalGames}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
