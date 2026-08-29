@@ -92,3 +92,31 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--theme-brand);
 }
+
+/* Mobile & Touch Utility Helpers */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.safe-bottom {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+.safe-top {
+  padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+}
+
+/* Touch active state enhancement */
+@media (hover: none) and (pointer: coarse) {
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

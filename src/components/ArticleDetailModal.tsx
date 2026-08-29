@@ -110,6 +110,29 @@ export const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
             </p>
           </div>
 
+          {/* Clustered Coverage / Additional Outlets */}
+          {article.clusteredSources && article.clusteredSources.length > 0 && (
+            <div className="p-3.5 bg-surface rounded-2xl border border-border space-y-2 text-xs">
+              <div className="font-bold text-text-heading text-[11px] uppercase tracking-wider">
+                Also Covered By Other Outlets:
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {article.clusteredSources.map((cs, idx) => (
+                  <a
+                    key={idx}
+                    href={cs.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-base hover:bg-border text-text-muted hover:text-text-main border border-border font-medium transition-colors"
+                  >
+                    <span>{cs.source}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5 pt-2">
             {article.tags.map((tag) => (

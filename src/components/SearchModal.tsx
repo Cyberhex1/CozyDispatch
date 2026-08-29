@@ -77,11 +77,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const totalMatches = matchedGames.length + matchedArticles.length + matchedPatches.length;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-start justify-center p-4 sm:p-6 animate-in fade-in duration-150">
-      <div className="relative bg-base text-text-main rounded-3xl border border-border shadow-2xl max-w-2xl w-full overflow-hidden mt-12 mb-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-start justify-center p-2 sm:p-6 animate-in fade-in duration-150">
+      <div className="relative bg-base text-text-main rounded-3xl border border-border shadow-2xl max-w-2xl w-full overflow-hidden mt-4 sm:mt-12 mb-4 sm:mb-8 max-h-[90vh] flex flex-col">
         {/* Search Bar Input */}
-        <div className="p-4 sm:p-5 border-b border-border flex items-center gap-3 bg-base">
-          <Search className="w-5 h-5 text-brand shrink-0" />
+        <div className="p-3.5 sm:p-5 border-b border-border flex items-center gap-2.5 sm:gap-3 bg-base shrink-0">
+          <Search className="w-4 sm:w-5 h-4 sm:h-5 text-brand shrink-0" />
           <input
             ref={inputRef}
             type="text"

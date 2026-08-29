@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { UserProfile, Game, WishlistItem, NotificationAlert } from '../types';
+import React, { useState, useEffect } from 'react';
+import { UserProfile, Game, WishlistItem, NotificationAlert, UserAccountData } from '../types';
 import { AVATAR_OPTIONS, DEFAULT_USER_PROFILE } from '../data/userState';
+import { loginAccount, signupAccount, logoutAccount } from '../services/accountSync';
 import { 
   User, 
   Heart, 
@@ -19,7 +20,11 @@ import {
   LogIn,
   Sliders,
   DollarSign,
-  TrendingDown
+  TrendingDown,
+  Cloud,
+  CloudCheck,
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 
 interface UserProfileModalProps {
@@ -38,6 +43,8 @@ interface UserProfileModalProps {
   notifications?: NotificationAlert[];
   onMarkNotificationRead?: (id: string) => void;
   onClearNotifications?: () => void;
+  onLoginSuccess?: (userData: UserAccountData) => void;
+  onLogoutSuccess?: () => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -52,7 +59,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onUpdateWishlistItem,
   onRemoveWishlistItem,
   allGames = [],
-  onSelectGame
+  onSelectGame,
+  onLoginSuccess,
+  onLogoutSuccess
 }) => {
   const currentProfile: UserProfile = userProfile || profile || DEFAULT_USER_PROFILE;
   const preferences = currentProfile.preferences || DEFAULT_USER_PROFILE.preferences;
@@ -65,11 +74,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [editedVibe, setEditedVibe] = useState(currentProfile.favoriteVibe || '');
   const [selectedAvatar, setSelectedAvatar] = useState(currentProfile.avatarIcon || 'sprout');
 
-  // Auth simulation state
-  const [authMode, setAuthMode] = useState<'logged_in' | 'login' | 'signup'>('logged_in');
+  // Real Auth state
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [authSuccessMsg, setAuthSuccessMsg] = useState('');
+  const [authErrorMsg, setAuthErrorMsg] = useState('');
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
+
+  // Sync edit form with profile changes
+  useEffect(() => {
+    setEditedName(currentProfile.username || 'Cozy Gamer');
+    setEditedTag(currentProfile.gamerTag || 'Cozy#1000');
+    setEditedBio(currentProfile.bio || '');
+    setEditedVibe(currentProfile.favoriteVibe || '');
+    setSelectedAvatar(currentProfile.avatarIcon || 'sprout');
+  }, [currentProfile]);
 
   if (!isOpen) return null;
 
@@ -117,349 +137,348 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     });
   };
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginEmail) {
-      const generatedName = loginEmail.split('@')[0] || 'CozyPlayer';
-      onUpdateProfile({
-        ...currentProfile,
-        username: generatedName,
-        gamerTag: `${generatedName}#${Math.floor(1000 + Math.random() * 9000)}`
-      });
-      setAuthSuccessMsg(`Logged in successfully as ${generatedName}!`);
-      setTimeout(() => {
-        setAuthMode('logged_in');
-        setAuthSuccessMsg('');
-      }, 1200);
+    setAuthErrorMsg('');
+    setAuthSuccessMsg('');
+    setIsSubmittingAuth(true);
+
+    try {
+      if (authMode === 'signup') {
+        const res = await signupAccount(loginEmail, loginPassword, editedName, {
+          profile: currentProfile,
+          wishlistedGameIds: wishlistGames.map((g) => g.id),
+          wishlistItems: wishlistItems
+        });
+
+        if (res.success && res.user) {
+          setAuthSuccessMsg(`Account created! Logged in as ${res.user.profile.username}.`);
+          if (onLoginSuccess) {
+            onLoginSuccess(res.user);
+          }
+          setLoginPassword('');
+        } else {
+          setAuthErrorMsg(res.error || 'Failed to create account.');
+        }
+      } else {
+        const res = await loginAccount(loginEmail, loginPassword);
+        if (res.success && res.user) {
+          setAuthSuccessMsg(`Welcome back, ${res.user.profile.username}! Your cloud data has loaded.`);
+          if (onLoginSuccess) {
+            onLoginSuccess(res.user);
+          }
+          setLoginPassword('');
+        } else {
+          setAuthErrorMsg(res.error || 'Invalid email or password.');
+        }
+      }
+    } catch (err: any) {
+      setAuthErrorMsg(err.message || 'Authentication error.');
+    } finally {
+      setIsSubmittingAuth(false);
     }
   };
 
+  const handleLogout = async () => {
+    await logoutAccount();
+    if (onLogoutSuccess) {
+      onLogoutSuccess();
+    }
+    setAuthSuccessMsg('Logged out successfully.');
+    setTimeout(() => setAuthSuccessMsg(''), 2500);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-base rounded-3xl border border-border w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-base rounded-3xl border border-border w-full max-w-3xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col">
         
         {/* Modal Top Header */}
-        <div className="px-6 py-4 border-b border-border bg-surface/80 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-2xl ${currentAvatarObj.bg} text-white flex items-center justify-center text-lg shadow-xs`}>
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-surface/80 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className={`w-9 sm:w-10 h-9 sm:h-10 rounded-2xl ${currentAvatarObj.bg} text-white flex items-center justify-center text-base sm:text-lg shadow-xs shrink-0`}>
               {currentAvatarObj.emoji}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-serif-natural text-lg font-normal text-text-heading">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="font-serif-natural text-base sm:text-lg font-normal text-text-heading truncate">
                   {currentProfile.username}
                 </h2>
-                <span className="text-[11px] font-mono bg-border text-text-heading px-2 py-0.5 rounded-md">
+                <span className="text-[10px] sm:text-[11px] font-mono bg-border text-text-heading px-1.5 sm:px-2 py-0.5 rounded-md shrink-0">
                   {currentProfile.gamerTag}
                 </span>
+                {currentProfile.isLoggedIn && (
+                  <span className="text-[10px] bg-brand text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
+                    <Cloud className="w-3 h-3" />
+                    Cloud Synced
+                  </span>
+                )}
               </div>
-              <p className="text-[11px] text-text-muted">
-                Member since {currentProfile.memberSince || '2025'} • {wishlistItems.length || wishlistGames.length} Saved PC Games
+              <p className="text-[10px] sm:text-[11px] text-text-muted truncate">
+                {currentProfile.isLoggedIn ? currentProfile.email : 'Guest Profile'} • Member since {currentProfile.memberSince || '2025'} • {wishlistItems.length || wishlistGames.length} Saved
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-text-muted hover:text-text-heading hover:bg-border/50 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shrink-0 ml-2"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 sm:w-5 h-4 sm:h-5" />
           </button>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="px-6 border-b border-border bg-base flex items-center gap-2 overflow-x-auto">
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-1 px-4 sm:px-6 pt-3 border-b border-border bg-surface/40 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`py-3 px-3.5 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'profile'
-                ? 'border-brand text-text-heading'
-                : 'border-transparent text-text-muted hover:text-text-heading'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-text-muted hover:text-text-main'
             }`}
           >
-            <User className="w-3.5 h-3.5" />
-            <span>Profile Persona</span>
+            <User className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+            <span>Profile & Bio</span>
           </button>
 
           <button
             onClick={() => setActiveTab('wishlist')}
-            className={`py-3 px-3.5 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'wishlist'
-                ? 'border-brand text-text-heading'
-                : 'border-transparent text-text-muted hover:text-text-heading'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-text-muted hover:text-text-main'
             }`}
           >
-            <Heart className="w-3.5 h-3.5" />
-            <span>Wishlist & Alerts ({wishlistItems.length})</span>
+            <Heart className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+            <span>Wishlist ({wishlistGames.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('preferences')}
-            className={`py-3 px-3.5 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'preferences'
-                ? 'border-brand text-text-heading'
-                : 'border-transparent text-text-muted hover:text-text-heading'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-text-muted hover:text-text-main'
             }`}
           >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>PC & Store Settings</span>
+            <Settings className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+            <span>Settings</span>
           </button>
 
           <button
             onClick={() => setActiveTab('auth')}
-            className={`py-3 px-3.5 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'auth'
-                ? 'border-brand text-text-heading'
-                : 'border-transparent text-text-muted hover:text-text-heading'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-text-muted hover:text-text-main'
             }`}
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Account Sync</span>
+            <ShieldCheck className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+            <span>{currentProfile.isLoggedIn ? 'Cloud Account' : 'Sign In / Sync'}</span>
           </button>
         </div>
 
-        {/* Modal Tab Body */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-6">
-          {/* TAB 1: Profile */}
+        {/* Tab Content Body */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6">
+          
+          {/* TAB 1: Profile & Customization */}
           {activeTab === 'profile' && (
             <div className="space-y-6">
-              {/* Avatar Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-text-muted tracking-wider">
-                  Choose Cozy Avatar Emoji
-                </label>
-                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5">
-                  {AVATAR_OPTIONS.map((av) => (
-                    <button
-                      key={av.id}
-                      onClick={() => {
-                        setSelectedAvatar(av.id);
-                        onUpdateProfile({ ...currentProfile, avatarIcon: av.id });
-                      }}
-                      className={`p-2.5 rounded-2xl flex flex-col items-center gap-1 border transition-all cursor-pointer ${
-                        selectedAvatar === av.id
-                          ? 'border-brand bg-surface-brand ring-2 ring-[#8BA888]/30 scale-105'
-                          : 'border-border bg-surface hover:border-brand/50'
-                      }`}
-                    >
-                      <span className="text-2xl">{av.emoji}</span>
-                      <span className="text-[10px] font-medium text-text-heading truncate max-w-full">
-                        {av.label.split(' ')[0]}
-                      </span>
-                    </button>
-                  ))}
+              {/* Avatar Picker */}
+              <div className="bg-base p-4 sm:p-5 rounded-2xl border border-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                    Choose Cozy Avatar Icon
+                  </span>
+                  <span className="text-xs text-brand font-semibold">
+                    {currentAvatarObj.label}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 pt-1">
+                  {AVATAR_OPTIONS.map((avatar) => {
+                    const isSelected = selectedAvatar === avatar.id;
+                    return (
+                      <button
+                        key={avatar.id}
+                        onClick={() => {
+                          setSelectedAvatar(avatar.id);
+                          onUpdateProfile({ ...currentProfile, avatarIcon: avatar.id });
+                        }}
+                        className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                          isSelected
+                            ? `${avatar.bg} text-white border-brand shadow-sm scale-105`
+                            : 'bg-surface border-border hover:bg-border/60 text-text-heading'
+                        }`}
+                      >
+                        <span className="text-xl sm:text-2xl">{avatar.emoji}</span>
+                        <span className={`text-[10px] font-bold ${isSelected ? 'text-white' : 'text-text-muted'} truncate w-full text-center`}>
+                          {avatar.label.split(' ')[0]}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Bio & Details Form */}
-              <div className="bg-base p-5 rounded-2xl border border-border space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-text-heading">Display Name</label>
-                    <input
-                      type="text"
-                      value={editedName}
-                      onChange={(e) => setEditedName(e.target.value)}
-                      className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-sm text-text-heading focus:outline-hidden focus:border-brand"
-                    />
+              {/* Bio & Gamer Details */}
+              <div className="bg-base p-4 sm:p-5 rounded-2xl border border-border space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                    Player Identity & Bio
+                  </span>
+                  {!isEditingBio ? (
+                    <button
+                      onClick={() => setIsEditingBio(true)}
+                      className="text-xs font-bold text-brand hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit Details</span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsEditingBio(false)}
+                        className="text-xs font-semibold text-text-muted hover:text-text-main cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveProfileDetails}
+                        className="text-xs font-bold text-brand hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Save</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {isEditingBio ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-text-muted block mb-1">Display Name</label>
+                        <input
+                          type="text"
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
+                          className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-heading focus:outline-hidden focus:border-brand"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-text-muted block mb-1">Cozy GamerTag</label>
+                        <input
+                          type="text"
+                          value={editedTag}
+                          onChange={(e) => setEditedTag(e.target.value)}
+                          className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-heading focus:outline-hidden focus:border-brand"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-text-muted block mb-1">Favorite Cozy Vibe / Aesthetic</label>
+                      <input
+                        type="text"
+                        value={editedVibe}
+                        onChange={(e) => setEditedVibe(e.target.value)}
+                        placeholder="e.g. 90s Anime Watercolors & Petting Animals"
+                        className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-heading focus:outline-hidden focus:border-brand"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-text-muted block mb-1">Player Bio</label>
+                      <textarea
+                        value={editedBio}
+                        onChange={(e) => setEditedBio(e.target.value)}
+                        rows={3}
+                        className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-heading focus:outline-hidden focus:border-brand"
+                      />
+                    </div>
                   </div>
+                ) : (
+                  <div className="space-y-2 text-xs">
+                    <div className="p-3 bg-surface rounded-xl border border-border">
+                      <span className="text-[10px] font-bold uppercase text-text-muted block mb-0.5">Player Bio</span>
+                      <p className="text-text-main leading-relaxed">
+                        {currentProfile.bio || 'No bio written yet. Click Edit Details to add a personal touch!'}
+                      </p>
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-text-heading">Cozy Gamer Tag</label>
-                    <input
-                      type="text"
-                      value={editedTag}
-                      onChange={(e) => setEditedTag(e.target.value)}
-                      className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-sm text-text-heading focus:outline-hidden focus:border-brand"
-                    />
+                    <div className="p-3 bg-surface rounded-xl border border-border flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase text-text-muted">Favorite Aesthetic</span>
+                      <span className="font-semibold text-brand">{currentProfile.favoriteVibe || 'Wholesome Sim'}</span>
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-text-heading">Favorite Vibe & Aesthetic</label>
-                  <input
-                    type="text"
-                    value={editedVibe}
-                    onChange={(e) => setEditedVibe(e.target.value)}
-                    placeholder="e.g. Pastel Watercolor, 90s Anime, Zero Stress"
-                    className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-sm text-text-heading focus:outline-hidden focus:border-brand"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-text-heading">About You / Bio</label>
-                  <textarea
-                    rows={3}
-                    value={editedBio}
-                    onChange={(e) => setEditedBio(e.target.value)}
-                    className="w-full bg-surface border border-border rounded-xl p-3 text-sm text-text-heading focus:outline-hidden focus:border-brand"
-                  />
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleSaveProfileDetails}
-                    className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Save Profile Changes</span>
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           )}
 
           {/* TAB 2: Wishlist Management */}
-          {activeTab === 'wishlist' && (() => {
-            const effectiveGames: Game[] = wishlistGames.length > 0
-              ? wishlistGames
-              : (wishlistItems || []).map((item) => (allGames || []).find((g) => g.id === item.gameId)).filter(Boolean) as Game[];
-
-            return (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-bold text-text-heading">
-                      Personal PC Wishlist & Notifications
-                    </h3>
-                    <p className="text-xs text-text-muted">
-                      Configure release alerts, price drop notices, and personal notes for your saved titles.
-                    </p>
-                  </div>
+          {activeTab === 'wishlist' && (
+            <div className="space-y-4">
+              {wishlistGames.length === 0 ? (
+                <div className="p-8 text-center bg-base rounded-2xl border border-border space-y-2">
+                  <Heart className="w-8 h-8 text-text-muted mx-auto" />
+                  <h4 className="font-serif-natural text-base text-text-heading">Your Wishlist is Empty</h4>
+                  <p className="text-xs text-text-muted">
+                    Click the heart icon on any game card across the catalog to track releases, prices, and patch notes.
+                  </p>
                 </div>
-
-                {effectiveGames.length === 0 ? (
-                  <div className="text-center py-12 bg-surface rounded-2xl border border-border p-6 space-y-2">
-                    <Heart className="w-8 h-8 text-brand mx-auto opacity-50" />
-                    <p className="text-sm font-medium text-text-heading">Your wishlist is currently empty</p>
-                    <p className="text-xs text-text-muted">
-                      Browse games in the Browser or Deals tab and click the heart icon to start building your collection!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {effectiveGames.map((game) => {
-                      const item = (wishlistItems || []).find((i) => i.gameId === game.id);
-
-                      return (
-                        <div
-                          key={game.id}
-                          className="bg-base p-4 rounded-2xl border border-border hover:border-brand transition-all space-y-3"
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div 
-                              className="flex items-center gap-3 cursor-pointer"
-                              onClick={() => {
-                                onClose();
-                                onSelectGame(game);
-                              }}
-                            >
-                              <img
-                                src={game.coverImage}
-                                alt={game.title}
-                                className="w-14 h-16 rounded-xl object-cover shadow-xs"
-                              />
-                              <div>
-                                <h4 className="font-serif-natural text-base font-normal text-text-heading hover:text-brand transition-colors">
-                                  {game.title}
-                                </h4>
-                                <div className="flex items-center gap-2 text-xs text-text-muted">
-                                  <span className="font-bold text-text-heading">{game.salePrice || game.price}</span>
-                                  {game.isOnSale && (
-                                    <span className="text-accent font-bold text-[11px]">
-                                      (-{game.discountPercent}%)
-                                    </span>
-                                  )}
-                                  <span>•</span>
-                                  <span>{game.steamDeckStatus === 'Verified' ? 'Deck Verified' : 'PC'}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <a
-                                href={game.steamStoreUrl || game.storeUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 rounded-xl bg-surface hover:bg-border text-text-heading text-xs transition-colors cursor-pointer"
-                                title="Open on Steam Store"
-                              >
-                                <ExternalLink className="w-4 h-4" />
-                              </a>
-
-                              <button
-                                onClick={() => {
-                                  if (onRemoveWishlist) onRemoveWishlist(game.id);
-                                  if (onRemoveWishlistItem) onRemoveWishlistItem(game.id);
-                                }}
-                                className="p-2 rounded-xl bg-surface hover:bg-rose-100 text-text-muted hover:text-rose-600 transition-colors cursor-pointer"
-                                title="Remove from wishlist"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
+              ) : (
+                <div className="space-y-3">
+                  {wishlistGames.map((game) => (
+                    <div
+                      key={game.id}
+                      className="p-3.5 bg-base rounded-2xl border border-border flex items-center justify-between gap-3 hover:border-brand/40 transition-colors"
+                    >
+                      <div 
+                        onClick={() => onSelectGame(game)}
+                        className="flex items-center gap-3 min-w-0 cursor-pointer flex-1"
+                      >
+                        <img
+                          src={game.coverImage}
+                          alt={game.title}
+                          className="w-12 h-12 rounded-xl object-cover shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <h4 className="font-serif-natural text-sm text-text-heading truncate">
+                            {game.title}
+                          </h4>
+                          <div className="flex items-center gap-2 text-[11px] text-text-muted mt-0.5">
+                            <span className="font-bold text-brand">{game.price || '$14.99'}</span>
+                            <span>•</span>
+                            <span>{game.category}</span>
                           </div>
-
-                          {/* Notification and priority toggles if wishlistItem exists */}
-                          {item && (
-                            <div className="pt-2 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs">
-                              <div className="flex flex-wrap items-center gap-3">
-                                <label className="flex items-center gap-1.5 text-text-heading cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    checked={item.notifyOnSale}
-                                    onChange={(e) => onUpdateWishlistItem && onUpdateWishlistItem(item.gameId, { notifyOnSale: e.target.checked })}
-                                    className="rounded text-brand focus:ring-0"
-                                  />
-                                  <span>Sale Price Drop Alert</span>
-                                </label>
-
-                                <label className="flex items-center gap-1.5 text-text-heading cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    checked={item.notifyOnRelease}
-                                    onChange={(e) => onUpdateWishlistItem && onUpdateWishlistItem(item.gameId, { notifyOnRelease: e.target.checked })}
-                                    className="rounded text-brand focus:ring-0"
-                                  />
-                                  <span>Release & 1.0 Alert</span>
-                                </label>
-                              </div>
-
-                              {/* Priority Selector */}
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[11px] text-text-muted">Priority:</span>
-                                <select
-                                  value={item.priority || 'medium'}
-                                  onChange={(e) => onUpdateWishlistItem && onUpdateWishlistItem(item.gameId, { priority: e.target.value as any })}
-                                  className="bg-surface text-[11px] text-text-heading font-bold rounded-lg px-2 py-1 border border-border cursor-pointer"
-                                >
-                                  <option value="high">High Priority</option>
-                                  <option value="medium">Medium</option>
-                                  <option value="low">Low</option>
-                                </select>
-                              </div>
-                            </div>
-                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
+                      </div>
 
-          {/* TAB 3: Preferences & PC Settings */}
+                      {onRemoveWishlist && (
+                        <button
+                          onClick={() => onRemoveWishlist(game.id)}
+                          className="p-2 rounded-xl bg-surface hover:bg-red-500/10 text-text-muted hover:text-red-500 transition-colors cursor-pointer"
+                          title="Remove from wishlist"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: Preferences */}
           {activeTab === 'preferences' && (
             <div className="space-y-6">
-              {/* PC Store Preference */}
+              {/* Store Preference */}
               <div className="bg-base p-5 rounded-2xl border border-border space-y-3">
                 <h4 className="text-xs font-bold uppercase text-text-heading tracking-wider">
-                  PC Store Platform Default
+                  Default Store Platform
                 </h4>
-                <p className="text-xs text-text-muted">
-                  Which PC gaming store do you prefer viewing links and pricing from?
-                </p>
                 <div className="grid grid-cols-3 gap-3 pt-1">
                   <button
                     onClick={() => handleStorePreferenceChange('steam')}
@@ -480,7 +499,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         : 'bg-surface border-border text-text-muted'
                     }`}
                   >
-                    Epic Games Store
+                    Epic Games
                   </button>
 
                   <button
@@ -491,54 +510,54 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         : 'bg-surface border-border text-text-muted'
                     }`}
                   >
-                    All PC Stores
+                    All Stores
                   </button>
                 </div>
               </div>
 
-              {/* Toggles */}
+              {/* Notification Toggles */}
               <div className="bg-base p-5 rounded-2xl border border-border space-y-4">
                 <h4 className="text-xs font-bold uppercase text-text-heading tracking-wider">
-                  Automated Notification Preferences
+                  Automated Cloud Notifications
                 </h4>
 
                 <div className="space-y-3">
                   <label className="flex items-center justify-between p-3 rounded-xl bg-surface cursor-pointer">
                     <div>
                       <div className="text-xs font-bold text-text-heading">Wishlist Sale Price Drops</div>
-                      <div className="text-[11px] text-text-muted">Get notified whenever a saved PC game goes on discount</div>
+                      <div className="text-[11px] text-text-muted">Alerts when saved games go on discount</div>
                     </div>
                     <input
                       type="checkbox"
                       checked={preferences.notifyOnPriceDrops}
                       onChange={() => handleTogglePreference('notifyOnPriceDrops')}
-                      className="rounded text-brand focus:ring-0 w-4 h-4"
+                      className="rounded text-brand focus:ring-0 w-4 h-4 cursor-pointer"
                     />
                   </label>
 
                   <label className="flex items-center justify-between p-3 rounded-xl bg-surface cursor-pointer">
                     <div>
-                      <div className="text-xs font-bold text-text-heading">New Game Release & 1.0 Launches</div>
-                      <div className="text-[11px] text-text-muted">Alerts when upcoming cozy games leave Early Access or launch</div>
+                      <div className="text-xs font-bold text-text-heading">New Releases & 1.0 Launches</div>
+                      <div className="text-[11px] text-text-muted">Alerts when upcoming cozy games launch</div>
                     </div>
                     <input
                       type="checkbox"
                       checked={preferences.notifyOnReleases}
                       onChange={() => handleTogglePreference('notifyOnReleases')}
-                      className="rounded text-brand focus:ring-0 w-4 h-4"
+                      className="rounded text-brand focus:ring-0 w-4 h-4 cursor-pointer"
                     />
                   </label>
 
                   <label className="flex items-center justify-between p-3 rounded-xl bg-surface cursor-pointer">
                     <div>
                       <div className="text-xs font-bold text-text-heading">Major Content Patches & Roadmaps</div>
-                      <div className="text-[11px] text-text-muted">Updates when games receive new crops, romance tiers, or Deck tweaks</div>
+                      <div className="text-[11px] text-text-muted">Updates when games receive new crops, quests, or Deck patches</div>
                     </div>
                     <input
                       type="checkbox"
                       checked={preferences.notifyOnPatches}
                       onChange={() => handleTogglePreference('notifyOnPatches')}
-                      className="rounded text-brand focus:ring-0 w-4 h-4"
+                      className="rounded text-brand focus:ring-0 w-4 h-4 cursor-pointer"
                     />
                   </label>
                 </div>
@@ -546,87 +565,165 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           )}
 
-          {/* TAB 4: Account & Auth */}
+          {/* TAB 4: Real Cloud Account & Auth */}
           {activeTab === 'auth' && (
             <div className="space-y-6">
-              <div className="bg-surface-brand p-5 rounded-2xl border border-brand/30 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Cloud Wishlist & PC Sync</span>
-                </div>
-                <h4 className="font-serif-natural text-lg text-text-heading">
-                  Your profile and wishlist are securely stored locally
-                </h4>
-                <p className="text-xs text-text-muted leading-relaxed">
-                  Log in or create a free account to sync your Steam Deck preferences, price drop notifications, and discovery quiz results across all your devices.
-                </p>
-              </div>
+              {currentProfile.isLoggedIn ? (
+                /* Authenticated State */
+                <div className="space-y-4">
+                  <div className="bg-surface-brand p-5 rounded-2xl border border-brand/40 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand">
+                        <Cloud className="w-4 h-4" />
+                        <span>Cloud Account Active</span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand text-white font-bold">
+                        Synchronized
+                      </span>
+                    </div>
 
-              {authSuccessMsg && (
-                <div className="p-3 bg-brand text-white rounded-xl text-xs font-bold text-center">
-                  {authSuccessMsg}
+                    <div>
+                      <h3 className="font-serif-natural text-xl text-text-heading">
+                        {currentProfile.username}
+                      </h3>
+                      <p className="text-xs text-text-muted mt-0.5">
+                        Connected as <strong className="text-text-heading">{currentProfile.email}</strong>
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      All your wishlisted games, bookmarked news articles, custom vibe preferences, and notifications are securely synced to the cloud and available on any device you sign into.
+                    </p>
+                  </div>
+
+                  {authSuccessMsg && (
+                    <div className="p-3.5 bg-brand text-white rounded-xl text-xs font-bold text-center">
+                      {authSuccessMsg}
+                    </div>
+                  )}
+
+                  <div className="p-5 bg-base rounded-2xl border border-border flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-text-heading">Log Out of This Device</div>
+                      <div className="text-[11px] text-text-muted">Your cloud data will remain safely stored.</div>
+                    </div>
+
+                    <button
+                      onClick={handleLogout}
+                      className="px-4 py-2 rounded-xl bg-surface hover:bg-red-500/10 text-text-muted hover:text-red-500 font-bold text-xs border border-border transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Unauthenticated Login / Signup Form */
+                <div className="space-y-4">
+                  <div className="bg-surface-brand p-5 rounded-2xl border border-brand/30 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand">
+                      <Cloud className="w-4 h-4" />
+                      <span>Multi-Device Cloud Sync</span>
+                    </div>
+                    <h4 className="font-serif-natural text-lg text-text-heading">
+                      Access your wishlist and favorites from any device
+                    </h4>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      Create a free account or log in to sync your saved games, bookmarks, and notification alerts across your PC, laptop, phone, and Steam Deck.
+                    </p>
+                  </div>
+
+                  {authErrorMsg && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl text-xs font-bold flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{authErrorMsg}</span>
+                    </div>
+                  )}
+
+                  {authSuccessMsg && (
+                    <div className="p-3.5 bg-brand text-white rounded-xl text-xs font-bold text-center">
+                      {authSuccessMsg}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleAuthSubmit} className="bg-base p-5 rounded-2xl border border-border space-y-4">
+                    <div className="flex items-center gap-2 border-b border-border pb-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode('login');
+                          setAuthErrorMsg('');
+                        }}
+                        className={`text-xs font-bold px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                          authMode === 'login' ? 'bg-inverse text-text-on-inverse' : 'text-text-muted hover:text-text-main'
+                        }`}
+                      >
+                        Sign In
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode('signup');
+                          setAuthErrorMsg('');
+                        }}
+                        className={`text-xs font-bold px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                          authMode === 'signup' ? 'bg-inverse text-text-on-inverse' : 'text-text-muted hover:text-text-main'
+                        }`}
+                      >
+                        Create Account
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-text-heading">Email Address</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="you@cozygames.com"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-sm text-text-heading focus:outline-hidden focus:border-brand transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-text-heading">Password</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-sm text-text-heading focus:outline-hidden focus:border-brand transition-colors"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-[11px] text-text-muted">
+                        {authMode === 'signup' ? 'Local games will be saved to your account.' : 'Your saved items will sync.'}
+                      </span>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmittingAuth}
+                        className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {isSubmittingAuth ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Connecting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <LogIn className="w-3.5 h-3.5" />
+                            <span>{authMode === 'signup' ? 'Create Account & Sync' : 'Sign In & Sync'}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
                 </div>
               )}
-
-              <form onSubmit={handleAuthSubmit} className="bg-base p-5 rounded-2xl border border-border space-y-4">
-                <div className="flex items-center gap-2 border-b border-border pb-3">
-                  <button
-                    type="button"
-                    onClick={() => setAuthMode('login')}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      authMode === 'login' || authMode === 'logged_in' ? 'bg-inverse text-text-on-inverse' : 'text-text-muted'
-                    }`}
-                  >
-                    Log In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAuthMode('signup')}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      authMode === 'signup' ? 'bg-inverse text-text-on-inverse' : 'text-text-muted'
-                    }`}
-                  >
-                    Create Account
-                  </button>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-text-heading">Email Address</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="you@cozygames.com"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-sm text-text-heading focus:outline-hidden focus:border-brand"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-text-heading">Password</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-sm text-text-heading focus:outline-hidden focus:border-brand"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-[11px] text-text-muted">
-                    Currently active as <strong className="text-text-heading">{currentProfile.username}</strong>
-                  </span>
-
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <LogIn className="w-3.5 h-3.5" />
-                    <span>{authMode === 'signup' ? 'Register Account' : 'Sign In'}</span>
-                  </button>
-                </div>
-              </form>
             </div>
           )}
         </div>

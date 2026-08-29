@@ -14,7 +14,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Cozy', 'Farming', 'Wholesome', 'Cute', 'Relaxing', 'No Death'],
     curatorQuote: 'Games that bring warmth, compassion, and gentle delight into your life.',
     establishedYear: '2020',
-    catalogCount: 14,
+    catalogCount: 300,
     highlightGameIds: [
       'fields-of-mistria',
       'tiny-glade',
@@ -40,7 +40,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Narrative', 'Sci-Fi', 'RPG', 'Choices Matter', 'Story Rich', 'Cyberpunk'],
     curatorQuote: 'Pushing the boundaries of narrative mechanics and interactive storytelling on Steam.',
     establishedYear: '2012',
-    catalogCount: 8,
+    catalogCount: 35,
     highlightGameIds: [
       'citizen-sleeper',
       'citizen-sleeper-2',
@@ -63,7 +63,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Atmospheric', 'Story Rich', 'Masterpiece', 'Stylized', 'Exploration', 'Puzzle'],
     curatorQuote: 'Art-house masterpieces that leave a lasting imprint long after the credits roll.',
     establishedYear: '2016',
-    catalogCount: 10,
+    catalogCount: 48,
     highlightGameIds: [
       'stray',
       'cocoon',
@@ -86,7 +86,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Indie', 'Pixel Art', 'Adventure', 'Atmospheric', 'Open World', 'Cozy RPG'],
     curatorQuote: 'Daring visionaries crafting vibrant, unforgettably atmospheric worlds.',
     establishedYear: '2015',
-    catalogCount: 9,
+    catalogCount: 91,
     highlightGameIds: [
       'sable',
       'cassette-beasts',
@@ -108,7 +108,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Indie', 'Roguelike', 'Stylized', 'Dark Humor', 'Deckbuilder', 'Fast-Paced'],
     curatorQuote: 'Boundary-breaking indie games powered by relentless style and mechanical genius.',
     establishedYear: '2009',
-    catalogCount: 12,
+    catalogCount: 155,
     highlightGameIds: [
       'cult-of-the-lamb',
       'inscryption',
@@ -131,7 +131,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Co-op', 'Simulation', 'Indie Horror', 'Cozy Cooking', 'Physics'],
     curatorQuote: 'Bringing players together with laughter, strategy, and atmospheric thrillers.',
     establishedYear: '1990',
-    catalogCount: 8,
+    catalogCount: 116,
     highlightGameIds: [
       'dredge',
       'overcooked-all-you-can-eat',
@@ -152,7 +152,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Pixel Art', 'Farming', 'Cozy', 'RPG', 'Magic', 'Strategy'],
     curatorQuote: 'Heartfelt pixel-art craftsmanship and enchanting, peaceful game worlds.',
     establishedYear: '2011',
-    catalogCount: 7,
+    catalogCount: 16,
     highlightGameIds: [
       'stardew-valley',
       'eastward',
@@ -172,7 +172,7 @@ export const CATALOG_SHOWCASES: CatalogShowcase[] = [
     featuredTags: ['Strategy', 'Medieval', 'Colony Sim', 'City Builder', 'Simulation'],
     curatorQuote: 'Uncompromising depth and organic historical simulation for strategy enthusiasts.',
     establishedYear: '2019',
-    catalogCount: 6,
+    catalogCount: 49,
     highlightGameIds: [
       'manor-lords',
       'against-the-storm',

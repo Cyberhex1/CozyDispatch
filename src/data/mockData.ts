@@ -1,4 +1,5 @@
 import { Game, NewsArticle, PatchNote, UpcomingRelease, DailyDigest } from '../types';
+import realNewsFeed from './newsFeed.json';
 
 export const INITIAL_GAMES: Game[] = [
   {
@@ -1085,7 +1086,7 @@ export const INITIAL_NEWS: NewsArticle[] = [
     source: 'Eurogamer',
     sourceUrl: 'https://store.steampowered.com/app/2198150/Tiny_Glade/',
     publishedAt: 'Yesterday',
-    category: 'simulation',
+    category: 'building',
     relatedGameId: 'tiny-glade',
     relatedGameTitle: 'Tiny Glade',
     imageUrl: 'https://cdn.akamai.steamstatic.com/steam/apps/2198150/header.jpg',
@@ -1241,6 +1242,8 @@ export const INITIAL_DAILY_DIGEST: DailyDigest = {
 
 export const MOCK_GAMES = INITIAL_GAMES;
 export const FEATURED_WEEKLY_GAMES = INITIAL_GAMES.filter((g) => g.isFeaturedThisWeek);
-export const MOCK_NEWS_ARTICLES = INITIAL_NEWS;
+export const MOCK_NEWS_ARTICLES: NewsArticle[] = (realNewsFeed as unknown as NewsArticle[])?.length > 0 
+  ? (realNewsFeed as unknown as NewsArticle[]) 
+  : INITIAL_NEWS;
 export const MOCK_PATCH_NOTES = INITIAL_PATCH_NOTES;
 export const MOCK_UPCOMING_RELEASES = INITIAL_UPCOMING;

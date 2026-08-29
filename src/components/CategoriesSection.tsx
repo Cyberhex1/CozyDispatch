@@ -1,6 +1,7 @@
 import React from 'react';
 import { Game, GameCategory } from '../types';
 import { formatRating } from '../utils/format';
+import { matchesGameCategory } from '../utils/categoryMatcher';
 import { 
   Coffee, 
   Sparkles, 
@@ -16,7 +17,6 @@ import {
   Puzzle as PuzzleIcon, 
   ArrowRight,
   Star,
-  CheckCircle2,
   Gamepad2
 } from 'lucide-react';
 
@@ -47,6 +47,16 @@ const CATEGORY_CONFIGS: CategoryConfig[] = [
     accentColor: 'from-[#8BA888]/20 to-[#8BA888]/5 text-[#4A6B47] border-brand/30',
     badge: 'Trending',
     topTags: ['Farming Sim', 'Pastoral', 'Wholesome', 'Cute', 'Life Sim']
+  },
+  {
+    id: 'farming',
+    name: 'Farming & Homesteading',
+    tagline: 'Seasonal crops, breeding genetics, and community restoration.',
+    description: 'Plant fields, raise whimsical livestock, repair ancient towns, attend seasonal festivals, and forge lifelong friendships.',
+    icon: Sprout,
+    accentColor: 'from-lime-500/20 to-lime-500/5 text-lime-800 border-lime-500/30',
+    badge: 'Staple',
+    topTags: ['Crops', 'Livestock', 'Breeding Genetics', 'Town Life']
   },
   {
     id: 'indie',
@@ -80,23 +90,53 @@ const CATEGORY_CONFIGS: CategoryConfig[] = [
   },
   {
     id: 'horror',
-    name: 'Indie Horror & Mystery',
-    tagline: 'Atmospheric chills, creepy investigations, and co-op panics.',
-    description: 'Paranormal investigations, eldritch fishing mystery, industrial scavenger horror, and tense psychological thrillers.',
+    name: 'Indie Horror & Cozy Creepy',
+    tagline: 'Chilling atmospheres, surreal mysteries, and retro dread.',
+    description: 'Bite-sized indie dread, atmospheric PS1 aesthetics, psychological thrillers, and wholesome campfire mysteries without jump scares.',
     icon: Ghost,
-    accentColor: 'from-rose-500/20 to-rose-500/5 text-rose-800 border-rose-500/30',
-    badge: 'Spooky',
-    topTags: ['Co-op Horror', 'Eldritch', 'Psychological', 'Proximity Chat']
+    accentColor: 'from-purple-500/20 to-purple-500/5 text-purple-800 border-purple-500/30',
+    badge: 'Atmospheric',
+    topTags: ['Cozy Horror', 'Retro PS1', 'Psychological', 'Surreal Mystery']
   },
   {
     id: 'cooking',
     name: 'Cozy Cooking & Cafes',
-    tagline: 'Satisfying recipes, potion brewing, and culinary magic.',
-    description: 'Master intricate recipes, manage bustling restaurants, alchemy potion brewing, and serve happy customers in charming cafes.',
+    tagline: 'Satisfying recipes, tavern management, and culinary zen.',
+    description: 'Run cozy tea shops, manage bustling fantasy taverns, craft decadent pastries, and master ASMR meal preparation.',
     icon: UtensilsCrossed,
     accentColor: 'from-orange-500/20 to-orange-500/5 text-orange-800 border-orange-500/30',
-    badge: 'Delicious',
-    topTags: ['Cooking Sim', 'Restaurant', 'Potion Brewing', 'Recipe Crafting']
+    badge: 'Delightful',
+    topTags: ['Baking', 'Tavern Sim', 'Tea Shop', 'Culinary ASMR']
+  },
+  {
+    id: 'rpg',
+    name: 'RPGs & Story-Rich',
+    tagline: 'Deep character decisions, worldbuilding, and romance.',
+    description: 'Atmospheric narrative roleplaying, choices that alter fates, ancient magic, romance options, and unforgettable character arcs.',
+    icon: BookOpen,
+    accentColor: 'from-indigo-500/20 to-indigo-500/5 text-indigo-800 border-indigo-500/30',
+    badge: 'Deep Story',
+    topTags: ['Choices Matter', 'Sci-Fi RPG', '90s Anime', 'Character Rich']
+  },
+  {
+    id: 'roguelike',
+    name: 'Roguelikes & Deckbuilders',
+    tagline: 'Hypnotic combos, joker synergies, and strategic depth.',
+    description: 'Poker roguelikes, illegal card combos, cult colony management, and infinite tactical replayability with chill soundtracks.',
+    icon: Dices,
+    accentColor: 'from-rose-500/20 to-rose-500/5 text-rose-800 border-rose-500/30',
+    badge: 'Addictive',
+    topTags: ['Deckbuilder', 'Combo Mechanics', 'Proc Generation', 'Jokers']
+  },
+  {
+    id: 'puzzle',
+    name: 'Puzzle & Organization',
+    tagline: 'Mindful sorting, unpacking boxes, and spatial zen.',
+    description: 'Unpacking life stories from cardboard boxes, tidying cozy rooms, connecting hexagonal tile landscapes, and spatial organization.',
+    icon: PuzzleIcon,
+    accentColor: 'from-fuchsia-500/20 to-fuchsia-500/5 text-fuchsia-800 border-fuchsia-500/30',
+    badge: 'Mindful',
+    topTags: ['Unpacking', 'Spatial Sorting', 'Relaxing', 'No Timers']
   },
   {
     id: 'job-sim',
@@ -117,46 +157,6 @@ const CATEGORY_CONFIGS: CategoryConfig[] = [
     accentColor: 'from-cyan-500/20 to-cyan-500/5 text-cyan-800 border-cyan-500/30',
     badge: 'Cruising',
     topTags: ['Trucking', 'Survival Roadtrip', 'Radio Tunes', 'Atmospheric']
-  },
-  {
-    id: 'rpg',
-    name: 'RPGs & Story-Rich',
-    tagline: 'Deep character decisions, worldbuilding, and romance.',
-    description: 'Atmospheric narrative roleplaying, choices that alter fates, ancient magic, romance options, and unforgettable character arcs.',
-    icon: BookOpen,
-    accentColor: 'from-purple-500/20 to-purple-500/5 text-purple-800 border-purple-500/30',
-    badge: 'Deep Story',
-    topTags: ['Choices Matter', 'Sci-Fi RPG', '90s Anime', 'Character Rich']
-  },
-  {
-    id: 'roguelike',
-    name: 'Roguelikes & Deckbuilders',
-    tagline: 'Hypnotic combos, joker synergies, and strategic depth.',
-    description: 'Poker roguelikes, illegal card combos, cult colony management, and infinite tactical replayability with chill soundtracks.',
-    icon: Dices,
-    accentColor: 'from-indigo-500/20 to-indigo-500/5 text-indigo-800 border-indigo-500/30',
-    badge: 'Addictive',
-    topTags: ['Deckbuilder', 'Combo Mechanics', 'Proc Generation', 'Jokers']
-  },
-  {
-    id: 'farming',
-    name: 'Farming & Life Sims',
-    tagline: 'Seasonal crops, breeding genetics, and community restoration.',
-    description: 'Plant fields, raise whimsical livestock, repair ancient towns, attend seasonal festivals, and forge lifelong friendships.',
-    icon: Sprout,
-    accentColor: 'from-lime-500/20 to-lime-500/5 text-lime-800 border-lime-500/30',
-    badge: 'Classic',
-    topTags: ['Crops', 'Livestock', 'Breeding Genetics', 'Town Life']
-  },
-  {
-    id: 'puzzle',
-    name: 'Puzzle & Organization',
-    tagline: 'Mindful sorting, unpacking boxes, and spatial zen.',
-    description: 'Unpacking life stories from cardboard boxes, tidying cozy rooms, connecting hexagonal tile landscapes, and spatial organization.',
-    icon: PuzzleIcon,
-    accentColor: 'from-fuchsia-500/20 to-fuchsia-500/5 text-fuchsia-800 border-fuchsia-500/30',
-    badge: 'Mindful',
-    topTags: ['Unpacking', 'Spatial Sorting', 'Relaxing', 'No Timers']
   }
 ];
 
@@ -166,63 +166,59 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
   onSelectGame
 }) => {
   return (
-    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
+    <section className="py-4 sm:py-8 px-2 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-10 animate-in fade-in duration-300">
       {/* Section Header */}
-      <div className="bg-base rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
+      <div className="bg-surface rounded-3xl p-5 sm:p-8 border border-border shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface text-text-muted text-xs font-semibold uppercase tracking-wider border border-border">
+        <div className="relative z-10 max-w-3xl space-y-2 sm:space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base text-text-muted text-xs font-semibold uppercase tracking-wider border border-border">
             <Gamepad2 className="w-3.5 h-3.5 text-brand" />
             <span>Genre Explorer</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2C2C24] tracking-tight font-serif">
-            Steam Relative Categories
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-text-heading tracking-tight font-serif-natural">
+            Explore Curated Steam Genres
           </h1>
-          <p className="text-[#505045] text-sm sm:text-base leading-relaxed">
+          <p className="text-text-main text-xs sm:text-base leading-relaxed">
             Explore carefully curated categories spanning cozy farming, gridless builders, handheld Steam Deck staples, atmospheric horror, job simulators, and narrative RPGs on Steam.
           </p>
         </div>
       </div>
 
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {CATEGORY_CONFIGS.map((cat) => {
-          // Get games in this category
-          const categoryGames = games.filter((g) => {
-            if (cat.id === 'steam-deck') return g.steamDeckStatus === 'Verified';
-            return g.category === cat.id;
-          });
-
+          // Get games matching this category via unified matching
+          const categoryGames = games.filter((g) => matchesGameCategory(g, cat.id));
           const totalGames = categoryGames.length;
-          const topGame = categoryGames.sort((a, b) => b.ratingScore - a.ratingScore)[0];
+          const topGame = [...categoryGames].sort((a, b) => b.ratingScore - a.ratingScore)[0];
           const Icon = cat.icon;
 
           return (
             <div 
               key={cat.id}
-              className="group bg-surface rounded-2xl p-6 border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+              className="group bg-surface rounded-2xl p-4 sm:p-6 border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {/* Header row */}
                 <div className="flex items-start justify-between">
-                  <div className={`p-3 rounded-2xl bg-gradient-to-br ${cat.accentColor} border shadow-xs`}>
-                    <Icon className="w-6 h-6" />
+                  <div className={`p-2.5 sm:p-3 rounded-2xl bg-gradient-to-br ${cat.accentColor} border shadow-xs`}>
+                    <Icon className="w-5 sm:w-6 h-5 sm:h-6" />
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-surface text-text-muted text-xs font-bold border border-border">
+                  <span className="px-2.5 py-0.5 sm:py-1 rounded-full bg-base text-text-muted text-[10px] sm:text-xs font-bold border border-border">
                     {cat.badge}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-[#2C2C24] group-hover:text-[#4A6B47] transition-colors font-serif">
+                  <h3 className="text-lg sm:text-xl font-bold text-text-heading group-hover:text-brand transition-colors font-serif-natural">
                     {cat.name}
                   </h3>
-                  <p className="text-xs text-text-muted mt-1 font-medium">
+                  <p className="text-xs text-text-muted mt-0.5 sm:mt-1 font-medium">
                     {cat.tagline}
                   </p>
                 </div>
 
-                <p className="text-xs text-[#505045] leading-relaxed">
+                <p className="text-xs text-text-main leading-relaxed">
                   {cat.description}
                 </p>
 
@@ -231,7 +227,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                   {cat.topTags.map((tag) => (
                     <span 
                       key={tag}
-                      className="px-2 py-0.5 rounded-md bg-surface text-[#505045] text-[11px] font-medium border border-border"
+                      className="px-2 py-0.5 rounded-md bg-base text-text-muted text-[10px] sm:text-[11px] font-medium border border-border"
                     >
                       #{tag}
                     </span>
@@ -242,11 +238,11 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                 {categoryGames.length > 0 && (
                   <div className="pt-2 border-t border-border/60 space-y-2">
                     <div className="flex items-center justify-between text-xs text-text-muted">
-                      <span className="font-semibold text-[#2C2C24]">Featured Titles:</span>
+                      <span className="font-semibold text-text-heading">Featured Titles:</span>
                       <span className="font-bold text-brand">{totalGames} Games</span>
                     </div>
                     
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
                       {categoryGames.slice(0, 4).map((g) => (
                         <button
                           key={g.id}
@@ -257,7 +253,8 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                           <img 
                             src={g.coverImage} 
                             alt={g.title}
-                            className="w-16 h-9 object-cover group-hover/thumb:scale-105 transition-transform duration-300" 
+                            className="w-14 sm:w-16 h-8 sm:h-9 object-cover group-hover/thumb:scale-105 transition-transform duration-300" 
+                            loading="lazy"
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
                             <Star className="w-3 h-3 text-amber-300 fill-amber-300" />
@@ -270,19 +267,19 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
               </div>
 
               {/* Action Button */}
-              <div className="pt-5 mt-4 border-t border-border/60 flex items-center justify-between">
+              <div className="pt-4 sm:pt-5 mt-3 sm:mt-4 border-t border-border/60 flex items-center justify-between gap-2">
                 {topGame ? (
-                  <div className="text-xs text-text-muted">
-                    <span className="text-[10px] uppercase tracking-wider text-text-alt block">Top Rated</span>
-                    <span className="font-bold text-[#2C2C24] truncate max-w-[130px] block">{topGame.title}</span>
+                  <div className="text-xs text-text-muted min-w-0">
+                    <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-text-muted block">Top Rated</span>
+                    <span className="font-bold text-text-heading truncate max-w-[120px] sm:max-w-[140px] block">{topGame.title}</span>
                   </div>
                 ) : (
-                  <span className="text-xs text-text-alt">Explore Catalog</span>
+                  <span className="text-xs text-text-muted">Explore Catalog</span>
                 )}
 
                 <button
                   onClick={() => onSelectCategory(cat.id)}
-                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-brand-hover text-text-on-inverse text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 sm:px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0 min-h-[38px] touch-manipulation"
                 >
                   <span>Browse {totalGames}</span>
                   <ArrowRight className="w-3.5 h-3.5" />

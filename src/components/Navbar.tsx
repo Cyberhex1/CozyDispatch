@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GameCategory, SoundscapeTrack, UserProfile, NotificationAlert } from '../types';
-import { NotificationsPopover } from './NotificationsPopover';
+import { GameCategory, UserProfile } from '../types';
 import { AVATAR_OPTIONS, DEFAULT_USER_PROFILE } from '../data/userState';
 import { 
   Coffee, 
@@ -10,25 +9,17 @@ import {
   Newspaper, 
   ChevronDown, 
   Search, 
-  Bookmark, 
-  Volume2, 
-  VolumeX, 
-  HeartHandshake, 
   Compass, 
-  Flame, 
-  Star, 
-  Gem, 
   Layers, 
   Menu, 
   X,
-  Play,
-  Square,
   Percent,
-  Bell,
   User,
   Heart,
   Sun,
-  Moon
+  Moon,
+  Home,
+  Check
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -38,21 +29,21 @@ interface NavbarProps {
   onOpenSearch: () => void;
   onOpenMoodMatcher: () => void;
   onOpenWishlist: () => void;
-  onOpenQuiz: () => void;
+  onOpenQuiz?: () => void;
   onOpenProfile: () => void;
   wishlistCount: number;
   userProfile: UserProfile;
-  notifications: NotificationAlert[];
-  onMarkNotificationRead: (id: string) => void;
-  onMarkAllNotificationsRead: () => void;
-  onClearNotifications: () => void;
+  notifications?: any[];
+  onMarkNotificationRead?: (id: string) => void;
+  onMarkAllNotificationsRead?: () => void;
+  onClearNotifications?: () => void;
   onSelectGameById?: (gameId: string) => void;
-  isPlayingAudio: boolean;
-  activeSoundtrack: SoundscapeTrack;
-  onToggleAudio: () => void;
-  onChangeSoundtrack: (track: SoundscapeTrack) => void;
-  audioVolume: number;
-  onVolumeChange: (vol: number) => void;
+  isPlayingAudio?: boolean;
+  activeSoundtrack?: any;
+  onToggleAudio?: () => void;
+  onChangeSoundtrack?: (track: any) => void;
+  audioVolume?: number;
+  onVolumeChange?: (vol: number) => void;
 }
 
 interface NavCategoryConfig {
@@ -105,25 +96,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSearch,
   onOpenMoodMatcher,
   onOpenWishlist,
-  onOpenQuiz,
   onOpenProfile,
   wishlistCount,
-  userProfile,
-  notifications,
-  onMarkNotificationRead,
-  onMarkAllNotificationsRead,
-  onClearNotifications,
-  onSelectGameById,
-  isPlayingAudio,
-  activeSoundtrack,
-  onToggleAudio,
-  onChangeSoundtrack,
-  audioVolume,
-  onVolumeChange
+  userProfile
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [isAudioMenuOpen, setIsAudioMenuOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     try {
@@ -136,11 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   });
   
   const navRef = useRef<HTMLDivElement>(null);
-  const audioMenuRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
-
   const safeProfile = userProfile || DEFAULT_USER_PROFILE;
-  const unreadNotifCount = (notifications || []).filter((n) => !n.isRead).length;
   const avatarObj = AVATAR_OPTIONS.find((a) => a.id === safeProfile?.avatarIcon) || AVATAR_OPTIONS[0];
 
   useEffect(() => {
@@ -160,44 +133,38 @@ export const Navbar: React.FC<NavbarProps> = ({
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
         setOpenDropdown(null);
       }
-      if (audioMenuRef.current && !audioMenuRef.current.contains(e.target as Node)) {
-        setIsAudioMenuOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setIsNotificationsOpen(false);
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
-    <header ref={navRef} className="sticky top-0 z-40 bg-base/95 backdrop-blur-md text-text-main border-b border-border shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+    <header ref={navRef} className="sticky top-0 z-40 bg-base/95 backdrop-blur-md text-text-main border-b border-border shadow-xs transition-colors">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20">
+          
           {/* Brand Logo & Name */}
-          <div className="flex items-center gap-6 xl:gap-8">
+          <div className="flex items-center gap-2 sm:gap-6 xl:gap-8 min-w-0">
             <button
               id="navbar-brand-btn"
               onClick={() => onNavigate('home')}
-              className="flex items-center gap-3 text-left group cursor-pointer shrink-0"
+              className="flex items-center gap-2 sm:gap-3 text-left group cursor-pointer shrink-0 min-h-[44px] touch-manipulation"
             >
-              <div className="w-10 h-10 rounded-2xl bg-brand flex items-center justify-center text-white font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
-                🌱
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-500/15 border border-blue-400/30 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 p-1">
+                <img src="/favicon.svg" alt="Cute Blue Teddy Bear" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
               </div>
-              <div>
-                <div className="font-serif-natural text-lg sm:text-xl font-normal text-text-heading tracking-tight leading-none group-hover:text-brand transition-colors">
+              <div className="min-w-0">
+                <div className="font-serif-natural text-sm sm:text-lg lg:text-xl font-normal text-text-heading tracking-tight leading-none group-hover:text-brand transition-colors truncate">
                   Cozy & Indie Dispatch
                 </div>
-                <div className="text-[10px] text-brand font-bold uppercase tracking-wider mt-0.5">
+                <div className="text-[8px] sm:text-[10px] text-brand font-bold uppercase tracking-wider mt-0.5 truncate hidden xs:block">
                   PC & Steam Deck Gaming
                 </div>
               </div>
             </button>
 
-            {/* Desktop Navigation Dropdowns */}
+            {/* Desktop Navigation Links */}
             <nav className="hidden lg:flex items-center gap-1">
-              {/* Direct Navigation Links */}
               <button
                 id="nav-browser-btn"
                 onClick={() => onNavigate('browser', 'all')}
@@ -211,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>All Games</span>
               </button>
 
-              {/* Categories Mega Menu */}
+              {/* Categories Dropdown */}
               <div className="relative">
                 <button
                   id="nav-categories-btn"
@@ -300,7 +267,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <Compass className="w-4 h-4 text-brand" />
-                <span>Showcases & Catalogs</span>
+                <span>Showcases</span>
               </button>
 
               <button
@@ -315,26 +282,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Percent className="w-4 h-4 text-accent" />
                 <span>Deals</span>
               </button>
+
+              <button
+                id="nav-news-btn"
+                onClick={() => onNavigate('news')}
+                className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  currentView === 'news'
+                    ? 'bg-brand text-white shadow-xs'
+                    : 'text-text-muted hover:text-text-main hover:bg-surface'
+                }`}
+              >
+                <Newspaper className="w-4 h-4 text-brand" />
+                <span>News & Patches</span>
+              </button>
             </nav>
           </div>
 
           {/* Right Action Icons */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Discovery Quiz Button */}
-            <button
-              id="navbar-quiz-btn"
-              onClick={onOpenQuiz}
-              className="px-3 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Discovery Quiz</span>
-            </button>
-
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Dark Mode Toggle */}
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center border border-border cursor-pointer"
-              title="Toggle Theme"
+              className="p-2 sm:p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center border border-border cursor-pointer min-w-[38px] min-h-[38px] justify-center touch-manipulation"
+              title="Toggle Dark / Light Theme"
             >
               {isDarkMode ? <Sun className="w-4 h-4 text-accent" /> : <Moon className="w-4 h-4 text-brand" />}
             </button>
@@ -343,131 +313,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="navbar-search-btn"
               onClick={onOpenSearch}
-              className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center gap-2 border border-border cursor-pointer"
-              title="Search PC games & articles"
+              className="p-2 sm:p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center gap-1.5 border border-border cursor-pointer min-w-[38px] min-h-[38px] justify-center touch-manipulation"
+              title="Search cozy games, articles & tags"
             >
               <Search className="w-4 h-4 text-brand" />
               <span className="text-xs font-semibold hidden xl:inline">Search</span>
             </button>
 
-            {/* Ambient Soundscapes Controls */}
-            <div ref={audioMenuRef} className="relative hidden md:block">
-              <button
-                id="navbar-soundscapes-btn"
-                onClick={() => setIsAudioMenuOpen(!isAudioMenuOpen)}
-                className={`p-2.5 rounded-xl transition-all border flex items-center gap-1.5 cursor-pointer ${
-                  isPlayingAudio
-                    ? 'bg-brand text-white border-brand shadow-xs'
-                    : 'bg-surface text-text-muted border-border hover:text-text-main hover:bg-border'
-                }`}
-                title="Procedural Lo-fi Ambience"
-              >
-                {isPlayingAudio ? (
-                  <Volume2 className="w-4 h-4 text-white animate-pulse" />
-                ) : (
-                  <VolumeX className="w-4 h-4 text-text-muted" />
-                )}
-              </button>
-
-              {/* Audio Controls Popover */}
-              {isAudioMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-base border border-border rounded-2xl shadow-xl p-4 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between border-b border-border pb-2">
-                    <div className="flex items-center gap-2">
-                      <Volume2 className="w-4 h-4 text-brand" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-text-heading">
-                        Procedural Ambience
-                      </span>
-                    </div>
-                    <button
-                      onClick={onToggleAudio}
-                      className={`text-xs px-2.5 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
-                        isPlayingAudio
-                          ? 'bg-accent/20 text-text-heading border border-[#E6A07D]/40'
-                          : 'bg-brand text-white'
-                      }`}
-                    >
-                      {isPlayingAudio ? 'Mute' : 'Play'}
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {[
-                      { id: 'rain', label: '🌧️ Gentle Rain' },
-                      { id: 'campfire', label: '🪵 Campfire' },
-                      { id: 'forest', label: '🌲 Forest Breeze' },
-                      { id: 'cafe', label: '☕ Lo-Fi Cafe' }
-                    ].map((track) => (
-                      <button
-                        key={track.id}
-                        onClick={() => onChangeSoundtrack(track.id as SoundscapeTrack)}
-                        className={`p-2 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer ${
-                          activeSoundtrack === track.id && isPlayingAudio
-                            ? 'bg-surface-brand text-text-heading border border-brand/40'
-                            : 'bg-surface hover:bg-border text-text-muted'
-                        }`}
-                      >
-                        {track.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="space-y-1 pt-1 border-t border-border">
-                    <div className="flex items-center justify-between text-[10px] text-text-muted font-bold uppercase">
-                      <span>Ambience Volume</span>
-                      <span>{Math.round(audioVolume * 100)}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      value={audioVolume}
-                      onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                      className="w-full h-1.5 bg-border rounded-lg appearance-none cursor-pointer accent-[#8BA888]"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Notifications Popover Toggle */}
-            <div ref={notifRef} className="relative">
-              <button
-                id="navbar-notifications-btn"
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center border border-border cursor-pointer relative"
-                title="Notifications & Price Alerts"
-              >
-                <Bell className="w-4 h-4 text-brand" />
-                {unreadNotifCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-accent text-white text-[9px] font-black flex items-center justify-center shadow-xs">
-                    {unreadNotifCount}
-                  </span>
-                )}
-              </button>
-
-              <NotificationsPopover
-                isOpen={isNotificationsOpen}
-                onClose={() => setIsNotificationsOpen(false)}
-                notifications={notifications}
-                onMarkAsRead={onMarkNotificationRead}
-                onMarkAllAsRead={onMarkAllNotificationsRead}
-                onClearAll={onClearNotifications}
-                onSelectGameById={onSelectGameById}
-              />
-            </div>
-
             {/* Wishlist Shelf Drawer Button */}
             <button
               id="navbar-wishlist-btn"
               onClick={onOpenWishlist}
-              className="p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center gap-1.5 border border-border cursor-pointer relative"
-              title="My Cozy PC Wishlist & Shelf"
+              className="p-2 sm:p-2.5 rounded-xl bg-surface hover:bg-border text-text-muted hover:text-text-main transition-all flex items-center gap-1.5 border border-border cursor-pointer relative min-w-[38px] min-h-[38px] justify-center touch-manipulation"
+              title="My Saved Games & Wishlist"
             >
               <Heart className="w-4 h-4 text-accent" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-brand text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                <span className="absolute -top-1 -right-1 sm:-top-1.5 sm:-right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand text-white text-[9px] font-black flex items-center justify-center shadow-xs">
                   {wishlistCount}
                 </span>
               )}
@@ -477,11 +339,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="navbar-profile-btn"
               onClick={onOpenProfile}
-              className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-surface-brand hover:bg-brand text-text-heading hover:text-white border border-brand/40 transition-all flex items-center gap-2 cursor-pointer shadow-xs"
-              title="User Profile & Settings"
+              className="p-1 sm:px-3 sm:py-1.5 rounded-xl bg-surface-brand hover:bg-brand text-text-heading hover:text-white border border-brand/40 transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs min-h-[38px] touch-manipulation"
+              title="User Account & Cloud Sync"
             >
               <span className="text-base">{avatarObj.emoji}</span>
-              <span className="text-xs font-bold hidden md:inline truncate max-w-[100px]">
+              <span className="text-xs font-bold hidden md:inline truncate max-w-[110px]">
                 {safeProfile?.username || 'Cozy Gamer'}
               </span>
             </button>
@@ -489,7 +351,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2.5 rounded-xl bg-surface text-text-muted hover:text-text-main border border-border lg:hidden cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-xl bg-surface text-text-muted hover:text-text-main border border-border lg:hidden cursor-pointer min-w-[38px] min-h-[38px] flex items-center justify-center touch-manipulation"
+              title="Menu"
+              aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -499,15 +363,34 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Collapsible Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-border bg-base p-4 space-y-4 max-h-[80vh] overflow-y-auto">
-          {/* Quick Direct Buttons */}
+        <div className="lg:hidden border-t border-border bg-base p-4 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
+          
+          {/* Quick Primary View Buttons */}
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2.5 rounded-xl bg-surface border border-border text-text-main text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              onClick={() => {
+                onNavigate('home');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer min-h-[44px] touch-manipulation ${
+                currentView === 'home' ? 'bg-brand text-white' : 'bg-surface border border-border text-text-main'
+              }`}
             >
-              {isDarkMode ? <Sun className="w-3.5 h-3.5 text-accent" /> : <Moon className="w-3.5 h-3.5 text-brand" />}
-              <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              <Home className="w-4 h-4" />
+              <span>Home Spotlight</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onNavigate('browser', 'all');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer min-h-[44px] touch-manipulation ${
+                currentView === 'browser' ? 'bg-brand text-white' : 'bg-surface border border-border text-text-main'
+              }`}
+            >
+              <Gamepad2 className="w-4 h-4 text-brand" />
+              <span>All Games</span>
             </button>
 
             <button
@@ -515,9 +398,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('categories');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-brand text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className={`p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer min-h-[44px] touch-manipulation ${
+                currentView === 'categories' ? 'bg-brand text-white' : 'bg-surface border border-border text-text-main'
+              }`}
             >
-              <Layers className="w-3.5 h-3.5" />
+              <Layers className="w-4 h-4 text-brand" />
               <span>Categories</span>
             </button>
 
@@ -526,10 +411,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('catalogs');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-inverse text-text-on-inverse text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className={`p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer min-h-[44px] touch-manipulation ${
+                currentView === 'catalogs' ? 'bg-inverse text-text-on-inverse' : 'bg-surface border border-border text-text-main'
+              }`}
             >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Showcases & Catalogs</span>
+              <Compass className="w-4 h-4 text-brand" />
+              <span>Showcases</span>
             </button>
 
             <button
@@ -537,75 +424,71 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('deals');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-accent text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className={`p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer min-h-[44px] touch-manipulation ${
+                currentView === 'deals' ? 'bg-accent text-white' : 'bg-surface border border-border text-text-main'
+              }`}
             >
-              <Percent className="w-3.5 h-3.5" />
+              <Percent className="w-4 h-4 text-accent" />
               <span>Deals & Sales</span>
             </button>
 
             <button
               onClick={() => {
-                onOpenQuiz();
+                onNavigate('news');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-brand text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className={`p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer min-h-[44px] touch-manipulation ${
+                currentView === 'news' ? 'bg-brand text-white' : 'bg-surface border border-border text-text-main'
+              }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Discovery Quiz</span>
+              <Newspaper className="w-4 h-4 text-brand" />
+              <span>News & Patches</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onOpenMoodMatcher();
+                setIsMobileMenuOpen(false);
+              }}
+              className="col-span-2 p-3 rounded-xl bg-surface border border-border text-text-heading text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer min-h-[44px] touch-manipulation"
+            >
+              <span>☕ Mood Matcher & Quiz</span>
             </button>
           </div>
 
-          <div className="space-y-3">
+          {/* Sub-Genre Quick Jump */}
+          <div className="space-y-2">
             <div className="text-xs font-bold uppercase tracking-wider text-text-heading">
-              Select PC Category
+              Browse Sub-Genres
             </div>
-            {CATEGORIES.map((cat) => (
-              <div key={cat.id} className="bg-surface p-3 rounded-2xl border border-border space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-bold text-sm text-text-main">
-                    <cat.icon className="w-4 h-4 text-brand" />
-                    <span>{cat.name}</span>
-                  </div>
-                  {cat.badge && (
-                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-base text-text-muted border border-border">
-                      {cat.badge}
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    onClick={() => {
-                      onNavigate('browser', cat.id);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="p-2 rounded-xl bg-base border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
-                  >
-                    🎮 Game Browser
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigate('news', cat.id);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="p-2 rounded-xl bg-base border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
-                  >
-                    📰 News & Updates
-                  </button>
-                </div>
-              </div>
-            ))}
+            <div className="grid grid-cols-2 gap-2">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    onNavigate('browser', cat.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="p-3 rounded-xl bg-surface border border-border text-xs font-bold text-text-main hover:text-brand flex items-center gap-2 cursor-pointer min-h-[44px] touch-manipulation"
+                >
+                  <cat.icon className="w-4 h-4 text-brand shrink-0" />
+                  <span className="truncate">{cat.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="pt-2 border-t border-border flex items-center justify-between">
+          {/* Account & Shelf Shortcuts */}
+          <div className="pt-3 border-t border-border flex items-center justify-between">
             <button
               onClick={() => {
-                onNavigate('home');
+                onOpenWishlist();
                 setIsMobileMenuOpen(false);
               }}
-              className="text-xs font-bold text-brand"
+              className="text-xs font-bold text-accent flex items-center gap-1.5 min-h-[44px] px-2 touch-manipulation"
             >
-              Weekly Top 5 Spotlight
+              <Heart className="w-4 h-4 fill-accent" />
+              <span>My Wishlist ({wishlistCount})</span>
             </button>
 
             <button
@@ -613,9 +496,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onOpenProfile();
                 setIsMobileMenuOpen(false);
               }}
-              className="text-xs font-bold text-text-heading"
+              className="text-xs font-bold text-text-heading flex items-center gap-1.5 min-h-[44px] px-2 touch-manipulation"
             >
-              Profile & Wishlist ({wishlistCount})
+              <span>{avatarObj.emoji} {safeProfile?.username || 'Profile & Sync'}</span>
             </button>
           </div>
         </div>

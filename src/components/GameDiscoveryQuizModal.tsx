@@ -144,20 +144,20 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-base rounded-3xl border border-border w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-base rounded-3xl border border-border w-full max-w-3xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col">
         
         {/* Modal Top Header */}
-        <div className="px-6 py-4 border-b border-border bg-surface/70 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-surface/70 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand/20 flex items-center justify-center text-brand">
+            <div className="w-8 h-8 rounded-xl bg-brand/20 flex items-center justify-center text-brand shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-serif-natural text-lg font-normal text-text-heading leading-tight">
+              <h2 className="font-serif-natural text-base sm:text-lg font-normal text-text-heading leading-tight">
                 Cozy & Indie PC Discovery Quiz
               </h2>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-[10px] sm:text-[11px] text-text-muted">
                 {isCompleted ? 'Your Tailored PC Recommendations' : `Step ${currentStep + 1} of ${totalSteps} • ${currentQuestion.category}`}
               </p>
             </div>
@@ -165,14 +165,14 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-text-muted hover:text-text-heading hover:bg-border/50 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-xl text-text-muted hover:text-text-heading hover:bg-border/50 transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 sm:space-y-6">
           {!isCompleted ? (
             <>
               {/* Step Progress Bar */}

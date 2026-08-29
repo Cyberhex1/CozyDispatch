@@ -12,6 +12,12 @@
     "fetch:catalog:quick": "tsx scripts/fetchCatalog.ts --mode=quick --max=100",
     "fetch:catalog:deep": "tsx scripts/fetchCatalog.ts --mode=deep --max=2500",
     "fetch:catalog:resume": "tsx scripts/fetchCatalog.ts --resume",
+    "fetch:showcases": "tsx scripts/fetchShowcases.ts",
+    "fetch:news": "tsx scripts/fetchNews.ts",
+    "sync:all": "tsx scripts/syncContent.ts --target=all",
+    "sync:news": "tsx scripts/syncContent.ts --target=news",
+    "sync:catalog": "tsx scripts/syncContent.ts --target=catalog",
+    "sync:rankings": "tsx scripts/syncContent.ts --target=rankings",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

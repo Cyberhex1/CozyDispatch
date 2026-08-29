@@ -16,7 +16,7 @@ export type SoundscapeTrack = 'rain' | 'campfire' | 'forest' | 'cafe' | 'none';
 
 export type MainSection = 'home' | 'browser' | 'categories' | 'catalogs' | 'deals' | 'news' | 'quiz';
 
-export type BrowserFilterType = 'newly_released' | 'popular' | 'highly_rated' | 'hidden_gems' | 'deals' | 'all';
+export type BrowserFilterType = 'newly_released' | 'newly_updated' | 'popular' | 'highly_rated' | 'hidden_gems' | 'deals' | 'all';
 
 export type SteamDeckStatus = 'Verified' | 'Playable' | 'Unsupported' | 'Unknown';
 
@@ -81,6 +81,9 @@ export interface Game {
   isFeaturedThisWeek: boolean;
   featuredReason?: string;
   isNewlyReleased?: boolean;
+  isNewlyUpdated?: boolean;
+  lastUpdatedAt?: string;
+  updateSummary?: string;
   isPopular?: boolean;
   isHighlyRated?: boolean;
   isHiddenGem?: boolean;
@@ -88,7 +91,36 @@ export interface Game {
   averagePlaytimeHours?: string;
 }
 
-export type NewsSource = 'IGN' | 'GameSpot' | 'Eurogamer' | 'PC Gamer' | 'Rock Paper Shotgun' | 'Nintendo Life' | 'Wholesome Games' | 'Daily Dispatch AI';
+export type NewsTopicCategory = 
+  | 'all'
+  | 'cozy'
+  | 'indie'
+  | 'life-sim'
+  | 'farming'
+  | 'building'
+  | 'wholesome'
+  | 'cozy-horror'
+  | 'animals'
+  | 'rpg-adventure'
+  | 'announcements'
+  | 'trailers'
+  | 'developer-news'
+  | 'releases'
+  | 'steam-deck'
+  | 'general';
+
+export type NewsSource = 
+  | 'Rock Paper Shotgun' 
+  | 'Eurogamer' 
+  | 'Nintendo Life' 
+  | 'Wholesome Games' 
+  | 'PC Gamer' 
+  | 'IGN' 
+  | 'GameSpot' 
+  | 'Steam Official' 
+  | 'Siliconera' 
+  | 'Daily Dispatch AI'
+  | string;
 
 export interface NewsArticle {
   id: string;
@@ -100,7 +132,8 @@ export interface NewsArticle {
   sourceLogoUrl?: string;
   sourceUrl: string;
   publishedAt: string;
-  category: GameCategory | 'general';
+  publishedIso?: string;
+  category: NewsTopicCategory;
   relatedGameId?: string;
   relatedGameTitle?: string;
   imageUrl: string;
@@ -108,7 +141,14 @@ export interface NewsArticle {
   readTimeMinutes: number;
   takeaways: string[];
   isHot?: boolean;
+  isFeatured?: boolean;
+  relevanceScore?: number;
   author: string;
+  clusteredSources?: {
+    source: string;
+    url: string;
+    title: string;
+  }[];
 }
 
 export interface PatchNote {
@@ -221,6 +261,8 @@ export interface UserPreferences {
 
 export interface UserProfile {
   id: string;
+  email?: string;
+  isLoggedIn?: boolean;
   username: string;
   gamerTag: string;
   avatarIcon: string;
@@ -228,6 +270,25 @@ export interface UserProfile {
   favoriteVibe: string;
   memberSince: string;
   preferences: UserPreferences;
+}
+
+export interface UserAccountData {
+  id: string;
+  email: string;
+  profile: UserProfile;
+  wishlistedGameIds: string[];
+  wishlistItems?: WishlistItem[];
+  bookmarkedArticleIds: string[];
+  notifications: NotificationAlert[];
+  lastSyncedAt?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  token?: string;
+  user?: UserAccountData;
+  error?: string;
+  message?: string;
 }
 
 export interface CozyVibePreference {

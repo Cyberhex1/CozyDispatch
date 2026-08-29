@@ -1,0 +1,13 @@
+[
+  {
+    "id": "sub_9bcb2db2-4761-4cd0-ac90-c8fd409ec04e",
+    "email": "cozy_reader_1788039568204@example.com",
+    "subscribedAt": "2026-08-29T21:39:28.340Z",
+    "source": "footer_signup",
+    "status": "unsubscribed",
+    "welcomeEmailSent": true,
+    "welcomeEmailSentAt": "2026-08-29T21:39:28.342Z",
+    "unsubscribeToken": "697272382648572401d4ee74344ad914",
+    "lastNewsletterSentAt": "2026-08-29T21:39:28.369Z"
+  }
+]

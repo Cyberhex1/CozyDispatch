@@ -232,7 +232,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
 
         {/* Footer Action */}
         {onOpenProfileWishlist && (
-          <div className="p-4 bg-surface border-t border-border">
+          <div className="p-4 bg-surface border-t border-border safe-bottom">
             <button
               onClick={() => {
                 onClose();

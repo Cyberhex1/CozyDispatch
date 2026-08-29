@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import crypto from 'crypto';
 import { GoogleGenAI, Type } from '@google/genai';
 
 dotenv.config();
@@ -32,37 +33,500 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Newsletter Subscribers Storage
-const SUBSCRIBERS_FILE = path.join(process.cwd(), 'src', 'data', 'subscribers.json');
+// ============================================================================
+// Real Cozy & Indie News Storage & Endpoints
+// ============================================================================
+const NEWS_FILE = path.join(process.cwd(), 'src', 'data', 'newsFeed.json');
+let cachedNews: any[] | null = null;
+let lastNewsRefreshTime = 0;
 
-function getSubscribers() {
+function loadNewsFromFile(): any[] {
   try {
-    if (fs.existsSync(SUBSCRIBERS_FILE)) {
-      const data = fs.readFileSync(SUBSCRIBERS_FILE, 'utf8');
+    if (fs.existsSync(NEWS_FILE)) {
+      const data = fs.readFileSync(NEWS_FILE, 'utf8');
+      cachedNews = JSON.parse(data);
+      return cachedNews || [];
+    }
+  } catch (err) {
+    console.error('Error reading newsFeed.json:', err);
+  }
+  return cachedNews || [];
+}
+
+// GET /api/news - Query, filter, and paginate live cozy news
+app.get('/api/news', (req, res) => {
+  try {
+    const { category, source, search, page = '1', limit = '50' } = req.query;
+    let articles = cachedNews || loadNewsFromFile();
+
+    // Category filter
+    if (category && category !== 'all') {
+      const catLower = String(category).toLowerCase();
+      articles = articles.filter((a: any) => 
+        a.category?.toLowerCase() === catLower || 
+        (a.tags && a.tags.some((t: string) => t.toLowerCase() === catLower))
+      );
+    }
+
+    // Source outlet filter
+    if (source && source !== 'all') {
+      const srcLower = String(source).toLowerCase();
+      articles = articles.filter((a: any) => a.source?.toLowerCase() === srcLower);
+    }
+
+    // Search filter
+    if (search && typeof search === 'string' && search.trim()) {
+      const q = search.trim().toLowerCase();
+      articles = articles.filter((a: any) => 
+        a.title?.toLowerCase().includes(q) ||
+        a.summary?.toLowerCase().includes(q) ||
+        a.relatedGameTitle?.toLowerCase().includes(q) ||
+        (a.tags && a.tags.some((t: string) => t.toLowerCase().includes(q)))
+      );
+    }
+
+    const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
+    const limitNum = Math.max(1, Math.min(100, parseInt(String(limit), 10) || 50));
+    const startIndex = (pageNum - 1) * limitNum;
+    const paginated = articles.slice(startIndex, startIndex + limitNum);
+
+    return res.json({
+      success: true,
+      total: articles.length,
+      page: pageNum,
+      limit: limitNum,
+      articles: paginated
+    });
+  } catch (error: any) {
+    console.error('Error fetching news:', error);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve news feed.' });
+  }
+});
+
+// POST /api/news/refresh - On-demand background sync
+app.post('/api/news/refresh', async (req, res) => {
+  const now = Date.now();
+  if (now - lastNewsRefreshTime < 60_000) {
+    return res.json({
+      success: true,
+      message: 'News feed was recently updated. Serving cached articles.',
+      total: (cachedNews || loadNewsFromFile()).length
+    });
+  }
+
+  lastNewsRefreshTime = now;
+  try {
+    const { syncNewsIncremental } = await import('./src/services/incrementalSyncService');
+    const result = await syncNewsIncremental(process.env.GEMINI_API_KEY);
+    cachedNews = loadNewsFromFile();
+
+    return res.json({
+      success: result.success,
+      message: `Incremental news sync complete: ${result.newArticles} new articles added (${result.skipped} unchanged).`,
+      total: result.totalArticles,
+      newCount: result.newArticles,
+      skippedCount: result.skipped
+    });
+  } catch (error: any) {
+    console.error('Error refreshing news:', error);
+    return res.status(500).json({ success: false, error: 'Failed to refresh news feed.' });
+  }
+});
+
+// ============================================================================
+// Incremental Content Synchronization Endpoints & Status
+// ============================================================================
+
+// GET /api/sync/status - Inspect sync metadata, timestamps & error states
+app.get('/api/sync/status', async (req, res) => {
+  try {
+    const { loadIngestionState } = await import('./src/services/incrementalSyncService');
+    const state = loadIngestionState();
+    return res.json({
+      success: true,
+      state
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/sync/news - Trigger incremental news sync
+app.post('/api/sync/news', async (req, res) => {
+  try {
+    const { syncNewsIncremental } = await import('./src/services/incrementalSyncService');
+    const result = await syncNewsIncremental(process.env.GEMINI_API_KEY);
+    cachedNews = loadNewsFromFile();
+    return res.json({ success: result.success, result });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/sync/catalog - Trigger incremental game discovery
+app.post('/api/sync/catalog', async (req, res) => {
+  try {
+    const { syncCatalogIncremental } = await import('./src/services/incrementalSyncService');
+    const result = await syncCatalogIncremental();
+    return res.json({ success: result.success, result });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/sync/rankings - Trigger incremental rankings & deals refresh
+app.post('/api/sync/rankings', async (req, res) => {
+  try {
+    const { syncRankingsIncremental } = await import('./src/services/incrementalSyncService');
+    const result = await syncRankingsIncremental();
+    return res.json({ success: result.success, result });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/sync/all - Run all scheduled syncs in sequence
+app.post('/api/sync/all', async (req, res) => {
+  try {
+    const { runAllIncrementalSyncs } = await import('./src/services/incrementalSyncService');
+    const result = await runAllIncrementalSyncs(process.env.GEMINI_API_KEY);
+    cachedNews = loadNewsFromFile();
+    return res.json({ success: true, result });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ============================================================================
+// Multi-Device User Account & Cloud Persistence System
+// ============================================================================
+const USERS_FILE = path.join(process.cwd(), 'src', 'data', 'users.json');
+const SESSIONS_FILE = path.join(process.cwd(), 'src', 'data', 'sessions.json');
+
+function getUsers(): any[] {
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      const data = fs.readFileSync(USERS_FILE, 'utf8');
       return JSON.parse(data);
     }
   } catch (err) {
-    console.error('Error reading subscribers file:', err);
+    console.error('Error reading users.json:', err);
   }
-  return [
-    { email: 'cozygamer@example.com', subscribedAt: new Date(Date.now() - 86400000 * 3).toISOString(), source: 'footer_signup' },
-    { email: 'decklover@example.com', subscribedAt: new Date(Date.now() - 86400000 * 10).toISOString(), source: 'footer_signup' }
-  ];
+  return [];
 }
 
-function saveSubscribers(subscribers: any[]) {
+function saveUsers(users: any[]) {
   try {
-    fs.mkdirSync(path.dirname(SUBSCRIBERS_FILE), { recursive: true });
-    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+    fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error saving subscribers file:', err);
+    console.error('Error saving users.json:', err);
   }
 }
 
-// Newsletter Subscribe Endpoint
-app.post('/api/newsletter/subscribe', (req, res) => {
+function getSessions(): Record<string, { userId: string; createdAt: string; lastActiveAt: string }> {
   try {
-    const { email } = req.body;
+    if (fs.existsSync(SESSIONS_FILE)) {
+      const data = fs.readFileSync(SESSIONS_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.error('Error reading sessions.json:', err);
+  }
+  return {};
+}
+
+function saveSessions(sessions: Record<string, any>) {
+  try {
+    fs.mkdirSync(path.dirname(SESSIONS_FILE), { recursive: true });
+    fs.writeFileSync(SESSIONS_FILE, JSON.stringify(sessions, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error saving sessions.json:', err);
+  }
+}
+
+function hashPassword(password: string, salt: string): string {
+  return crypto.scryptSync(password, salt, 64).toString('hex');
+}
+
+function createSession(userId: string): string {
+  const token = crypto.randomBytes(32).toString('hex');
+  const sessions = getSessions();
+  sessions[token] = {
+    userId,
+    createdAt: new Date().toISOString(),
+    lastActiveAt: new Date().toISOString()
+  };
+  saveSessions(sessions);
+  return token;
+}
+
+function getUserFromToken(token: string): any | null {
+  if (!token) return null;
+  const sessions = getSessions();
+  const session = sessions[token];
+  if (!session) return null;
+
+  session.lastActiveAt = new Date().toISOString();
+  saveSessions(sessions);
+
+  const users = getUsers();
+  return users.find((u: any) => u.id === session.userId) || null;
+}
+
+function sanitizeUser(user: any) {
+  if (!user) return null;
+  const { passwordHash, salt, ...safeUser } = user;
+  return safeUser;
+}
+
+// POST /api/auth/signup - Register account & migrate local state
+app.post('/api/auth/signup', (req, res) => {
+  try {
+    const { email, password, username, initialData } = req.body;
+
+    if (!email || typeof email !== 'string' || !email.includes('@') || !email.includes('.')) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+    }
+
+    if (!password || typeof password !== 'string' || password.length < 4) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 4 characters long.' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const users = getUsers();
+
+    if (users.some((u: any) => u.email === trimmedEmail)) {
+      return res.status(409).json({ success: false, error: 'An account with this email already exists. Please log in.' });
+    }
+
+    const salt = crypto.randomBytes(16).toString('hex');
+    const passwordHash = hashPassword(password, salt);
+    const chosenName = (username && typeof username === 'string' && username.trim()) || trimmedEmail.split('@')[0] || 'CozyGamer';
+
+    const userId = `usr_${crypto.randomUUID()}`;
+    const newUser = {
+      id: userId,
+      email: trimmedEmail,
+      passwordHash,
+      salt,
+      createdAt: new Date().toISOString(),
+      profile: {
+        id: userId,
+        email: trimmedEmail,
+        isLoggedIn: true,
+        username: chosenName,
+        gamerTag: `${chosenName}#${Math.floor(1000 + Math.random() * 9000)}`,
+        avatarIcon: initialData?.profile?.avatarIcon || 'sprout',
+        bio: initialData?.profile?.bio || 'Cozy indie gamer and Steam Deck explorer.',
+        favoriteVibe: initialData?.profile?.favoriteVibe || 'Pastel Watercolor & Zero Combat',
+        memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        preferences: initialData?.profile?.preferences || {
+          notifyOnPriceDrops: true,
+          notifyOnReleases: true,
+          notifyOnPatches: true,
+          preferredGenres: ['Farming Sim', 'Gridless Builder', 'Atmospheric', 'Cozy Castle', 'Roguelike Deckbuilder'],
+          preferredStore: 'all',
+          steamDeckOnly: false,
+          minCozyScore: 8.5,
+          dailyDigestOptIn: true
+        }
+      },
+      wishlistedGameIds: Array.isArray(initialData?.wishlistedGameIds) && initialData.wishlistedGameIds.length > 0
+        ? initialData.wishlistedGameIds
+        : ['fields-of-mistria', 'tiny-glade', 'balatro'],
+      wishlistItems: Array.isArray(initialData?.wishlistItems) ? initialData.wishlistItems : [],
+      bookmarkedArticleIds: Array.isArray(initialData?.bookmarkedArticleIds) ? initialData.bookmarkedArticleIds : [],
+      notifications: Array.isArray(initialData?.notifications) && initialData.notifications.length > 0
+        ? initialData.notifications
+        : [
+            {
+              id: 'notif-welcome',
+              type: 'wishlist',
+              title: 'Welcome to Cozy Dispatch Cloud!',
+              message: 'Your profile and wishlist are now securely synchronized across all your devices.',
+              timestamp: 'Just now',
+              isRead: false
+            }
+          ],
+      lastSyncedAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    const token = createSession(userId);
+    return res.status(201).json({
+      success: true,
+      message: 'Account created successfully!',
+      token,
+      user: sanitizeUser(newUser)
+    });
+  } catch (error: any) {
+    console.error('Error signing up:', error);
+    return res.status(500).json({ success: false, error: 'Registration failed. Please try again.' });
+  }
+});
+
+// POST /api/auth/login - Log into account from any device
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Please provide both email and password.' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const users = getUsers();
+    const user = users.find((u: any) => u.email === trimmedEmail);
+
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    }
+
+    const computedHash = hashPassword(password, user.salt);
+    if (computedHash !== user.passwordHash) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    }
+
+    // Ensure isLoggedIn in profile is true
+    user.profile.isLoggedIn = true;
+    user.profile.email = user.email;
+    saveUsers(users);
+
+    const token = createSession(user.id);
+    return res.json({
+      success: true,
+      message: `Welcome back, ${user.profile.username}!`,
+      token,
+      user: sanitizeUser(user)
+    });
+  } catch (error: any) {
+    console.error('Error logging in:', error);
+    return res.status(500).json({ success: false, error: 'Login failed. Please try again.' });
+  }
+});
+
+// POST /api/auth/logout - Invalidate session
+app.post('/api/auth/logout', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = req.body?.token || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null);
+
+    if (token) {
+      const sessions = getSessions();
+      delete sessions[token];
+      saveSessions(sessions);
+    }
+
+    return res.json({ success: true, message: 'Logged out successfully.' });
+  } catch (error: any) {
+    console.error('Error logging out:', error);
+    return res.status(500).json({ success: false, error: 'Failed to log out.' });
+  }
+});
+
+// GET /api/user/sync - Hydrate cloud user data on any device
+app.get('/api/user/sync', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : (req.query.token as string);
+
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Unauthorized. Please log in.' });
+    }
+
+    const user = getUserFromToken(token);
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Session expired. Please log in again.' });
+    }
+
+    return res.json({
+      success: true,
+      user: sanitizeUser(user)
+    });
+  } catch (error: any) {
+    console.error('Error syncing user:', error);
+    return res.status(500).json({ success: false, error: 'Failed to sync user data.' });
+  }
+});
+
+// PUT /api/user/sync - Cloud save updates for authenticated user
+app.put('/api/user/sync', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : (req.body?.token as string);
+
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Unauthorized. Please log in.' });
+    }
+
+    const users = getUsers();
+    const sessions = getSessions();
+    const session = sessions[token];
+
+    if (!session) {
+      return res.status(401).json({ success: false, error: 'Session expired. Please log in again.' });
+    }
+
+    const userIndex = users.findIndex((u: any) => u.id === session.userId);
+    if (userIndex === -1) {
+      return res.status(404).json({ success: false, error: 'User not found.' });
+    }
+
+    const targetUser = users[userIndex];
+    const { profile, wishlistedGameIds, wishlistItems, bookmarkedArticleIds, notifications } = req.body;
+
+    if (profile && typeof profile === 'object') {
+      targetUser.profile = {
+        ...targetUser.profile,
+        ...profile,
+        id: targetUser.id,
+        email: targetUser.email,
+        isLoggedIn: true
+      };
+    }
+
+    if (Array.isArray(wishlistedGameIds)) {
+      targetUser.wishlistedGameIds = wishlistedGameIds;
+    }
+
+    if (Array.isArray(wishlistItems)) {
+      targetUser.wishlistItems = wishlistItems;
+    }
+
+    if (Array.isArray(bookmarkedArticleIds)) {
+      targetUser.bookmarkedArticleIds = bookmarkedArticleIds;
+    }
+
+    if (Array.isArray(notifications)) {
+      targetUser.notifications = notifications;
+    }
+
+    targetUser.lastSyncedAt = new Date().toISOString();
+    users[userIndex] = targetUser;
+    saveUsers(users);
+
+    return res.json({
+      success: true,
+      message: 'Cloud sync successful.',
+      user: sanitizeUser(targetUser)
+    });
+  } catch (error: any) {
+    console.error('Error saving sync data:', error);
+    return res.status(500).json({ success: false, error: 'Failed to persist user updates.' });
+  }
+});
+
+// ============================================================================
+// Real Newsletter, Welcome Email & Subscriber Broadcast System
+// ============================================================================
+
+// POST /api/newsletter/subscribe - Subscribe email, deduplicate, and trigger welcome email
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  try {
+    const { email, source = 'footer_signup' } = req.body;
     
     if (!email || typeof email !== 'string' || !email.includes('@') || !email.includes('.')) {
       return res.status(400).json({
@@ -71,49 +535,124 @@ app.post('/api/newsletter/subscribe', (req, res) => {
       });
     }
 
-    const trimmedEmail = email.trim().toLowerCase();
-    const subscribers = getSubscribers();
+    const { subscribeUser, getSubscribers } = await import('./src/services/emailService');
+    const result = await subscribeUser(email, source);
 
-    // Check if already subscribed
-    const existing = subscribers.find((s: any) => s.email === trimmedEmail);
-    if (existing) {
-      return res.json({
-        success: true,
-        alreadySubscribed: true,
-        message: "You're already subscribed to Cozy Dispatch! The next recap arrives Friday morning."
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to process subscription.'
       });
     }
 
-    subscribers.push({
-      email: trimmedEmail,
-      subscribedAt: new Date().toISOString(),
-      source: 'footer_signup'
-    });
-    
-    saveSubscribers(subscribers);
-
-    // Simulate an email being sent
-    console.log(`[Newsletter] New subscriber added: ${trimmedEmail}. A welcome email has been simulated.`);
-
+    const allSubscribers = getSubscribers();
     return res.json({
       success: true,
-      message: 'Welcome aboard! You are now subscribed to the weekly Cozy Dispatch recap.',
-      totalSubscribers: subscribers.length
+      alreadySubscribed: !result.isNew,
+      welcomeSent: result.welcomeSent,
+      message: result.message,
+      totalSubscribers: allSubscribers.length
     });
   } catch (error: any) {
-    console.error('Newsletter subscription error:', error);
+    console.error('[Newsletter] Subscription endpoint error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to process subscription.'
+      error: 'Failed to process subscription. Please try again.'
     });
   }
 });
 
+// POST /api/newsletter/broadcast - Dispatch newsletter campaign to all active subscribers
+app.post('/api/newsletter/broadcast', async (req, res) => {
+  try {
+    const { headline, intro, editionNumber, featuredGames, articles } = req.body;
+
+    if (!headline || !intro) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide both a headline and an intro for the newsletter campaign.'
+      });
+    }
+
+    const { broadcastNewsletter } = await import('./src/services/emailService');
+    const result = await broadcastNewsletter({
+      headline,
+      intro,
+      editionNumber,
+      featuredGames,
+      articles
+    });
+
+    return res.json({
+      success: true,
+      message: `Newsletter broadcast complete: Sent to ${result.successfulSends} active subscribers.`,
+      result
+    });
+  } catch (error: any) {
+    console.error('[Newsletter] Broadcast error:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to broadcast newsletter.'
+    });
+  }
+});
+
+// GET /api/newsletter/outbox - Inspect sent emails and delivery logs
+app.get('/api/newsletter/outbox', async (req, res) => {
+  try {
+    const { getOutbox } = await import('./src/services/emailService');
+    const outbox = getOutbox();
+    return res.json({
+      success: true,
+      totalSent: outbox.length,
+      outbox
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/newsletter/unsubscribe - 1-Click unsubscribe handler
+app.get('/api/newsletter/unsubscribe', async (req, res) => {
+  const token = req.query.token as string;
+  const { unsubscribeUserByToken } = await import('./src/services/emailService');
+  const result = unsubscribeUserByToken(token);
+
+  return res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Cozy Dispatch Unsubscribe</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #F8F6F0; color: #2C2C24; display: flex; align-items: center; justify-content: center; min-height: 90vh; margin: 0; }
+    .card { background: #FFFFFF; border: 1px solid #E6E2D8; border-radius: 20px; padding: 36px; max-width: 460px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+    h2 { font-family: Georgia, serif; color: #2C2C24; margin-top: 0; }
+    p { font-size: 14px; color: #505045; line-height: 1.6; }
+    a { display: inline-block; margin-top: 16px; background: #2C2C24; color: #fff; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>${result.success ? 'Unsubscribed' : 'Notice'}</h2>
+    <p>${result.message}</p>
+    <a href="/">Return to Cozy Dispatch</a>
+  </div>
+</body>
+</html>`);
+});
+
 // Subscriber Stats Endpoint
-app.get('/api/newsletter/stats', (req, res) => {
-  res.json({
+app.get('/api/newsletter/stats', async (req, res) => {
+  const { getSubscribers, getOutbox } = await import('./src/services/emailService');
+  const subs = getSubscribers();
+  const activeCount = subs.filter(s => s.status === 'active').length;
+  const outbox = getOutbox();
+
+  return res.json({
     success: true,
-    totalSubscribers: getSubscribers().length,
+    totalSubscribers: subs.length,
+    activeSubscribers: activeCount,
+    totalEmailsSent: outbox.length,
     latestEdition: 'Issue #42: Fields of Mistria Magic & Tiny Glade Zen'
   });
 });
@@ -399,7 +938,49 @@ async function setupViteMiddleware() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Cozy Indie Dispatch server running on port ${PORT}`);
+    startScheduledSyncJobs();
   });
+}
+
+function startScheduledSyncJobs() {
+  console.log('[Scheduler] Initializing automated incremental content updates (News: 2h, Rankings: 12h, Catalog: 24h)...');
+
+  // 1. News sync: Every 2 hours
+  const NEWS_INTERVAL_MS = 2 * 60 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      console.log('[Scheduler] Executing scheduled incremental news update...');
+      const { syncNewsIncremental } = await import('./src/services/incrementalSyncService');
+      await syncNewsIncremental(process.env.GEMINI_API_KEY);
+      cachedNews = loadNewsFromFile();
+    } catch (err: any) {
+      console.error('[Scheduler] Scheduled news update error:', err.message);
+    }
+  }, NEWS_INTERVAL_MS);
+
+  // 2. Rankings & Deals sync: Every 12 hours
+  const RANKINGS_INTERVAL_MS = 12 * 60 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      console.log('[Scheduler] Executing scheduled incremental rankings update...');
+      const { syncRankingsIncremental } = await import('./src/services/incrementalSyncService');
+      await syncRankingsIncremental();
+    } catch (err: any) {
+      console.error('[Scheduler] Scheduled rankings update error:', err.message);
+    }
+  }, RANKINGS_INTERVAL_MS);
+
+  // 3. Catalog discovery check: Every 24 hours
+  const CATALOG_INTERVAL_MS = 24 * 60 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      console.log('[Scheduler] Executing scheduled incremental catalog discovery...');
+      const { syncCatalogIncremental } = await import('./src/services/incrementalSyncService');
+      await syncCatalogIncremental();
+    } catch (err: any) {
+      console.error('[Scheduler] Scheduled catalog update error:', err.message);
+    }
+  }, CATALOG_INTERVAL_MS);
 }
 
 setupViteMiddleware().catch((err) => {

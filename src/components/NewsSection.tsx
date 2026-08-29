@@ -1,21 +1,30 @@
 import React, { useState, useMemo } from 'react';
-import { NewsArticle, PatchNote, UpcomingRelease, GameCategory, NewsSource, DailyDigest } from '../types';
+import { 
+  NewsArticle, 
+  PatchNote, 
+  UpcomingRelease, 
+  NewsTopicCategory, 
+  DailyDigest 
+} from '../types';
 import { 
   Newspaper, 
   Sparkles, 
   Clock, 
   ExternalLink, 
   Flame, 
-  Filter, 
+  Search,
+  X,
+  RefreshCw,
   Calendar, 
   Wrench, 
-  Share2, 
   Bookmark, 
-  Check, 
   ChevronRight,
   TrendingUp,
   Tag,
-  ArrowRight
+  ArrowRight,
+  Layers,
+  Check,
+  Loader2
 } from 'lucide-react';
 
 interface NewsSectionProps {
@@ -23,8 +32,8 @@ interface NewsSectionProps {
   patchNotes: PatchNote[];
   upcomingReleases: UpcomingRelease[];
   dailyDigest: DailyDigest;
-  selectedCategory: GameCategory | 'all';
-  onCategoryChange: (cat: GameCategory | 'all') => void;
+  selectedCategory: NewsTopicCategory;
+  onCategoryChange: (cat: NewsTopicCategory) => void;
   onSelectArticle: (article: NewsArticle) => void;
   onSelectPatch: (patch: PatchNote) => void;
   onSelectUpcoming: (item: UpcomingRelease) => void;
@@ -32,7 +41,27 @@ interface NewsSectionProps {
   isGeneratingDigest: boolean;
   onBookmarkArticle: (articleId: string) => void;
   isBookmarked: (articleId: string) => boolean;
+  onRefreshFeed?: () => Promise<void>;
+  isRefreshingFeed?: boolean;
 }
+
+const CATEGORIES: { id: NewsTopicCategory; label: string }[] = [
+  { id: 'all', label: 'All Stories' },
+  { id: 'cozy', label: '☕ Cozy' },
+  { id: 'indie', label: '✨ Indie' },
+  { id: 'life-sim', label: '🏡 Life Sim' },
+  { id: 'farming', label: '🌾 Farming' },
+  { id: 'building', label: '🏰 Building' },
+  { id: 'wholesome', label: '💛 Wholesome' },
+  { id: 'cozy-horror', label: '🕯️ Cozy Horror' },
+  { id: 'animals', label: '🐾 Animals' },
+  { id: 'rpg-adventure', label: '🗡️ RPG / Adventure' },
+  { id: 'announcements', label: '📢 Announcements' },
+  { id: 'trailers', label: '🎬 Trailers' },
+  { id: 'developer-news', label: '🛠️ Dev News' },
+  { id: 'releases', label: '🚀 Releases' },
+  { id: 'steam-deck', label: '🎮 Steam Deck' }
+];
 
 export const NewsSection: React.FC<NewsSectionProps> = ({
   articles,
@@ -47,432 +76,430 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
   onGenerateAIDigest,
   isGeneratingDigest,
   onBookmarkArticle,
-  isBookmarked
+  isBookmarked,
+  onRefreshFeed,
+  isRefreshingFeed = false
 }) => {
   const [activeTab, setActiveTab] = useState<'headlines' | 'patches' | 'upcoming'>('headlines');
-  const [selectedSource, setSelectedSource] = useState<NewsSource | 'all'>('all');
+  const [selectedSource, setSelectedSource] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const sources: (NewsSource | 'all')[] = ['all', 'IGN', 'GameSpot', 'Eurogamer', 'PC Gamer', 'Nintendo Life', 'Rock Paper Shotgun'];
+  // Extract unique sources from available articles
+  const availableSources = useMemo(() => {
+    const set = new Set<string>();
+    articles.forEach((a) => {
+      if (a.source) set.add(a.source);
+    });
+    return ['all', ...Array.from(set)];
+  }, [articles]);
 
   // Filtered articles
   const filteredArticles = useMemo(() => {
     return articles.filter((a) => {
-      if (selectedCategory !== 'all' && a.category !== selectedCategory && a.category !== 'general') return false;
-      if (selectedSource !== 'all' && a.source !== selectedSource) return false;
+      // Category filter
+      if (selectedCategory !== 'all') {
+        const catLower = selectedCategory.toLowerCase();
+        const matchesCategory = 
+          a.category?.toLowerCase() === catLower ||
+          a.tags?.some((t) => t.toLowerCase() === catLower);
+        if (!matchesCategory) return false;
+      }
+
+      // Source filter
+      if (selectedSource !== 'all' && a.source !== selectedSource) {
+        return false;
+      }
+
+      // Search query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesQuery =
+          a.title.toLowerCase().includes(q) ||
+          a.summary.toLowerCase().includes(q) ||
+          a.author?.toLowerCase().includes(q) ||
+          a.relatedGameTitle?.toLowerCase().includes(q) ||
+          a.tags?.some((t) => t.toLowerCase() === q);
+        if (!matchesQuery) return false;
+      }
+
       return true;
     });
-  }, [articles, selectedCategory, selectedSource]);
+  }, [articles, selectedCategory, selectedSource, searchQuery]);
 
-  // Filtered patch notes
-  const filteredPatches = useMemo(() => {
-    return patchNotes.filter((p) => {
-      if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
-      return true;
-    });
-  }, [patchNotes, selectedCategory]);
-
-  // Filtered upcoming
-  const filteredUpcoming = useMemo(() => {
-    return upcomingReleases.filter((u) => {
-      if (selectedCategory !== 'all' && u.category !== selectedCategory) return false;
-      return true;
-    });
-  }, [upcomingReleases, selectedCategory]);
-
-  // Helper for outlet badge colors
-  const getSourceBadgeColor = (source: NewsSource) => {
-    switch (source) {
-      case 'IGN':
-        return 'bg-red-600 text-white';
-      case 'GameSpot':
-        return 'bg-amber-600 text-white';
-      case 'Eurogamer':
-        return 'bg-blue-600 text-white';
-      case 'PC Gamer':
-        return 'bg-rose-700 text-white';
-      case 'Nintendo Life':
-        return 'bg-red-500 text-white';
-      case 'Rock Paper Shotgun':
-        return 'bg-emerald-700 text-white';
-      default:
-        return 'bg-stone-800 text-amber-300';
+  // Top featured story candidate
+  const featuredArticle = useMemo(() => {
+    if (searchQuery.trim() || selectedCategory !== 'all' || selectedSource !== 'all') {
+      return null;
     }
-  };
+    return filteredArticles.find((a) => a.isFeatured) || filteredArticles[0] || null;
+  }, [filteredArticles, searchQuery, selectedCategory, selectedSource]);
+
+  // Remaining articles for grid
+  const gridArticles = useMemo(() => {
+    if (!featuredArticle) return filteredArticles;
+    return filteredArticles.filter((a) => a.id !== featuredArticle.id);
+  }, [filteredArticles, featuredArticle]);
 
   return (
-    <div className="space-y-8">
-      {/* Header & Subtitle */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
-        <div>
-          <div className="flex items-center gap-2 text-xs uppercase font-bold text-brand tracking-wider mb-1">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+      
+      {/* Header Banner */}
+      <div className="bg-surface rounded-3xl p-5 sm:p-8 border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1.5 min-w-0">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand">
             <Newspaper className="w-4 h-4" />
-            <span>Daily Indie & Cozy Gaming Dispatch</span>
+            <span>Cozy Gaming Newsroom</span>
           </div>
-          <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading tracking-tight">
-            News, Releases & Patch Notes Hub
+          <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading tracking-tight leading-tight">
+            The Daily Cozy & Indie Dispatch
           </h2>
-          <p className="text-text-muted text-sm mt-1">
-            Aggregated coverage from IGN, GameSpot, Eurogamer, and developer dispatches with 30-second cozy takeaways.
+          <p className="text-xs sm:text-sm text-text-muted max-w-2xl leading-relaxed">
+            Live aggregated coverage from Eurogamer, Rock Paper Shotgun, Nintendo Life, Siliconera, and official Steam developer patch notes.
           </p>
         </div>
 
-        {/* AI Morning Dispatch Button */}
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          {onRefreshFeed && (
+            <button
+              onClick={onRefreshFeed}
+              disabled={isRefreshingFeed}
+              className="px-4 py-2.5 rounded-xl bg-surface hover:bg-border text-text-heading border border-border text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[44px] touch-manipulation"
+              title="Fetch fresh RSS feeds & Steam patch notes"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-brand ${isRefreshingFeed ? 'animate-spin' : ''}`} />
+              <span>{isRefreshingFeed ? 'Syncing...' : 'Sync Live Feeds'}</span>
+            </button>
+          )}
+
+          <button
+            onClick={onGenerateAIDigest}
+            disabled={isGeneratingDigest}
+            className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[44px] touch-manipulation"
+          >
+            {isGeneratingDigest ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Brewing Digest...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>AI Daily Digest</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Section Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-border pb-1 overflow-x-auto no-scrollbar">
         <button
-          id="news-generate-digest-btn"
-          onClick={onGenerateAIDigest}
-          disabled={isGeneratingDigest}
-          className="self-start md:self-center px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs sm:text-sm shadow-xs flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+          onClick={() => setActiveTab('headlines')}
+          className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap min-h-[44px] touch-manipulation ${
+            activeTab === 'headlines'
+              ? 'bg-brand text-white shadow-xs'
+              : 'text-text-muted hover:text-text-main hover:bg-surface'
+          }`}
         >
-          <Sparkles className={`w-4 h-4 text-white ${isGeneratingDigest ? 'animate-spin' : ''}`} />
-          <span>{isGeneratingDigest ? 'Synthesizing Daily AI Briefing...' : 'Generate Fresh AI Briefing'}</span>
+          <Newspaper className="w-4 h-4" />
+          <span>Latest Stories ({articles.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('patches')}
+          className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap min-h-[44px] touch-manipulation ${
+            activeTab === 'patches'
+              ? 'bg-brand text-white shadow-xs'
+              : 'text-text-muted hover:text-text-main hover:bg-surface'
+          }`}
+        >
+          <Wrench className="w-4 h-4" />
+          <span>Patch Notes ({patchNotes.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('upcoming')}
+          className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap min-h-[44px] touch-manipulation ${
+            activeTab === 'upcoming'
+              ? 'bg-brand text-white shadow-xs'
+              : 'text-text-muted hover:text-text-main hover:bg-surface'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span>Upcoming Launches ({upcomingReleases.length})</span>
         </button>
       </div>
 
-      {/* Daily Digest Morning Card */}
-      <div className="bg-base text-text-main rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
-        <div className="relative z-10 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-surface-brand text-text-heading border border-brand/40">
-                Today's Curated Briefing
-              </span>
-              <span className="text-xs text-text-muted font-medium">
-                {dailyDigest.date}
-              </span>
+      {/* TAB 1: Real News Stories */}
+      {activeTab === 'headlines' && (
+        <div className="space-y-6">
+          
+          {/* Category Horizontal Filter Pill Bar */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              {CATEGORIES.map((cat) => {
+                const isSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => onCategoryChange(cat.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[38px] touch-manipulation flex items-center gap-1 ${
+                      isSelected
+                        ? 'bg-brand text-white shadow-xs'
+                        : 'bg-surface border border-border text-text-muted hover:bg-border/60 hover:text-text-main'
+                    }`}
+                  >
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <span className="text-xs text-brand italic hidden sm:inline font-medium">
-              ☕ Powered by Cozy Dispatch & Gemini
-            </span>
-          </div>
 
-          <div>
-            <h3 className="font-serif-natural text-xl sm:text-2xl font-normal text-text-heading tracking-tight">
-              {dailyDigest.headline}
-            </h3>
-            <p className="text-sm text-text-muted mt-1 leading-relaxed">
-              {dailyDigest.greeting}
-            </p>
-          </div>
-
-          {/* 3 Key Morning Highlights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-            {dailyDigest.curatedPicks.map((pick, i) => (
-              <div
-                key={i}
-                className="bg-base border border-border rounded-2xl p-4 space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-text-heading">
-                    {pick.gameTitle}
-                  </span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-surface-brand text-text-heading border border-brand/30">
-                    {pick.vibeTag}
-                  </span>
-                </div>
-                <p className="text-xs text-text-muted leading-relaxed">
-                  {pick.highlight}
-                </p>
+            {/* Sub-Filters: Outlet selector & Search input */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-3 sm:p-4 rounded-2xl border border-border text-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold text-text-muted">Outlet:</span>
+                <select
+                  value={selectedSource}
+                  onChange={(e) => setSelectedSource(e.target.value)}
+                  className="bg-base border border-border px-3 py-1.5 rounded-xl font-bold text-text-heading focus:outline-hidden cursor-pointer min-h-[38px]"
+                >
+                  <option value="all">All Outlets ({availableSources.length - 1} Sources)</option>
+                  {availableSources.filter((s) => s !== 'all').map((src) => (
+                    <option key={src} value={src}>{src}</option>
+                  ))}
+                </select>
               </div>
-            ))}
+
+              <div className="relative flex-1 sm:max-w-xs">
+                <Search className="w-3.5 h-3.5 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search cozy news..."
+                  className="w-full pl-8 pr-8 py-1.5 bg-base border border-border rounded-xl text-xs text-text-heading placeholder-text-muted focus:outline-hidden focus:border-brand min-h-[38px]"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main p-1 cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Community Vibe Note */}
-          <div className="pt-2 flex items-center justify-between text-xs text-text-muted">
-            <span>
-              <strong className="text-text-heading">Community Pulse: </strong> {dailyDigest.communityVibeCheck}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Tabs: Top Headlines | Patch Notes | Upcoming Release Radar */}
-      <div className="flex items-center justify-between border-b border-border pb-2">
-        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar">
-          <button
-            id="tab-headlines-btn"
-            onClick={() => setActiveTab('headlines')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'headlines'
-                ? 'bg-brand text-white shadow-xs'
-                : 'bg-base text-text-muted hover:bg-surface border border-border'
-            }`}
-          >
-            <Newspaper className="w-4 h-4" />
-            <span>Latest News Articles ({filteredArticles.length})</span>
-          </button>
-
-          <button
-            id="tab-patches-btn"
-            onClick={() => setActiveTab('patches')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'patches'
-                ? 'bg-brand text-white shadow-xs'
-                : 'bg-base text-text-muted hover:bg-surface border border-border'
-            }`}
-          >
-            <Wrench className="w-4 h-4" />
-            <span>Patch Notes Hub ({filteredPatches.length})</span>
-          </button>
-
-          <button
-            id="tab-upcoming-btn"
-            onClick={() => setActiveTab('upcoming')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'upcoming'
-                ? 'bg-brand text-white shadow-xs'
-                : 'bg-base text-text-muted hover:bg-surface border border-border'
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            <span>Upcoming Releases ({filteredUpcoming.length})</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Outlet & Category Sub-Bar */}
-      {activeTab === 'headlines' && (
-        <div className="bg-base p-3 rounded-xl border border-border shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-          {/* Source Outlet Filter */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <span className="font-bold text-text-muted uppercase tracking-wider mr-1">
-              Outlet:
-            </span>
-            {sources.map((src) => (
-              <button
-                key={src}
-                onClick={() => setSelectedSource(src)}
-                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedSource === src
-                    ? 'bg-inverse text-text-on-inverse'
-                    : 'bg-surface hover:bg-border text-text-muted'
-                }`}
-              >
-                {src === 'all' ? 'All Outlets' : src}
-              </button>
-            ))}
-          </div>
-
-          {/* Category Filter */}
-          <div className="flex items-center gap-1">
-            <span className="font-bold text-text-muted uppercase tracking-wider mr-1">
-              Category:
-            </span>
-            {[
-              { id: 'all', label: 'All' },
-              { id: 'cozy', label: 'Cozy' },
-              { id: 'indie', label: 'Indie' },
-              { id: 'simulation', label: 'Sim' },
-              { id: 'steam-deck', label: 'Steam Deck' }
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => onCategoryChange(cat.id as any)}
-                className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
-                  selectedCategory === cat.id
-                    ? 'bg-brand text-white'
-                    : 'bg-surface hover:bg-border text-text-muted'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 1: News Articles */}
-      {activeTab === 'headlines' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.map((article) => {
-            const saved = isBookmarked(article.id);
-            return (
-              <article
-                key={article.id}
-                onClick={() => onSelectArticle(article)}
-                className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
-              >
-                {/* Thumbnail & Source Badge */}
-                <div className="relative aspect-[16/9] bg-base overflow-hidden">
+          {/* TOP FEATURED HERO ARTICLE */}
+          {featuredArticle && (
+            <div 
+              onClick={() => onSelectArticle(featuredArticle)}
+              className="group bg-surface rounded-3xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
+                {/* Image Banner */}
+                <div className="lg:col-span-6 relative aspect-[16/10] bg-base overflow-hidden">
                   <img
-                    src={article.imageUrl}
-                    alt={article.title}
+                    src={featuredArticle.imageUrl}
+                    alt={featuredArticle.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
                   />
-
-                  {/* Outlet Badge */}
-                  <div className={`absolute top-3 left-3 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-xs ${getSourceBadgeColor(article.source)}`}>
-                    {article.source}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                    <span className="bg-brand text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs flex items-center gap-1">
+                      <Flame className="w-3 h-3 text-amber-300" />
+                      Top Featured Story
+                    </span>
                   </div>
-
-                  {/* Hot Badge */}
-                  {article.isHot && (
-                    <div className="absolute top-3 right-3 bg-accent text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
-                      <Flame className="w-3 h-3" />
-                      Hot
-                    </div>
-                  )}
-
-                  {/* Reading Time */}
-                  <div className="absolute bottom-2.5 right-2.5 bg-inverse/80 backdrop-blur-xs text-text-on-inverse text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-text-on-inverse" />
-                    <span>{article.readTimeMinutes} min read</span>
+                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-md">
+                    {featuredArticle.source}
                   </div>
                 </div>
 
-                {/* Body Content */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-                  <div>
-                    <div className="flex items-center gap-2 text-xs text-text-muted mb-1.5 font-medium">
-                      <span>{article.publishedAt}</span>
+                {/* Content */}
+                <div className="lg:col-span-6 p-5 sm:p-8 flex flex-col justify-between space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs text-text-muted">
+                      <span className="font-bold text-brand uppercase">{featuredArticle.category}</span>
                       <span>•</span>
-                      <span>By {article.author}</span>
+                      <span>{featuredArticle.publishedAt}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {featuredArticle.readTimeMinutes} min read
+                      </span>
                     </div>
 
-                    <h3 className="font-serif-natural text-base font-normal text-text-main group-hover:text-brand transition-colors leading-snug line-clamp-2">
-                      {article.title}
+                    <h3 className="font-serif-natural text-xl sm:text-2xl font-normal text-text-heading group-hover:text-brand transition-colors leading-tight">
+                      {featuredArticle.title}
                     </h3>
 
-                    <p className="text-xs text-text-muted line-clamp-2 mt-2 leading-relaxed">
-                      {article.summary}
+                    <p className="text-xs sm:text-sm text-text-muted line-clamp-3 leading-relaxed">
+                      {featuredArticle.summary}
                     </p>
-                  </div>
 
-                  {/* 30-second Key Takeaways Preview */}
-                  <div className="p-3 bg-base rounded-xl border border-border text-xs space-y-1.5">
-                    <div className="font-bold text-text-heading text-[11px] uppercase tracking-wider flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-brand" />
-                      <span>30-Second Takeaway</span>
-                    </div>
-                    <ul className="space-y-1 text-text-muted text-[11px]">
-                      {article.takeaways.slice(0, 2).map((t, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5">
-                          <span className="text-brand font-bold shrink-0">•</span>
-                          <span className="line-clamp-1">{t}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Footer & Actions */}
-                  <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onBookmarkArticle(article.id);
-                      }}
-                      className={`flex items-center gap-1 font-semibold transition-colors cursor-pointer ${
-                        saved ? 'text-accent' : 'text-text-muted hover:text-text-main'
-                      }`}
-                    >
-                      <Bookmark className={`w-3.5 h-3.5 ${saved ? 'fill-[#E6A07D]' : ''}`} />
-                      <span>{saved ? 'Saved' : 'Save'}</span>
-                    </button>
-
-                    <div className="flex items-center gap-1 text-brand font-bold group-hover:translate-x-0.5 transition-transform">
-                      <span>Read Full Dispatch</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
-
-      {/* TAB 2: Patch Notes Hub */}
-      {activeTab === 'patches' && (
-        <div className="space-y-4">
-          <div className="bg-surface-brand border border-brand/40 rounded-2xl p-4 text-xs text-text-heading flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-brand shrink-0" />
-              <span>
-                <strong className="text-text-heading">Recent Game Updates: </strong> Tracking major quality-of-life updates, balance adjustments, and Steam Deck fixes for community favorites.
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredPatches.map((patch) => (
-              <div
-                key={patch.id}
-                onClick={() => onSelectPatch(patch)}
-                className="bg-base rounded-2xl border border-border p-5 shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between space-y-4"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={patch.gameCover}
-                        alt={patch.gameTitle}
-                        className="w-12 h-12 rounded-xl object-cover"
-                      />
-                      <div>
-                        <h3 className="font-serif-natural font-normal text-base text-text-main">
-                          {patch.gameTitle}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-surface text-text-heading">
-                            {patch.version}
-                          </span>
-                          <span className="text-[11px] text-text-muted">
-                            {patch.releaseDate}
-                          </span>
-                        </div>
+                    {/* 30-Second Takeaways */}
+                    {featuredArticle.takeaways && featuredArticle.takeaways.length > 0 && (
+                      <div className="p-3 bg-surface-brand rounded-xl border border-brand/30 space-y-1.5">
+                        <span className="text-[10px] font-bold uppercase text-brand flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          30-Second Takeaway
+                        </span>
+                        <ul className="text-xs text-text-heading space-y-1">
+                          {featuredArticle.takeaways.slice(0, 2).map((t, idx) => (
+                            <li key={idx} className="flex items-start gap-1.5">
+                              <span className="text-brand font-bold">•</span>
+                              <span className="line-clamp-2">{t}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </div>
-
-                    {patch.isMajorUpdate && (
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-surface-brand text-text-heading border border-brand/40">
-                        Major Patch
-                      </span>
                     )}
                   </div>
 
-                  <p className="text-xs text-text-muted mt-3 leading-relaxed">
-                    {patch.summary}
-                  </p>
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-xs font-bold text-brand flex items-center gap-1 group-hover:underline">
+                      <span>Read Full Story & Takeaways</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
 
-                  {/* Highlights list */}
-                  <div className="mt-3 space-y-2">
-                    {patch.highlights.map((h, idx) => (
-                      <div
-                        key={idx}
-                        className="p-2.5 rounded-xl bg-base border border-border text-xs"
-                      >
-                        <div className="flex items-center justify-between font-bold text-text-heading">
-                          <span>{h.title}</span>
-                          {h.badge && (
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-brand text-text-heading">
-                              {h.badge}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-text-muted mt-0.5">
-                          {h.description}
-                        </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onBookmarkArticle(featuredArticle.id);
+                      }}
+                      className="p-2 rounded-full bg-surface hover:bg-border text-text-muted hover:text-accent transition-colors"
+                      title="Bookmark Story"
+                    >
+                      <Bookmark className={`w-4 h-4 ${isBookmarked(featuredArticle.id) ? 'fill-accent text-accent' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ARTICLES GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {gridArticles.map((article) => {
+              const bookmarked = isBookmarked(article.id);
+              return (
+                <div
+                  key={article.id}
+                  onClick={() => onSelectArticle(article)}
+                  className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Cover Thumbnail */}
+                    <div className="relative aspect-[16/10] bg-base overflow-hidden">
+                      <img
+                        src={article.imageUrl}
+                        alt={article.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        {article.source}
                       </div>
-                    ))}
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onBookmarkArticle(article.id);
+                        }}
+                        className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-xs shadow-xs transition-colors z-10 ${
+                          bookmarked ? 'bg-accent text-white' : 'bg-black/60 hover:bg-black/80 text-white'
+                        }`}
+                        title="Bookmark article"
+                      >
+                        <Bookmark className={`w-3.5 h-3.5 ${bookmarked ? 'fill-white' : ''}`} />
+                      </button>
+                    </div>
+
+                    {/* Meta & Title */}
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                        <span className="font-bold text-brand uppercase">{article.category}</span>
+                        <span>•</span>
+                        <span>{article.publishedAt}</span>
+                      </div>
+
+                      <h4 className="font-serif-natural text-base font-normal text-text-heading group-hover:text-brand transition-colors line-clamp-2 leading-snug">
+                        {article.title}
+                      </h4>
+
+                      <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
+                        {article.summary}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="px-4 pb-4 pt-2 border-t border-border flex items-center justify-between text-[11px] text-text-muted">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-text-muted" />
+                      {article.readTimeMinutes} min read
+                    </span>
+
+                    <span className="text-brand font-bold flex items-center gap-0.5 group-hover:underline">
+                      <span>Dispatch</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {filteredArticles.length === 0 && (
+            <div className="p-12 text-center bg-surface rounded-2xl border border-border space-y-2">
+              <Search className="w-8 h-8 text-text-muted mx-auto" />
+              <h4 className="font-serif-natural text-base text-text-heading">No matching stories found</h4>
+              <p className="text-xs text-text-muted">
+                Try selecting "All Stories" or clearing your search term.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 2: Patch Notes */}
+      {activeTab === 'patches' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {patchNotes.map((patch) => (
+              <div
+                key={patch.id}
+                onClick={() => onSelectPatch(patch)}
+                className="group p-5 bg-surface rounded-2xl border border-border hover:border-brand transition-all cursor-pointer shadow-xs space-y-3"
+              >
+                <div className="flex items-start gap-3">
+                  <img
+                    src={patch.gameCover}
+                    alt={patch.gameTitle}
+                    className="w-12 h-12 rounded-xl object-cover shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase text-brand px-2 py-0.5 bg-surface-brand rounded-md">
+                        v{patch.version}
+                      </span>
+                      <span className="text-xs text-text-muted">{patch.releaseDate}</span>
+                    </div>
+                    <h4 className="font-serif-natural text-base text-text-heading group-hover:text-brand transition-colors truncate mt-0.5">
+                      {patch.gameTitle}
+                    </h4>
                   </div>
                 </div>
 
-                {/* Steam Deck Notes */}
-                {patch.deckImprovements && (
-                  <div className="p-2.5 rounded-xl bg-surface-brand border border-brand/40 text-xs text-text-heading flex items-start gap-2">
-                    <span className="font-bold text-brand">Steam Deck:</span>
-                    <span>{patch.deckImprovements}</span>
-                  </div>
-                )}
+                <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
+                  {patch.summary}
+                </p>
 
-                <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
-                  <span className="text-text-muted font-medium">
-                    {patch.detailedNotes.length} detailed changelog items
-                  </span>
-                  <span className="text-brand font-bold flex items-center gap-1">
-                    <span>Read Full Changelog</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
+                <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-brand font-bold">
+                  <span>View Patch Highlights</span>
+                  <ChevronRight className="w-4 h-4" />
                 </div>
               </div>
             ))}
@@ -480,71 +507,46 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
         </div>
       )}
 
-      {/* TAB 3: Upcoming Release Radar */}
+      {/* TAB 3: Upcoming Releases */}
       {activeTab === 'upcoming' && (
         <div className="space-y-4">
-          <div className="bg-base text-text-main rounded-2xl p-5 border border-border shadow-xs flex items-center justify-between">
-            <div>
-              <h3 className="font-serif-natural text-lg font-normal text-text-heading">
-                Cozy & Indie Release Radar
-              </h3>
-              <p className="text-xs text-text-muted mt-0.5">
-                Countdown calendar of the most anticipated relaxing titles in active development.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUpcoming.map((item) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {upcomingReleases.map((item) => (
               <div
                 key={item.id}
                 onClick={() => onSelectUpcoming(item)}
-                className="bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
+                className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
               >
-                <div className="relative aspect-[16/10] bg-base">
-                  <img
-                    src={item.coverImage}
-                    alt={item.gameTitle}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 right-3 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1">
-                    <Flame className="w-3.5 h-3.5 text-accent" />
-                    <span>Hype: {item.hypeScore}/100</span>
+                <div>
+                  <div className="relative aspect-[16/10] bg-base overflow-hidden">
+                    <img
+                      src={item.coverImage}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-[10px] font-bold px-2 py-0.5 rounded-md">
+                      Hype: {item.hypeScore}/100
+                    </div>
+                    <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                      {item.expectedReleaseWindow}
+                    </div>
                   </div>
 
-                  <div className="absolute bottom-3 left-3 bg-brand text-white text-xs font-bold px-3 py-1 rounded-lg shadow-xs">
-                    {item.releaseDate}
+                  <div className="p-4 space-y-1.5">
+                    <span className="text-[10px] font-bold text-brand uppercase">{item.developer}</span>
+                    <h4 className="font-serif-natural text-base text-text-heading group-hover:text-brand transition-colors line-clamp-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
+                      {item.shortDescription}
+                    </p>
                   </div>
                 </div>
 
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-                  <div>
-                    <h3 className="font-serif-natural font-normal text-base text-text-main">
-                      {item.gameTitle}
-                    </h3>
-                    <p className="text-xs text-text-muted mt-0.5">
-                      by {item.developer}
-                    </p>
-
-                    <p className="text-xs text-text-muted line-clamp-3 mt-2 leading-relaxed">
-                      {item.cozyVibeNotes}
-                    </p>
-                  </div>
-
-                  <div className="pt-2 border-t border-border space-y-2">
-                    <div className="flex flex-wrap gap-1">
-                      {item.tags.map((t) => (
-                        <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-surface text-text-muted">
-                          #{t}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-text-muted pt-1">
-                      <span>Platforms: {item.platforms.join(', ')}</span>
-                      <span className="text-brand font-bold">Track Title →</span>
-                    </div>
-                  </div>
+                <div className="px-4 pb-4 pt-2 border-t border-border flex items-center justify-between text-xs text-brand font-bold">
+                  <span>View Radar File</span>
+                  <ChevronRight className="w-4 h-4" />
                 </div>
               </div>
             ))}

@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Game, 
   NewsArticle, 
   PatchNote, 
   UpcomingRelease, 
-  GameCategory, 
+  GameCategory,
+  NewsTopicCategory,
   DailyDigest, 
   SoundscapeTrack,
   UserProfile,
-  NotificationAlert
+  NotificationAlert,
+  UserAccountData,
+  BrowserFilterType
 } from './types';
 import { 
   MOCK_GAMES, 
@@ -21,6 +24,7 @@ import {
 import { STEAM_CATALOG_GAMES } from './data/steamCatalog';
 import { formatRating } from './utils/format';
 import { DEFAULT_USER_PROFILE, DEFAULT_NOTIFICATIONS } from './data/userState';
+import { fetchCloudUserData, pushCloudUserData, getStoredAuthToken } from './services/accountSync';
 import { Navbar } from './components/Navbar';
 import { HeroFeaturedSection } from './components/HeroFeaturedSection';
 import { GameBrowser } from './components/GameBrowser';
@@ -39,16 +43,18 @@ import { FooterNewsletter } from './components/FooterNewsletter';
 import { SearchModal } from './components/SearchModal';
 import { audioSynth } from './utils/audioSynth';
 import { 
-  Tv, 
   Star, 
   Sparkles, 
   Gamepad2, 
-  Newspaper, 
   ArrowRight,
   Coffee,
   Percent,
   Compass,
-  Check
+  Heart,
+  Layers,
+  User,
+  Home,
+  Tv
 } from 'lucide-react';
 
 /**
@@ -69,14 +75,70 @@ const ALL_GAMES: Game[] = (() => {
   return unique;
 })();
 
+type AppView = 'home' | 'browser' | 'categories' | 'catalogs' | 'news' | 'deals';
+
+function parseUrlState() {
+  if (typeof window === 'undefined') {
+    return {
+      view: 'home' as AppView,
+      category: 'all' as GameCategory | NewsTopicCategory | 'all',
+      filter: 'all' as BrowserFilterType,
+      sort: 'rating' as 'rating' | 'cozy' | 'reviews' | 'newest' | 'updated' | 'price',
+      search: '',
+      gameId: null as string | null,
+      articleId: null as string | null
+    };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const viewParam = params.get('view') as AppView | null;
+  const catParam = params.get('category') as (GameCategory | NewsTopicCategory | 'all') | null;
+  const filterParam = params.get('filter') as BrowserFilterType | null;
+  const sortParam = params.get('sort') as ('rating' | 'cozy' | 'reviews' | 'newest' | 'updated' | 'price') | null;
+  const searchParam = params.get('q') || params.get('search') || '';
+  const gameParam = params.get('game');
+  const articleParam = params.get('article');
+
+  const validViews: AppView[] = ['home', 'browser', 'categories', 'catalogs', 'news', 'deals'];
+  const view: AppView = viewParam && validViews.includes(viewParam) ? viewParam : 'home';
+  const category = catParam || 'all';
+  const filter: BrowserFilterType = filterParam || 'all';
+  const sort = sortParam || 'rating';
+
+  return {
+    view,
+    category,
+    filter,
+    sort,
+    search: searchParam,
+    gameId: gameParam,
+    articleId: articleParam
+  };
+}
+
 export default function App() {
+  const initialUrl = useRef(parseUrlState()).current;
+
   // Navigation State: 'home' | 'browser' | 'categories' | 'catalogs' | 'news' | 'deals'
-  const [currentView, setCurrentView] = useState<'home' | 'browser' | 'categories' | 'catalogs' | 'news' | 'deals'>('home');
-  const [selectedCategory, setSelectedCategory] = useState<GameCategory | 'all'>('all');
+  const [currentView, setCurrentView] = useState<AppView>(initialUrl.view);
+  const [selectedCategory, setSelectedCategory] = useState<GameCategory | NewsTopicCategory | 'all'>(initialUrl.category);
+  const [browserFilter, setBrowserFilter] = useState<BrowserFilterType>(initialUrl.filter);
+  const [browserSort, setBrowserSort] = useState<'rating' | 'cozy' | 'reviews' | 'newest' | 'updated' | 'price'>(initialUrl.sort);
+  const [browserSearch, setBrowserSearch] = useState<string>(initialUrl.search);
 
   // Active Modals & Drawers
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(() => {
+    if (initialUrl.gameId) {
+      return ALL_GAMES.find((g) => g.id === initialUrl.gameId || g.slug === initialUrl.gameId) || null;
+    }
+    return null;
+  });
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(() => {
+    if (initialUrl.articleId) {
+      return MOCK_NEWS_ARTICLES.find((a) => a.id === initialUrl.articleId) || null;
+    }
+    return null;
+  });
   const [selectedPatch, setSelectedPatch] = useState<PatchNote | null>(null);
   const [isMoodMatcherOpen, setIsMoodMatcherOpen] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -133,12 +195,173 @@ export default function App() {
   const [dailyDigest, setDailyDigest] = useState<DailyDigest>(INITIAL_DAILY_DIGEST);
   const [isGeneratingDigest, setIsGeneratingDigest] = useState(false);
 
-  // Audio Ambience Synth State
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [activeSoundtrack, setActiveSoundtrack] = useState<SoundscapeTrack>('rain');
-  const [audioVolume, setAudioVolume] = useState(0.4);
+  // Live News Articles Feed State
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>(MOCK_NEWS_ARTICLES);
+  const [isRefreshingNews, setIsRefreshingNews] = useState(false);
 
-  // Persist State
+  // Synchronize URL Query Parameters with state changes
+  const updateUrlParams = useCallback((replace = false) => {
+    const params = new URLSearchParams();
+
+    if (currentView !== 'home') {
+      params.set('view', currentView);
+    }
+    if (selectedCategory !== 'all') {
+      params.set('category', selectedCategory);
+    }
+    if (currentView === 'browser') {
+      if (browserFilter !== 'all') {
+        params.set('filter', browserFilter);
+      }
+      if (browserSort !== 'rating') {
+        params.set('sort', browserSort);
+      }
+      if (browserSearch.trim()) {
+        params.set('q', browserSearch.trim());
+      }
+    }
+    if (selectedGame) {
+      params.set('game', selectedGame.id);
+    }
+    if (selectedArticle) {
+      params.set('article', selectedArticle.id);
+    }
+
+    const searchStr = params.toString();
+    const newUrl = searchStr ? `${window.location.pathname}?${searchStr}` : window.location.pathname;
+
+    if (replace) {
+      window.history.replaceState({ view: currentView, category: selectedCategory }, '', newUrl);
+    } else {
+      window.history.pushState({ view: currentView, category: selectedCategory }, '', newUrl);
+    }
+  }, [currentView, selectedCategory, browserFilter, browserSort, browserSearch, selectedGame, selectedArticle]);
+
+  // Initial and subsequent URL synchronization
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      updateUrlParams(true);
+      return;
+    }
+    updateUrlParams(false);
+  }, [currentView, selectedCategory, browserFilter, browserSort, browserSearch, selectedGame, selectedArticle, updateUrlParams]);
+
+  // Listen to popstate (Back/Forward browser buttons)
+  useEffect(() => {
+    const handlePopState = () => {
+      const parsed = parseUrlState();
+      setCurrentView(parsed.view);
+      setSelectedCategory(parsed.category);
+      setBrowserFilter(parsed.filter);
+      setBrowserSort(parsed.sort);
+      setBrowserSearch(parsed.search);
+      if (parsed.gameId) {
+        setSelectedGame(ALL_GAMES.find((g) => g.id === parsed.gameId || g.slug === parsed.gameId) || null);
+      } else {
+        setSelectedGame(null);
+      }
+      if (parsed.articleId) {
+        setSelectedArticle(newsArticles.find((a) => a.id === parsed.articleId) || null);
+      } else {
+        setSelectedArticle(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [newsArticles]);
+
+  // Fetch live news on mount
+  useEffect(() => {
+    fetch('/api/news')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.articles) && data.articles.length > 0) {
+          setNewsArticles(data.articles);
+        }
+      })
+      .catch(() => {
+        // Falls back seamlessly to bundled snapshot
+      });
+  }, []);
+
+  const handleRefreshNews = async () => {
+    setIsRefreshingNews(true);
+    try {
+      const res = await fetch('/api/news/refresh', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        const fetchRes = await fetch('/api/news');
+        const newsData = await fetchRes.json();
+        if (newsData.success && Array.isArray(newsData.articles)) {
+          setNewsArticles(newsData.articles);
+        }
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setIsRefreshingNews(false);
+    }
+  };
+
+  // Multi-Device Cloud Hydration on App Mount
+  useEffect(() => {
+    const token = getStoredAuthToken();
+    if (token) {
+      fetchCloudUserData().then((cloudUser) => {
+        if (cloudUser) {
+          setUserProfile({ ...cloudUser.profile, isLoggedIn: true, email: cloudUser.email });
+          if (Array.isArray(cloudUser.wishlistedGameIds)) {
+            setWishlistedGameIds(cloudUser.wishlistedGameIds);
+          }
+          if (Array.isArray(cloudUser.bookmarkedArticleIds)) {
+            setBookmarkedArticleIds(cloudUser.bookmarkedArticleIds);
+          }
+          if (Array.isArray(cloudUser.notifications) && cloudUser.notifications.length > 0) {
+            setNotifications(cloudUser.notifications);
+          }
+        }
+      });
+    }
+  }, []);
+
+  // Multi-Device Cloud Sync (Debounced Auto-Save when Logged In)
+  useEffect(() => {
+    if (!userProfile.isLoggedIn) return;
+
+    const timer = setTimeout(() => {
+      pushCloudUserData({
+        profile: userProfile,
+        wishlistedGameIds,
+        bookmarkedArticleIds,
+        notifications
+      });
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [userProfile, wishlistedGameIds, bookmarkedArticleIds, notifications]);
+
+  // Auth Handlers
+  const handleLoginSuccess = (userData: UserAccountData) => {
+    setUserProfile({ ...userData.profile, isLoggedIn: true, email: userData.email });
+    if (Array.isArray(userData.wishlistedGameIds)) {
+      setWishlistedGameIds(userData.wishlistedGameIds);
+    }
+    if (Array.isArray(userData.bookmarkedArticleIds)) {
+      setBookmarkedArticleIds(userData.bookmarkedArticleIds);
+    }
+    if (Array.isArray(userData.notifications) && userData.notifications.length > 0) {
+      setNotifications(userData.notifications);
+    }
+  };
+
+  const handleLogoutSuccess = () => {
+    setUserProfile({ ...DEFAULT_USER_PROFILE, isLoggedIn: false });
+  };
+
+  // Local Storage Cache Backup
   useEffect(() => {
     try {
       localStorage.setItem('cozy_user_profile', JSON.stringify(userProfile));
@@ -175,29 +398,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Audio volume change listener
-  const handleVolumeChange = (vol: number) => {
-    setAudioVolume(vol);
-    audioSynth.setVolume(vol);
-  };
-
-  const handleToggleAudio = () => {
-    if (isPlayingAudio) {
-      audioSynth.stop();
-      setIsPlayingAudio(false);
-    } else {
-      audioSynth.start(activeSoundtrack, audioVolume);
-      setIsPlayingAudio(true);
-    }
-  };
-
-  const handleChangeSoundtrack = (track: SoundscapeTrack) => {
-    setActiveSoundtrack(track);
-    if (isPlayingAudio) {
-      audioSynth.start(track, audioVolume);
-    }
-  };
-
   // Wishlist / Bookmark Toggles with automatic price-drop alert check
   const handleToggleWishlist = (gameId: string) => {
     setWishlistedGameIds((prev) => {
@@ -205,7 +405,6 @@ export default function App() {
       const targetGame = ALL_GAMES.find((g) => g.id === gameId);
       
       if (!isAlready && targetGame) {
-        // Create an alert confirmation
         const newNotif: NotificationAlert = {
           id: `notif-add-${Date.now()}`,
           title: `Added "${targetGame.title}" to Wishlist`,
@@ -235,11 +434,14 @@ export default function App() {
   };
 
   // Navigation handler
-  const handleNavigate = (view: 'home' | 'browser' | 'categories' | 'catalogs' | 'news' | 'deals', category?: GameCategory) => {
+  const handleNavigate = (
+    view: AppView, 
+    category?: GameCategory | NewsTopicCategory | 'all'
+  ) => {
     setCurrentView(view);
     if (category) {
       setSelectedCategory(category);
-    } else if (view === 'home' || view === 'deals' || view === 'categories' || view === 'catalogs') {
+    } else if (view === 'home' || view === 'deals' || view === 'catalogs') {
       setSelectedCategory('all');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -252,19 +454,8 @@ export default function App() {
     );
   };
 
-  const handleMarkAllNotificationsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-  };
-
   const handleClearNotifications = () => {
     setNotifications([]);
-  };
-
-  const handleSelectGameById = (gameId: string) => {
-    const found = ALL_GAMES.find((g) => g.id === gameId);
-    if (found) {
-      setSelectedGame(found);
-    }
   };
 
   // Daily AI Briefing generation
@@ -289,40 +480,28 @@ export default function App() {
 
   // Get wishlisted Game and Article objects for the drawer
   const savedGameObjects = ALL_GAMES.filter((g) => wishlistedGameIds.includes(g.id));
-  const savedArticleObjects = MOCK_NEWS_ARTICLES.filter((a) => bookmarkedArticleIds.includes(a.id));
+  const savedArticleObjects = newsArticles.filter((a) => bookmarkedArticleIds.includes(a.id));
 
   return (
     <div className="min-h-screen flex flex-col bg-base text-text-main selection:bg-brand/20 selection:text-text-heading">
       {/* Top Main Navigation Bar */}
       <Navbar
         currentView={currentView}
-        selectedCategory={selectedCategory}
+        selectedCategory={selectedCategory as any}
         onNavigate={handleNavigate}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenMoodMatcher={() => setIsMoodMatcherOpen(true)}
         onOpenWishlist={() => setIsWishlistOpen(true)}
-        onOpenQuiz={() => setIsQuizOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
         wishlistCount={wishlistedGameIds.length + bookmarkedArticleIds.length}
         userProfile={userProfile}
-        notifications={notifications}
-        onMarkNotificationRead={handleMarkNotificationRead}
-        onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
-        onClearNotifications={handleClearNotifications}
-        onSelectGameById={handleSelectGameById}
-        isPlayingAudio={isPlayingAudio}
-        activeSoundtrack={activeSoundtrack}
-        onToggleAudio={handleToggleAudio}
-        onChangeSoundtrack={handleChangeSoundtrack}
-        audioVolume={audioVolume}
-        onVolumeChange={handleVolumeChange}
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-8 sm:space-y-12 pb-28 md:pb-8">
         {/* ===================== VIEW 1: HOME PAGE ===================== */}
         {currentView === 'home' && (
-          <div className="space-y-12">
+          <div className="space-y-8 sm:space-y-12">
             {/* HERO FEATURED SECTION (5 Most Talked-About Weekly Releases) */}
             <HeroFeaturedSection
               featuredGames={FEATURED_WEEKLY_GAMES}
@@ -332,13 +511,13 @@ export default function App() {
             />
 
             {/* Quick Interactive Discovery Banner & Discovery Quiz CTA */}
-            <section className="bg-gradient-to-r from-surface-brand via-surface to-base p-6 sm:p-8 rounded-3xl border border-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+            <section className="bg-gradient-to-r from-surface-brand via-surface to-base p-5 sm:p-8 rounded-3xl border border-border shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-5 sm:gap-6">
               <div className="space-y-2 max-w-xl">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand text-white text-xs font-bold shadow-xs">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Personalized PC Recommendations</span>
                 </div>
-                <h3 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading">
+                <h3 className="font-serif-natural text-xl sm:text-2xl lg:text-3xl font-normal text-text-heading">
                   Unsure what cozy PC game to play next?
                 </h3>
                 <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
@@ -346,11 +525,11 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
                 <button
                   id="home-start-quiz-btn"
                   onClick={() => setIsQuizOpen(true)}
-                  className="px-6 py-3.5 rounded-2xl bg-brand hover:bg-brand-hover text-white font-bold text-sm shadow-md hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto justify-center px-6 py-3 rounded-2xl bg-brand hover:bg-brand-hover text-white font-bold text-xs sm:text-sm shadow-md hover:scale-105 transition-all flex items-center gap-2 cursor-pointer min-h-[44px] touch-manipulation"
                 >
                   <Compass className="w-4 h-4" />
                   <span>Start Discovery Quiz</span>
@@ -358,7 +537,7 @@ export default function App() {
                 <button
                   id="home-view-deals-btn"
                   onClick={() => handleNavigate('deals')}
-                  className="px-5 py-3.5 rounded-2xl bg-base hover:bg-surface text-text-heading border border-border font-bold text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                  className="w-full sm:w-auto justify-center px-5 py-3 rounded-2xl bg-base hover:bg-surface text-text-heading border border-border font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs min-h-[44px] touch-manipulation"
                 >
                   <Percent className="w-4 h-4 text-accent" />
                   <span>Browse Deals & Sales</span>
@@ -406,14 +585,14 @@ export default function App() {
                 return (
                   <div
                     key={pillar.id}
-                    className="bg-base p-5 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all group flex flex-col justify-between"
+                    className="bg-surface p-5 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all group flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${pillar.color} text-white flex items-center justify-center shadow-xs`}>
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface text-text-muted border border-border">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-base text-text-muted border border-border">
                           {pillar.badge}
                         </span>
                       </div>
@@ -429,17 +608,10 @@ export default function App() {
                     <div className="flex items-center gap-2 pt-4 mt-2 border-t border-border text-xs font-bold">
                       <button
                         onClick={() => handleNavigate('browser', pillar.id as GameCategory)}
-                        className="text-brand hover:text-text-heading cursor-pointer flex items-center gap-1 transition-colors"
+                        className="text-brand hover:text-text-heading cursor-pointer flex items-center gap-1 transition-colors min-h-[36px]"
                       >
-                        <span>Games</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="text-[#D6D2C4]">•</span>
-                      <button
-                        onClick={() => handleNavigate('news', pillar.id as GameCategory)}
-                        className="text-text-muted hover:text-text-main cursor-pointer transition-colors"
-                      >
-                        News
+                        <span>Explore {pillar.title}</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                       </button>
                     </div>
                   </div>
@@ -447,78 +619,13 @@ export default function App() {
               })}
             </section>
 
-            {/* Daily Morning Dispatch & Trending News Highlights */}
-            <section className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+            {/* Quick Catalog Preview Bar */}
+            <section className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
                 <div>
-                  <div className="flex items-center gap-2 text-xs uppercase font-bold text-brand tracking-wider">
-                    <Newspaper className="w-4 h-4" />
-                    <span>Aggregated Outlets & Reports</span>
-                  </div>
-                  <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading tracking-tight">
-                    Today's Top Headlines & Coverage
-                  </h2>
-                </div>
-
-                <button
-                  id="home-view-all-news-btn"
-                  onClick={() => handleNavigate('news')}
-                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-inverse/80 text-text-on-inverse font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
-                >
-                  <span>View All News & Patch Notes</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* 3 Featured News Articles Preview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {MOCK_NEWS_ARTICLES.slice(0, 3).map((article) => (
-                  <article
-                    key={article.id}
-                    onClick={() => setSelectedArticle(article)}
-                    className="group bg-surface rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
-                  >
-                    <div className="relative aspect-[16/9] bg-base overflow-hidden">
-                      <img
-                        src={article.imageUrl}
-                        alt={article.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-3 left-3 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs">
-                        {article.source}
-                      </div>
-                    </div>
-
-                    <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
-                      <div>
-                        <div className="text-[11px] text-text-muted mb-1">
-                          {article.publishedAt} • {article.readTimeMinutes} min read
-                        </div>
-                        <h3 className="font-display text-sm font-bold text-text-main group-hover:text-brand transition-colors leading-snug line-clamp-2">
-                          {article.title}
-                        </h3>
-                        <p className="text-xs text-text-muted line-clamp-2 mt-1.5 leading-relaxed">
-                          {article.summary}
-                        </p>
-                      </div>
-
-                      <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-brand font-bold">
-                        <span>Read Takeaway</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            {/* Hidden Gems & Highly Rated Spotlight Preview */}
-            <section className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
-                <div>
-                  <div className="flex items-center gap-2 text-xs uppercase font-bold text-accent tracking-wider">
-                    <Star className="w-4 h-4 fill-[#E6A07D] text-accent" />
-                    <span>Hand-Picked PC Gems</span>
+                  <div className="flex items-center gap-2 text-xs uppercase font-bold text-brand tracking-wider mb-1">
+                    <Gamepad2 className="w-4 h-4" />
+                    <span>Catalog Discovery</span>
                   </div>
                   <h2 className="font-serif-natural text-2xl sm:text-3xl font-normal text-text-heading tracking-tight">
                     Relaxing Gems & Community Favorites
@@ -527,8 +634,8 @@ export default function App() {
 
                 <button
                   id="home-view-all-browser-btn"
-                  onClick={() => handleNavigate('browser')}
-                  className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
+                  onClick={() => handleNavigate('browser', 'all')}
+                  className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs min-h-[44px] touch-manipulation"
                 >
                   <span>Explore Full Game Browser ({ALL_GAMES.length} Titles)</span>
                   <ArrowRight className="w-4 h-4" />
@@ -549,6 +656,7 @@ export default function App() {
                           src={game.coverImage}
                           alt={game.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
                         />
                         <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-[10px] font-bold px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
                           <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
@@ -560,16 +668,16 @@ export default function App() {
                           </div>
                         )}
                         {game.isOnSale && (
-                          <div className="absolute bottom-2.5 left-2.5 bg-accent text-white text-[10px] font-black px-2 py-0.5 rounded shadow-xs">
-                            -{game.discountPercent}% OFF
+                          <div className="absolute bottom-2.5 left-2.5 bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
+                            -{game.discountPercent}%
                           </div>
                         )}
                       </div>
 
-                      <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                      <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
                         <div>
-                          <div className="flex items-start justify-between gap-1">
-                            <h3 className="font-display text-sm font-bold text-text-main group-hover:text-brand transition-colors line-clamp-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="font-serif-natural text-base font-normal text-text-main group-hover:text-brand transition-colors line-clamp-1">
                               {game.title}
                             </h3>
                             <span className="text-xs font-bold text-text-heading whitespace-nowrap">
@@ -585,7 +693,7 @@ export default function App() {
                           <span className="text-brand font-bold">
                             {formatRating(game.ratingScore, ' Pos')}
                           </span>
-                          <span className="text-text-faint capitalize">
+                          <span className="text-text-muted capitalize">
                             {game.category}
                           </span>
                         </div>
@@ -602,11 +710,17 @@ export default function App() {
         {currentView === 'browser' && (
           <GameBrowser
             games={ALL_GAMES}
-            selectedCategory={selectedCategory}
+            selectedCategory={selectedCategory as GameCategory | 'all'}
             onCategoryChange={(cat) => setSelectedCategory(cat)}
             onSelectGame={(game) => setSelectedGame(game)}
             onToggleWishlist={handleToggleWishlist}
             isWishlisted={(id) => wishlistedGameIds.includes(id)}
+            initialFilterType={browserFilter}
+            initialSortBy={browserSort}
+            initialSearchQuery={browserSearch}
+            onFilterChange={(f) => setBrowserFilter(f)}
+            onSortChange={(s) => setBrowserSort(s)}
+            onSearchChange={(q) => setBrowserSearch(q)}
           />
         )}
 
@@ -636,11 +750,11 @@ export default function App() {
         {/* ===================== VIEW 5: NEWS & PATCH HUB ===================== */}
         {currentView === 'news' && (
           <NewsSection
-            articles={MOCK_NEWS_ARTICLES}
+            articles={newsArticles}
             patchNotes={MOCK_PATCH_NOTES}
             upcomingReleases={MOCK_UPCOMING_RELEASES}
             dailyDigest={dailyDigest}
-            selectedCategory={selectedCategory}
+            selectedCategory={selectedCategory as NewsTopicCategory}
             onCategoryChange={(cat) => setSelectedCategory(cat)}
             onSelectArticle={(article) => setSelectedArticle(article)}
             onSelectPatch={(patch) => setSelectedPatch(patch)}
@@ -652,16 +766,19 @@ export default function App() {
             isGeneratingDigest={isGeneratingDigest}
             onBookmarkArticle={handleBookmarkArticle}
             isBookmarked={(id) => bookmarkedArticleIds.includes(id)}
+            onRefreshFeed={handleRefreshNews}
+            isRefreshingFeed={isRefreshingNews}
           />
         )}
 
-        {/* ===================== VIEW 4: DEALS & SALES ===================== */}
+        {/* ===================== VIEW 6: DEALS & SALES ===================== */}
         {currentView === 'deals' && (
           <DealsAndSalesSection
             games={ALL_GAMES}
             onSelectGame={(game) => setSelectedGame(game)}
             onToggleWishlist={handleToggleWishlist}
             isWishlisted={(id) => wishlistedGameIds.includes(id)}
+            onOpenQuiz={() => setIsQuizOpen(true)}
           />
         )}
       </main>
@@ -677,13 +794,15 @@ export default function App() {
       <ArticleDetailModal
         article={selectedArticle}
         onClose={() => setSelectedArticle(null)}
-        onBookmark={handleBookmarkArticle}
+        onBookmark={(id) => handleBookmarkArticle(id)}
         isBookmarked={selectedArticle ? bookmarkedArticleIds.includes(selectedArticle.id) : false}
+        onSelectGame={(game) => setSelectedGame(game)}
       />
 
       <PatchNoteDetailModal
         patch={selectedPatch}
         onClose={() => setSelectedPatch(null)}
+        onSelectGame={(game) => setSelectedGame(game)}
       />
 
       <CozyMoodMatcherModal
@@ -714,6 +833,8 @@ export default function App() {
         notifications={notifications}
         onMarkNotificationRead={handleMarkNotificationRead}
         onClearNotifications={handleClearNotifications}
+        onLoginSuccess={handleLoginSuccess}
+        onLogoutSuccess={handleLogoutSuccess}
       />
 
       <WishlistDrawer
@@ -726,7 +847,7 @@ export default function App() {
         onSelectGame={(game) => setSelectedGame(game)}
         onSelectArticle={(article) => setSelectedArticle(article)}
         onClearAll={handleClearAllWishlist}
-        onOpenProfile={() => {
+        onOpenProfileWishlist={() => {
           setIsWishlistOpen(false);
           setIsProfileOpen(true);
         }}
@@ -736,14 +857,14 @@ export default function App() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         games={ALL_GAMES}
-        articles={MOCK_NEWS_ARTICLES}
+        articles={newsArticles}
         patchNotes={MOCK_PATCH_NOTES}
         onSelectGame={(game) => setSelectedGame(game)}
         onSelectArticle={(article) => setSelectedArticle(article)}
         onSelectPatch={(patch) => setSelectedPatch(patch)}
       />
 
-      {/* Elegant Footer in Natural Tones */}
+      {/* Elegant Footer */}
       <footer className="mt-16 bg-surface text-text-muted border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -767,33 +888,28 @@ export default function App() {
               </h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button onClick={() => handleNavigate('home')} className="hover:text-text-heading transition-colors">
+                  <button onClick={() => handleNavigate('home')} className="hover:text-text-heading transition-colors cursor-pointer">
                     Weekly Featured Releases
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('deals')} className="hover:text-text-heading text-accent font-bold transition-colors">
+                  <button onClick={() => handleNavigate('deals')} className="hover:text-text-heading text-accent font-bold transition-colors cursor-pointer">
                     🏷️ Steam Deals & Sales
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setIsQuizOpen(true)} className="hover:text-text-heading text-brand font-bold transition-colors">
+                  <button onClick={() => setIsQuizOpen(true)} className="hover:text-text-heading text-brand font-bold transition-colors cursor-pointer">
                     ✨ Game Discovery Quiz
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('browser', 'cozy')} className="hover:text-text-heading transition-colors">
+                  <button onClick={() => handleNavigate('browser', 'cozy')} className="hover:text-text-heading transition-colors cursor-pointer">
                     Cozy & Wholesome Games
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('browser', 'indie')} className="hover:text-text-heading transition-colors">
-                    Indie Art & Roguelikes
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => handleNavigate('browser', 'steam-deck')} className="hover:text-text-heading transition-colors">
-                    Steam Deck Verified Radar
+                  <button onClick={() => handleNavigate('browser', 'farming')} className="hover:text-text-heading transition-colors cursor-pointer">
+                    🌾 Farming & Life Sims
                   </button>
                 </li>
               </ul>
@@ -801,27 +917,27 @@ export default function App() {
 
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-text-heading mb-3">
-                News & Dispatches
+                Categories & Handheld
               </h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button onClick={() => handleNavigate('news')} className="hover:text-text-heading transition-colors">
-                    Latest IGN, GameSpot & Eurogamer Coverage
+                  <button onClick={() => handleNavigate('browser', 'simulation')} className="hover:text-text-heading transition-colors cursor-pointer">
+                    Simulation & Tactile Builders
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('news')} className="hover:text-text-heading transition-colors">
-                    Stardew Valley & Balatro PC Patch Notes
+                  <button onClick={() => handleNavigate('browser', 'indie')} className="hover:text-text-heading transition-colors cursor-pointer">
+                    Indie Art & Roguelikes
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigate('news')} className="hover:text-text-heading transition-colors">
-                    Upcoming PC Release Calendar
+                  <button onClick={() => handleNavigate('browser', 'steam-deck')} className="hover:text-text-heading transition-colors cursor-pointer">
+                    Steam Deck Verified Radar
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setIsProfileOpen(true)} className="hover:text-text-heading transition-colors text-text-heading font-bold">
-                    👤 User Profile & Price Alerts
+                  <button onClick={() => handleNavigate('browser', 'horror')} className="hover:text-text-heading transition-colors cursor-pointer">
+                    🕯️ Cozy Horror & Mystery
                   </button>
                 </li>
               </ul>
@@ -833,6 +949,98 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Mobile Sticky Bottom Navigation Tab Bar (< md screens) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-base/95 backdrop-blur-xl border-t border-border px-2 py-1.5 md:hidden safe-bottom shadow-lg transition-transform">
+        <div className="grid grid-cols-6 items-center justify-around max-w-lg mx-auto">
+          {/* Home */}
+          <button
+            onClick={() => handleNavigate('home')}
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer ${
+              currentView === 'home'
+                ? 'text-brand font-bold'
+                : 'text-text-muted hover:text-text-main'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-colors ${currentView === 'home' ? 'bg-surface-brand text-brand' : ''}`}>
+              <Home className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] mt-0.5 leading-tight">Home</span>
+          </button>
+
+          {/* Games Browser */}
+          <button
+            onClick={() => handleNavigate('browser', 'all')}
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer ${
+              currentView === 'browser'
+                ? 'text-brand font-bold'
+                : 'text-text-muted hover:text-text-main'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-colors ${currentView === 'browser' ? 'bg-surface-brand text-brand' : ''}`}>
+              <Gamepad2 className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] mt-0.5 leading-tight">Games</span>
+          </button>
+
+          {/* Categories */}
+          <button
+            onClick={() => handleNavigate('categories')}
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer ${
+              currentView === 'categories'
+                ? 'text-brand font-bold'
+                : 'text-text-muted hover:text-text-main'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-colors ${currentView === 'categories' ? 'bg-surface-brand text-brand' : ''}`}>
+              <Layers className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] mt-0.5 leading-tight">Genres</span>
+          </button>
+
+          {/* Deals */}
+          <button
+            onClick={() => handleNavigate('deals')}
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer ${
+              currentView === 'deals'
+                ? 'text-accent font-bold'
+                : 'text-text-muted hover:text-text-main'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-colors ${currentView === 'deals' ? 'bg-accent/15 text-accent' : ''}`}>
+              <Percent className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] mt-0.5 leading-tight">Deals</span>
+          </button>
+
+          {/* Wishlist */}
+          <button
+            onClick={() => setIsWishlistOpen(true)}
+            className="flex flex-col items-center justify-center py-1 px-1 rounded-xl text-text-muted hover:text-text-main transition-all cursor-pointer relative"
+          >
+            <div className="p-1 rounded-lg relative">
+              <Heart className="w-4 h-4 text-accent" />
+              {(wishlistedGameIds.length + bookmarkedArticleIds.length) > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-brand text-white text-[8px] font-black flex items-center justify-center shadow-xs">
+                  {wishlistedGameIds.length + bookmarkedArticleIds.length}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] mt-0.5 leading-tight">Shelf</span>
+          </button>
+
+          {/* Profile */}
+          <button
+            onClick={() => setIsProfileOpen(true)}
+            className="flex flex-col items-center justify-center py-1 px-1 rounded-xl text-text-muted hover:text-text-main transition-all cursor-pointer"
+          >
+            <div className="p-1 rounded-lg">
+              <User className="w-4 h-4 text-brand" />
+            </div>
+            <span className="text-[10px] mt-0.5 leading-tight">Profile</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }

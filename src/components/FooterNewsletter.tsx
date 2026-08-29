@@ -38,11 +38,10 @@ export const FooterNewsletter: React.FC = () => {
         setStatus('error');
         setMessage(data.error || 'Failed to subscribe. Please try again.');
       }
-    } catch (err) {
-      // Fallback for client-side resilience
-      setStatus('success');
-      setMessage('Subscribed! Welcome to the Cozy Dispatch weekly recap.');
-      setEmail('');
+    } catch (err: any) {
+      console.error('[Newsletter UI] Subscription request failed:', err);
+      setStatus('error');
+      setMessage('Network error connecting to the newsletter service. Please check your connection and try again.');
     }
   };
 
