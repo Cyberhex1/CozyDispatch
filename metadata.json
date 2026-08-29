@@ -1,0 +1,6 @@
+{
+  "name": "Cozy & Indie PC Game Dispatch",
+  "description": "Daily curated news, Steam discounts, patch notes, interactive Discovery Quiz, user profiles, and game browser for cozy and indie titles exclusively on PC and Steam Deck.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
