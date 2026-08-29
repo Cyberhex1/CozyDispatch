@@ -163,7 +163,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
               onClick={() => setPlatformFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 platformFilter === 'all'
-                  ? 'bg-inverse text-white'
+                  ? 'bg-inverse text-text-on-inverse'
                   : 'bg-surface text-text-muted hover:text-text-heading'
               }`}
             >
@@ -318,7 +318,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
                     </span>
 
                     {game.isHistoricalLow && (
-                      <span className="bg-inverse text-inverse font-bold text-[10px] px-2 py-0.5 rounded-full border border-white/20">
+                      <span className="bg-inverse text-text-on-inverse font-bold text-[10px] px-2 py-0.5 rounded-full border border-white/20">
                         ★ Historical Low
                       </span>
                     )}

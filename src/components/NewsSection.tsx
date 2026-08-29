@@ -243,7 +243,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 onClick={() => setSelectedSource(src)}
                 className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedSource === src
-                    ? 'bg-inverse text-white'
+                    ? 'bg-inverse text-text-on-inverse'
                     : 'bg-surface hover:bg-border text-text-muted'
                 }`}
               >
@@ -314,8 +314,8 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   )}
 
                   {/* Reading Time */}
-                  <div className="absolute bottom-2.5 right-2.5 bg-inverse/80 backdrop-blur-xs text-inverse text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-inverse" />
+                  <div className="absolute bottom-2.5 right-2.5 bg-inverse/80 backdrop-blur-xs text-text-on-inverse text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-text-on-inverse" />
                     <span>{article.readTimeMinutes} min read</span>
                   </div>
                 </div>
@@ -507,7 +507,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                     alt={item.gameTitle}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-3 right-3 bg-inverse/90 backdrop-blur-xs text-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1">
+                  <div className="absolute top-3 right-3 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1">
                     <Flame className="w-3.5 h-3.5 text-accent" />
                     <span>Hype: {item.hypeScore}/100</span>
                   </div>

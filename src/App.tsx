@@ -463,7 +463,7 @@ export default function App() {
                 <button
                   id="home-view-all-news-btn"
                   onClick={() => handleNavigate('news')}
-                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-text-on-inverse font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
                 >
                   <span>View All News & Patch Notes</span>
                   <ArrowRight className="w-4 h-4" />
@@ -484,7 +484,7 @@ export default function App() {
                         alt={article.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-3 left-3 bg-inverse/90 backdrop-blur-xs text-inverse text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs">
+                      <div className="absolute top-3 left-3 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs">
                         {article.source}
                       </div>
                     </div>
@@ -550,7 +550,7 @@ export default function App() {
                           alt={game.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-inverse text-[10px] font-bold px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
+                        <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-[10px] font-bold px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
                           <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
                           <span>{game.cozyScore}/10</span>
                         </div>

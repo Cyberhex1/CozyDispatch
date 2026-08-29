@@ -62,8 +62,8 @@ export const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
             <span className="bg-brand text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-md shadow-xs">
               {article.source} Coverage
             </span>
-            <span className="bg-inverse/80 backdrop-blur-xs text-inverse text-xs font-medium px-2.5 py-1 rounded-md flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-inverse" />
+            <span className="bg-inverse/80 backdrop-blur-xs text-text-on-inverse text-xs font-medium px-2.5 py-1 rounded-md flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-text-on-inverse" />
               <span>{article.readTimeMinutes} min read</span>
             </span>
           </div>

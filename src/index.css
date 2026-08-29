@@ -12,6 +12,7 @@
   --color-text-muted: var(--theme-text-muted);
   --color-text-faint: var(--theme-text-faint);
   --color-text-alt: var(--theme-text-alt);
+  --color-text-on-inverse: var(--theme-text-on-inverse);
   --color-brand: var(--theme-brand);
   --color-brand-hover: var(--theme-brand-hover);
   --color-accent: var(--theme-accent);
@@ -21,7 +22,7 @@
 
 :root {
   --theme-base: #FDFBF7;
-  --theme-surface: #F5F5F0;
+  --theme-surface: #FFFFFF;
   --theme-surface-brand: #EBF0EA;
   --theme-border: #E6E2D3;
   --theme-border-hover: #D6D2C4;
@@ -30,6 +31,7 @@
   --theme-text-muted: #707060;
   --theme-text-faint: #A0A090;
   --theme-text-alt: #888870;
+  --theme-text-on-inverse: #FDFBF7;
   --theme-brand: #8BA888;
   --theme-brand-hover: #7A9977;
   --theme-accent: #E6A07D;
@@ -39,7 +41,7 @@
 
 .dark {
   --theme-base: #141410;
-  --theme-surface: #1E1E1A;
+  --theme-surface: #24241E;
   --theme-surface-brand: #222C21;
   --theme-border: #32322A;
   --theme-border-hover: #4A4A40;
@@ -48,6 +50,7 @@
   --theme-text-muted: #A5A595;
   --theme-text-faint: #707060;
   --theme-text-alt: #A0A090;
+  --theme-text-on-inverse: #141410;
   --theme-brand: #96B593;
   --theme-brand-hover: #8BA888;
   --theme-accent: #EBA886;

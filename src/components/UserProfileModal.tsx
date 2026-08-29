@@ -574,7 +574,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     type="button"
                     onClick={() => setAuthMode('login')}
                     className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      authMode === 'login' || authMode === 'logged_in' ? 'bg-inverse text-white' : 'text-text-muted'
+                      authMode === 'login' || authMode === 'logged_in' ? 'bg-inverse text-text-on-inverse' : 'text-text-muted'
                     }`}
                   >
                     Log In
@@ -583,7 +583,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     type="button"
                     onClick={() => setAuthMode('signup')}
                     className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                      authMode === 'signup' ? 'bg-inverse text-white' : 'text-text-muted'
+                      authMode === 'signup' ? 'bg-inverse text-text-on-inverse' : 'text-text-muted'
                     }`}
                   >
                     Create Account

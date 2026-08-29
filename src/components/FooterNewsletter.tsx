@@ -95,7 +95,7 @@ export const FooterNewsletter: React.FC = () => {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="absolute right-1 top-1 bottom-1 px-3 bg-inverse hover:bg-[#4A6B47] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1 shadow-xs cursor-pointer disabled:opacity-50"
+              className="absolute right-1 top-1 bottom-1 px-3 bg-inverse hover:bg-[#4A6B47] text-text-on-inverse text-xs font-bold rounded-lg transition-colors flex items-center gap-1 shadow-xs cursor-pointer disabled:opacity-50"
             >
               {status === 'loading' ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

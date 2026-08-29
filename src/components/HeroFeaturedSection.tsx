@@ -112,7 +112,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
               />
               
               {/* Cozy Score Pill */}
-              <div className="absolute top-3 left-3 bg-inverse/90 backdrop-blur-xs text-inverse text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
+              <div className="absolute top-3 left-3 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 fill-[#E6A07D] text-accent" />
                 <span>Cozy Scale: {activeGame.cozyScore} / 10</span>
               </div>
@@ -125,7 +125,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
 
               {/* Price Tag & Demo */}
               <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                <span className="bg-inverse text-white text-xs font-bold px-3 py-1 rounded-lg shadow-xs">
+                <span className="bg-inverse text-text-on-inverse text-xs font-bold px-3 py-1 rounded-lg shadow-xs">
                   {activeGame.price}
                 </span>
                 {activeGame.demoAvailable && (
@@ -136,7 +136,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
               </div>
 
               {/* Bottom Right: Release Date (USER REQUIREMENT) */}
-              <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
+              <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-text-on-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
                 <Calendar className="w-3.5 h-3.5 text-brand" />
                 <span>{activeGame.releaseDate}</span>
               </div>

@@ -295,7 +295,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onNavigate('catalogs')}
                 className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   currentView === 'catalogs'
-                    ? 'bg-inverse text-white shadow-xs'
+                    ? 'bg-inverse text-text-on-inverse shadow-xs'
                     : 'text-text-muted hover:text-text-main hover:bg-surface'
                 }`}
               >
@@ -526,7 +526,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('catalogs');
                 setIsMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-inverse text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+              className="p-2.5 rounded-xl bg-inverse text-text-on-inverse text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
             >
               <Compass className="w-3.5 h-3.5" />
               <span>Showcases & Catalogs</span>

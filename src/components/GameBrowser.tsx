@@ -200,7 +200,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   : 'bg-base hover:bg-surface text-text-muted border border-border'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-inverse' : 'text-brand'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-text-on-inverse' : 'text-brand'}`} />
               <span>{tab.label}</span>
               <span className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${
                 isActive ? 'bg-[#7A9977] text-white' : 'bg-surface text-text-muted'
@@ -238,7 +238,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                 onClick={() => onCategoryChange(cat.id as any)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedCategory === cat.id
-                    ? 'bg-inverse text-white font-bold'
+                    ? 'bg-inverse text-text-on-inverse font-bold'
                     : 'bg-surface hover:bg-border text-text-muted'
                 }`}
               >
@@ -420,7 +420,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   />
 
                   {/* Top Left: Cozy Scale Pill */}
-                  <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-inverse text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 z-10">
+                  <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-text-on-inverse text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 z-10">
                     <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
                     <span>{game.cozyScore} / 10</span>
                   </div>
@@ -457,7 +457,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   </div>
 
                   {/* Bottom Right: Release Date (USER REQUIREMENT) */}
-                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-xs text-inverse text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 border border-white/20 z-10">
+                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-xs text-text-on-inverse text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 border border-white/20 z-10">
                     <Calendar className="w-3 h-3 text-brand" />
                     <span>{game.releaseDate}</span>
                   </div>
@@ -517,7 +517,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                       <button
                         id={`game-card-details-${game.id}-btn`}
                         onClick={() => onSelectGame(game)}
-                        className="flex-1 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-white font-bold text-xs transition-colors text-center cursor-pointer shadow-xs"
+                        className="flex-1 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-text-on-inverse font-bold text-xs transition-colors text-center cursor-pointer shadow-xs"
                       >
                         View Details
                       </button>
@@ -633,7 +633,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
                   <button
                     onClick={() => onSelectGame(game)}
-                    className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-text-on-inverse font-bold text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     Specs
                   </button>

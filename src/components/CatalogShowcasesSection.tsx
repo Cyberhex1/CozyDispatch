@@ -73,7 +73,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
               onClick={() => setActiveCatalogId(catalog.id)}
               className={`shrink-0 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer border ${
                 isActive
-                  ? 'bg-inverse text-white border-[#2C2C24] shadow-xs'
+                  ? 'bg-inverse text-text-on-inverse border-[#2C2C24] shadow-xs'
                   : 'bg-base text-text-muted hover:text-[#2C2C24] border-border hover:border-brand'
               }`}
             >
@@ -211,7 +211,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                       </div>
 
                       {/* Bottom Right: Release Date */}
-                      <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
+                      <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-xs text-text-on-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1.5 border border-white/20">
                         <Calendar className="w-3.5 h-3.5 text-brand" />
                         <span>{game.releaseDate}</span>
                       </div>
