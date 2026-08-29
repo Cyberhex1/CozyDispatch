@@ -279,9 +279,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Compass className="w-4 h-4 text-[#8BA888]" />
                 <span>Showcases & Catalogs</span>
-                <span className="bg-[#8BA888] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
-                  Wholesome & Fellow
-                </span>
               </button>
 
               <button

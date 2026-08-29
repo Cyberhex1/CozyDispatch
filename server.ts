@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import { GoogleGenAI, Type } from '@google/genai';
 
 dotenv.config();
@@ -32,16 +33,31 @@ app.get('/api/health', (req, res) => {
 });
 
 // Newsletter Subscribers Storage
-interface Subscriber {
-  email: string;
-  subscribedAt: string;
-  source: string;
+const SUBSCRIBERS_FILE = path.join(process.cwd(), 'src', 'data', 'subscribers.json');
+
+function getSubscribers() {
+  try {
+    if (fs.existsSync(SUBSCRIBERS_FILE)) {
+      const data = fs.readFileSync(SUBSCRIBERS_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.error('Error reading subscribers file:', err);
+  }
+  return [
+    { email: 'cozygamer@example.com', subscribedAt: new Date(Date.now() - 86400000 * 3).toISOString(), source: 'footer_signup' },
+    { email: 'decklover@example.com', subscribedAt: new Date(Date.now() - 86400000 * 10).toISOString(), source: 'footer_signup' }
+  ];
 }
 
-const subscribers: Subscriber[] = [
-  { email: 'cozygamer@example.com', subscribedAt: new Date(Date.now() - 86400000 * 3).toISOString(), source: 'footer_signup' },
-  { email: 'decklover@example.com', subscribedAt: new Date(Date.now() - 86400000 * 10).toISOString(), source: 'footer_signup' }
-];
+function saveSubscribers(subscribers: any[]) {
+  try {
+    fs.mkdirSync(path.dirname(SUBSCRIBERS_FILE), { recursive: true });
+    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+  } catch (err) {
+    console.error('Error saving subscribers file:', err);
+  }
+}
 
 // Newsletter Subscribe Endpoint
 app.post('/api/newsletter/subscribe', (req, res) => {
@@ -56,9 +72,10 @@ app.post('/api/newsletter/subscribe', (req, res) => {
     }
 
     const trimmedEmail = email.trim().toLowerCase();
+    const subscribers = getSubscribers();
 
     // Check if already subscribed
-    const existing = subscribers.find((s) => s.email === trimmedEmail);
+    const existing = subscribers.find((s: any) => s.email === trimmedEmail);
     if (existing) {
       return res.json({
         success: true,
@@ -72,6 +89,11 @@ app.post('/api/newsletter/subscribe', (req, res) => {
       subscribedAt: new Date().toISOString(),
       source: 'footer_signup'
     });
+    
+    saveSubscribers(subscribers);
+
+    // Simulate an email being sent
+    console.log(`[Newsletter] New subscriber added: ${trimmedEmail}. A welcome email has been simulated.`);
 
     return res.json({
       success: true,
