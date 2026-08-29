@@ -119,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   audioVolume,
   onVolumeChange
 }) => {
-  const [openDropdown, setOpenDropdown] = useState<GameCategory | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isAudioMenuOpen, setIsAudioMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -175,101 +175,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Desktop Navigation Dropdowns */}
             <nav className="hidden lg:flex items-center gap-1">
-              {CATEGORIES.map((category) => {
-                const Icon = category.icon;
-                const isOpen = openDropdown === category.id;
-                const isSelected = selectedCategory === category.id && currentView !== 'home' && currentView !== 'deals';
-
-                return (
-                  <div key={category.id} className="relative">
-                    <button
-                      id={`nav-category-${category.id}-btn`}
-                      onClick={() => setOpenDropdown(isOpen ? null : category.id)}
-                      className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/40'
-                          : 'text-[#707060] hover:text-[#4A4A40] hover:bg-[#F5F5F0]'
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 ${isSelected ? 'text-[#8BA888]' : 'text-[#707060]'}`} />
-                      <span>{category.name}</span>
-                      {category.badge && (
-                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded-full bg-[#F5F5F0] text-[#707060] border border-[#E6E2D3]">
-                          {category.badge}
-                        </span>
-                      )}
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#8BA888]' : 'text-[#A0A090]'}`} />
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    {isOpen && (
-                      <div className="absolute top-full left-0 mt-2 w-72 bg-[#FDFBF7] border border-[#E6E2D3] rounded-2xl shadow-xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                        <div className="px-3 py-2 border-b border-[#E6E2D3] mb-2">
-                          <div className="flex items-center gap-2 font-bold text-xs text-[#5A5A40] uppercase tracking-wider">
-                            <Icon className="w-3.5 h-3.5 text-[#8BA888]" />
-                            <span>{category.name} PC Section</span>
-                          </div>
-                          <p className="text-[11px] text-[#707060] mt-1 leading-snug">
-                            {category.description}
-                          </p>
-                        </div>
-
-                        {/* Dropdown Links */}
-                        <div className="space-y-1">
-                          <button
-                            id={`dropdown-${category.id}-browser-btn`}
-                            onClick={() => {
-                              onNavigate('browser', category.id);
-                              setOpenDropdown(null);
-                            }}
-                            className="w-full text-left p-2.5 rounded-xl hover:bg-[#F5F5F0] transition-colors flex items-center justify-between group cursor-pointer"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-lg bg-[#EBF0EA] text-[#5A5A40] flex items-center justify-center group-hover:bg-[#8BA888] group-hover:text-white transition-colors">
-                                <Gamepad2 className="w-4 h-4" />
-                              </div>
-                              <div>
-                                <div className="text-xs font-bold text-[#4A4A40] group-hover:text-[#8BA888]">
-                                  {category.name} Game Browser
-                                </div>
-                                <div className="text-[10px] text-[#707060]">
-                                  Filter new, popular, hidden gems
-                                </div>
-                              </div>
-                            </div>
-                            <span className="text-[#A0A090] text-xs group-hover:translate-x-0.5 transition-transform">→</span>
-                          </button>
-
-                          <button
-                            id={`dropdown-${category.id}-news-btn`}
-                            onClick={() => {
-                              onNavigate('news', category.id);
-                              setOpenDropdown(null);
-                            }}
-                            className="w-full text-left p-2.5 rounded-xl hover:bg-[#F5F5F0] transition-colors flex items-center justify-between group cursor-pointer"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-lg bg-[#F5F5F0] text-[#707060] flex items-center justify-center group-hover:bg-[#8BA888] group-hover:text-white transition-colors">
-                                <Newspaper className="w-4 h-4" />
-                              </div>
-                              <div>
-                                <div className="text-xs font-bold text-[#4A4A40] group-hover:text-[#8BA888]">
-                                  {category.name} News & Updates
-                                </div>
-                                <div className="text-[10px] text-[#707060]">
-                                  IGN, Eurogamer & Steam patch notes
-                                </div>
-                              </div>
-                            </div>
-                            <span className="text-[#A0A090] text-xs group-hover:translate-x-0.5 transition-transform">→</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-
               {/* Direct Navigation Links */}
               <button
                 id="nav-browser-btn"
@@ -284,18 +189,84 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>All Games</span>
               </button>
 
-              <button
-                id="nav-categories-btn"
-                onClick={() => onNavigate('categories')}
-                className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  currentView === 'categories'
-                    ? 'bg-[#8BA888] text-white shadow-xs'
-                    : 'text-[#707060] hover:text-[#4A4A40] hover:bg-[#F5F5F0]'
-                }`}
-              >
-                <Layers className="w-4 h-4 text-[#8BA888]" />
-                <span>Categories</span>
-              </button>
+              {/* Categories Mega Menu */}
+              <div className="relative">
+                <button
+                  id="nav-categories-btn"
+                  onClick={() => setOpenDropdown(openDropdown === 'categories' ? null : 'categories')}
+                  className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    currentView === 'categories' || openDropdown === 'categories'
+                      ? 'bg-[#EBF0EA] text-[#5A5A40] border border-[#8BA888]/40'
+                      : 'text-[#707060] hover:text-[#4A4A40] hover:bg-[#F5F5F0]'
+                  }`}
+                >
+                  <Layers className={`w-4 h-4 ${currentView === 'categories' || openDropdown === 'categories' ? 'text-[#8BA888]' : 'text-[#707060]'}`} />
+                  <span>Categories</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openDropdown === 'categories' ? 'rotate-180 text-[#8BA888]' : 'text-[#A0A090]'}`} />
+                </button>
+
+                {openDropdown === 'categories' && (
+                  <div className="absolute top-full left-0 mt-2 w-80 bg-[#FDFBF7] border border-[#E6E2D3] rounded-2xl shadow-xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-2 border-b border-[#E6E2D3] mb-2 flex items-center justify-between">
+                      <div className="text-xs font-bold text-[#5A5A40] uppercase tracking-wider">
+                        Browse by Genre
+                      </div>
+                      <Layers className="w-3.5 h-3.5 text-[#8BA888]" />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-1">
+                      {CATEGORIES.map((category) => {
+                        const Icon = category.icon;
+                        return (
+                          <button
+                            key={category.id}
+                            id={`dropdown-${category.id}-browser-btn`}
+                            onClick={() => {
+                              onNavigate('browser', category.id);
+                              setOpenDropdown(null);
+                            }}
+                            className="w-full text-left p-2.5 rounded-xl hover:bg-[#F5F5F0] transition-colors flex items-center justify-between group cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-[#EBF0EA] text-[#5A5A40] flex items-center justify-center group-hover:bg-[#8BA888] group-hover:text-white transition-colors">
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-bold text-[#4A4A40] group-hover:text-[#8BA888]">
+                                    {category.name}
+                                  </div>
+                                  {category.badge && (
+                                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-white text-[#707060] border border-[#E6E2D3]">
+                                      {category.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[11px] text-[#707060] leading-snug mt-0.5 line-clamp-1">
+                                  {category.description}
+                                </div>
+                              </div>
+                            </div>
+                            <span className="text-[#A0A090] text-sm group-hover:translate-x-0.5 transition-transform">→</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="mt-2 pt-2 border-t border-[#E6E2D3]">
+                       <button 
+                         onClick={() => {
+                           onNavigate('categories');
+                           setOpenDropdown(null);
+                         }}
+                         className="w-full text-center p-2 rounded-lg bg-[#F5F5F0] text-xs font-bold text-[#707060] hover:text-[#4A4A40] hover:bg-[#E6E2D3] transition-colors cursor-pointer"
+                       >
+                         View All Category Overviews
+                       </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <button
                 id="nav-catalogs-btn"
