@@ -9,6 +9,9 @@
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
     "fetch:catalog": "tsx scripts/fetchCatalog.ts",
+    "fetch:catalog:quick": "tsx scripts/fetchCatalog.ts --mode=quick --max=100",
+    "fetch:catalog:deep": "tsx scripts/fetchCatalog.ts --mode=deep --max=2500",
+    "fetch:catalog:resume": "tsx scripts/fetchCatalog.ts --resume",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
