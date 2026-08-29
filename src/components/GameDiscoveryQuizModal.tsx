@@ -280,7 +280,7 @@ export const GameDiscoveryQuizModal: React.FC<GameDiscoveryQuizModalProps> = ({
                     className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       savedToProfile
                         ? 'bg-brand text-white'
-                        : 'bg-[#5A5A40] text-white hover:bg-[#4A4A40]'
+                        : 'bg-inverse text-white hover:bg-[#4A4A40]'
                     }`}
                   >
                     {savedToProfile ? <Check className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5" />}

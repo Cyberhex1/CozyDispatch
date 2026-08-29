@@ -158,7 +158,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               id="browser-view-grid-btn"
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                viewMode === 'grid' ? 'bg-white text-text-heading shadow-xs' : 'hover:text-text-main'
+                viewMode === 'grid' ? 'bg-base text-text-heading shadow-xs' : 'hover:text-text-main'
               }`}
               title="Grid View"
             >
@@ -168,7 +168,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               id="browser-view-list-btn"
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                viewMode === 'list' ? 'bg-white text-text-heading shadow-xs' : 'hover:text-text-main'
+                viewMode === 'list' ? 'bg-base text-text-heading shadow-xs' : 'hover:text-text-main'
               }`}
               title="Compact List View"
             >
@@ -197,7 +197,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                 isActive
                   ? 'bg-brand text-white shadow-xs scale-[1.02]'
-                  : 'bg-white hover:bg-surface text-text-muted border border-border'
+                  : 'bg-base hover:bg-surface text-text-muted border border-border'
               }`}
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-inverse' : 'text-brand'}`} />
@@ -213,7 +213,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
       </div>
 
       {/* Sub-genre Categories & Search */}
-      <div className="bg-white p-4 rounded-2xl border border-border shadow-xs space-y-4">
+      <div className="bg-base p-4 rounded-2xl border border-border shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           {/* Expanded Sub-Genre Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
@@ -238,7 +238,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                 onClick={() => onCategoryChange(cat.id as any)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedCategory === cat.id
-                    ? 'bg-[#5A5A40] text-white font-bold'
+                    ? 'bg-inverse text-white font-bold'
                     : 'bg-surface hover:bg-border text-text-muted'
                 }`}
               >
@@ -381,7 +381,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
       {/* Empty State */}
       {filteredGames.length === 0 && (
-        <div className="bg-white rounded-2xl p-12 text-center border border-border shadow-xs max-w-lg mx-auto">
+        <div className="bg-base rounded-2xl p-12 text-center border border-border shadow-xs max-w-lg mx-auto">
           <div className="w-14 h-14 rounded-full bg-surface-brand text-brand flex items-center justify-center mx-auto mb-4">
             <Search className="w-6 h-6" />
           </div>
@@ -408,7 +408,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
             return (
               <div
                 key={game.id}
-                className="group bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col"
+                className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col"
               >
                 {/* Cover Image & Overlay Badges */}
                 <div className="relative aspect-[16/10] bg-surface overflow-hidden">
@@ -420,7 +420,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                   />
 
                   {/* Top Left: Cozy Scale Pill */}
-                  <div className="absolute top-2.5 left-2.5 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 z-10">
+                  <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-inverse text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 z-10">
                     <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
                     <span>{game.cozyScore} / 10</span>
                   </div>
@@ -517,7 +517,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
                       <button
                         id={`game-card-details-${game.id}-btn`}
                         onClick={() => onSelectGame(game)}
-                        className="flex-1 py-2 rounded-xl bg-[#5A5A40] hover:bg-[#4A4A40] text-white font-bold text-xs transition-colors text-center cursor-pointer shadow-xs"
+                        className="flex-1 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-white font-bold text-xs transition-colors text-center cursor-pointer shadow-xs"
                       >
                         View Details
                       </button>
@@ -551,7 +551,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
               <div
                 key={game.id}
                 onClick={() => onSelectGame(game)}
-                className="group bg-white p-4 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
+                className="group bg-base p-4 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative shrink-0">
@@ -633,7 +633,7 @@ export const GameBrowser: React.FC<GameBrowserProps> = ({
 
                   <button
                     onClick={() => onSelectGame(game)}
-                    className="px-4 py-2 rounded-xl bg-[#5A5A40] hover:bg-[#4A4A40] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     Specs
                   </button>

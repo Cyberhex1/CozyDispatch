@@ -259,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                                     {category.name}
                                   </div>
                                   {category.badge && (
-                                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-white text-text-muted border border-border">
+                                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-base text-text-muted border border-border">
                                       {category.badge}
                                     </span>
                                   )}
@@ -503,6 +503,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Quick Direct Buttons */}
           <div className="grid grid-cols-2 gap-2">
             <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2.5 rounded-xl bg-surface border border-border text-text-main text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              {isDarkMode ? <Sun className="w-3.5 h-3.5 text-accent" /> : <Moon className="w-3.5 h-3.5 text-brand" />}
+              <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+            </button>
+
+            <button
               onClick={() => {
                 onNavigate('categories');
                 setIsMobileMenuOpen(false);
@@ -559,7 +567,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span>{cat.name}</span>
                   </div>
                   {cat.badge && (
-                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-white text-text-muted border border-border">
+                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-base text-text-muted border border-border">
                       {cat.badge}
                     </span>
                   )}
@@ -571,7 +579,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onNavigate('browser', cat.id);
                       setIsMobileMenuOpen(false);
                     }}
-                    className="p-2 rounded-xl bg-white border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
+                    className="p-2 rounded-xl bg-base border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
                   >
                     🎮 Game Browser
                   </button>
@@ -580,7 +588,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onNavigate('news', cat.id);
                       setIsMobileMenuOpen(false);
                     }}
-                    className="p-2 rounded-xl bg-white border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
+                    className="p-2 rounded-xl bg-base border border-border text-xs font-bold text-text-main hover:text-brand text-center cursor-pointer"
                   >
                     📰 News & Updates
                   </button>

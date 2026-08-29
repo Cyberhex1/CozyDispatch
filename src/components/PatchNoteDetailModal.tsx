@@ -27,7 +27,7 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-      <div className="relative bg-white text-text-main rounded-3xl border border-border shadow-xl max-w-2xl w-full overflow-hidden my-8">
+      <div className="relative bg-base text-text-main rounded-3xl border border-border shadow-xl max-w-2xl w-full overflow-hidden my-8">
         {/* Header */}
         <div className="p-6 bg-base border-b border-border flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -53,7 +53,7 @@ export const PatchNoteDetailModal: React.FC<PatchNoteDetailModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white hover:bg-surface text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
+            className="p-2 rounded-full bg-base hover:bg-surface text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
           >
             <X className="w-5 h-5" />
           </button>

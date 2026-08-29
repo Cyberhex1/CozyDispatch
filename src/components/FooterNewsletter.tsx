@@ -47,7 +47,7 @@ export const FooterNewsletter: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-border shadow-xs space-y-3">
+    <div className="bg-base rounded-2xl p-5 border border-border shadow-xs space-y-3">
       <div className="flex items-center gap-2">
         <div className="p-2 rounded-xl bg-brand/15 text-[#4A6B47]">
           <Mail className="w-4 h-4" />

@@ -129,7 +129,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
       </div>
 
       {/* Daily Digest Morning Card */}
-      <div className="bg-white text-text-main rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
+      <div className="bg-base text-text-main rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
         <div className="relative z-10 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
             <div className="flex items-center gap-2">
@@ -194,7 +194,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
             className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'headlines'
                 ? 'bg-brand text-white shadow-xs'
-                : 'bg-white text-text-muted hover:bg-surface border border-border'
+                : 'bg-base text-text-muted hover:bg-surface border border-border'
             }`}
           >
             <Newspaper className="w-4 h-4" />
@@ -207,7 +207,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
             className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'patches'
                 ? 'bg-brand text-white shadow-xs'
-                : 'bg-white text-text-muted hover:bg-surface border border-border'
+                : 'bg-base text-text-muted hover:bg-surface border border-border'
             }`}
           >
             <Wrench className="w-4 h-4" />
@@ -220,7 +220,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
             className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'upcoming'
                 ? 'bg-brand text-white shadow-xs'
-                : 'bg-white text-text-muted hover:bg-surface border border-border'
+                : 'bg-base text-text-muted hover:bg-surface border border-border'
             }`}
           >
             <Calendar className="w-4 h-4" />
@@ -231,7 +231,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
       {/* Outlet & Category Sub-Bar */}
       {activeTab === 'headlines' && (
-        <div className="bg-white p-3 rounded-xl border border-border shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="bg-base p-3 rounded-xl border border-border shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
           {/* Source Outlet Filter */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             <span className="font-bold text-text-muted uppercase tracking-wider mr-1">
@@ -243,7 +243,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 onClick={() => setSelectedSource(src)}
                 className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedSource === src
-                    ? 'bg-[#5A5A40] text-white'
+                    ? 'bg-inverse text-white'
                     : 'bg-surface hover:bg-border text-text-muted'
                 }`}
               >
@@ -289,7 +289,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
               <article
                 key={article.id}
                 onClick={() => onSelectArticle(article)}
-                className="group bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
+                className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
               >
                 {/* Thumbnail & Source Badge */}
                 <div className="relative aspect-[16/9] bg-surface overflow-hidden">
@@ -314,7 +314,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   )}
 
                   {/* Reading Time */}
-                  <div className="absolute bottom-2.5 right-2.5 bg-[#5A5A40]/80 backdrop-blur-xs text-inverse text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1">
+                  <div className="absolute bottom-2.5 right-2.5 bg-inverse/80 backdrop-blur-xs text-inverse text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1">
                     <Clock className="w-3 h-3 text-inverse" />
                     <span>{article.readTimeMinutes} min read</span>
                   </div>
@@ -398,7 +398,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
               <div
                 key={patch.id}
                 onClick={() => onSelectPatch(patch)}
-                className="bg-white rounded-2xl border border-border p-5 shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between space-y-4"
+                className="bg-base rounded-2xl border border-border p-5 shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between space-y-4"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3">
@@ -483,7 +483,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
       {/* TAB 3: Upcoming Release Radar */}
       {activeTab === 'upcoming' && (
         <div className="space-y-4">
-          <div className="bg-white text-text-main rounded-2xl p-5 border border-border shadow-xs flex items-center justify-between">
+          <div className="bg-base text-text-main rounded-2xl p-5 border border-border shadow-xs flex items-center justify-between">
             <div>
               <h3 className="font-serif-natural text-lg font-normal text-text-heading">
                 Cozy & Indie Release Radar
@@ -499,7 +499,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
               <div
                 key={item.id}
                 onClick={() => onSelectUpcoming(item)}
-                className="bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
+                className="bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div className="relative aspect-[16/10] bg-surface">
                   <img
@@ -507,7 +507,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                     alt={item.gameTitle}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-3 right-3 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1">
+                  <div className="absolute top-3 right-3 bg-inverse/90 backdrop-blur-xs text-inverse text-xs font-bold px-2.5 py-1 rounded-lg shadow-xs flex items-center gap-1">
                     <Flame className="w-3.5 h-3.5 text-accent" />
                     <span>Hype: {item.hypeScore}/100</span>
                   </div>

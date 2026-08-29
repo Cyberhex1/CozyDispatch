@@ -163,7 +163,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
               onClick={() => setPlatformFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 platformFilter === 'all'
-                  ? 'bg-[#5A5A40] text-white'
+                  ? 'bg-inverse text-white'
                   : 'bg-surface text-text-muted hover:text-text-heading'
               }`}
             >
@@ -318,7 +318,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
                     </span>
 
                     {game.isHistoricalLow && (
-                      <span className="bg-[#5A5A40] text-inverse font-bold text-[10px] px-2 py-0.5 rounded-full border border-white/20">
+                      <span className="bg-inverse text-inverse font-bold text-[10px] px-2 py-0.5 rounded-full border border-white/20">
                         ★ Historical Low
                       </span>
                     )}
@@ -333,7 +333,7 @@ export const DealsAndSalesSection: React.FC<DealsAndSalesSectionProps> = ({
                     className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-transform active:scale-95 cursor-pointer shadow-xs ${
                       isWish
                         ? 'bg-accent text-white'
-                        : 'bg-white/80 hover:bg-white text-text-muted hover:text-accent'
+                        : 'bg-base/80 hover:bg-base text-text-muted hover:text-accent'
                     }`}
                     title={isWish ? 'Saved to Wishlist' : 'Add to Wishlist & Enable Sale Alerts'}
                   >

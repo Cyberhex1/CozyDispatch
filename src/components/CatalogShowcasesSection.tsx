@@ -47,7 +47,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
       {/* Page Title & Intro */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
+      <div className="bg-base rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface text-text-muted text-xs font-semibold uppercase tracking-wider border border-border">
@@ -74,7 +74,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
               className={`shrink-0 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer border ${
                 isActive
                   ? 'bg-inverse text-white border-[#2C2C24] shadow-xs'
-                  : 'bg-white text-text-muted hover:text-[#2C2C24] border-border hover:border-brand'
+                  : 'bg-base text-text-muted hover:text-[#2C2C24] border-border hover:border-brand'
               }`}
             >
               <span>{catalog.logoBadge || catalog.name}</span>
@@ -110,7 +110,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                 href={activeCatalog.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/20 flex items-center gap-2 backdrop-blur-xs"
+                className="px-4 py-2.5 rounded-xl bg-base/10 hover:bg-base/20 text-white text-xs font-bold transition-all border border-white/20 flex items-center gap-2 backdrop-blur-xs"
               >
                 <Globe className="w-4 h-4 text-brand" />
                 <span>Official Site</span>
@@ -159,13 +159,13 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
           <h3 className="text-2xl font-bold text-[#2C2C24] font-serif">
             {activeCatalog.name} Titles on Steam
           </h3>
-          <span className="text-xs font-bold text-text-muted bg-white px-3 py-1.5 rounded-xl border border-border">
+          <span className="text-xs font-bold text-text-muted bg-base px-3 py-1.5 rounded-xl border border-border">
             {catalogGames.length} Games Shown
           </span>
         </div>
 
         {catalogGames.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-border space-y-3">
+          <div className="bg-base rounded-2xl p-12 text-center border border-border space-y-3">
             <p className="text-[#505045] font-medium">No titles matched for this showcase in current filter view.</p>
           </div>
         ) : (
@@ -176,7 +176,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
               return (
                 <div
                   key={game.id}
-                  className="group bg-white rounded-2xl overflow-hidden border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+                  className="group bg-base rounded-2xl overflow-hidden border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
                 >
                   <div>
                     {/* Cover Header Image */}
@@ -274,7 +274,7 @@ export const CatalogShowcasesSection: React.FC<CatalogShowcasesSectionProps> = (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => onSelectGame(game)}
-                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-surface text-[#2C2C24] text-xs font-bold transition-all border border-border cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-base hover:bg-surface text-[#2C2C24] text-xs font-bold transition-all border border-border cursor-pointer"
                       >
                         Details
                       </button>

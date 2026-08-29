@@ -47,7 +47,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-stone-900/40 backdrop-blur-xs flex justify-end animate-in fade-in duration-150">
-      <div className="relative w-full max-w-md bg-white text-text-main h-full shadow-2xl flex flex-col border-l border-border animate-in slide-in-from-right duration-200">
+      <div className="relative w-full max-w-md bg-base text-text-main h-full shadow-2xl flex flex-col border-l border-border animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="p-5 border-b border-border flex items-center justify-between bg-base">
           <div className="flex items-center gap-2.5">
@@ -75,7 +75,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
             )}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-white hover:bg-surface text-text-muted hover:text-text-main border border-border cursor-pointer"
+              className="p-1.5 rounded-lg bg-base hover:bg-surface text-text-muted hover:text-text-main border border-border cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>

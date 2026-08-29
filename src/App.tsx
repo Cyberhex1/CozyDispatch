@@ -358,7 +358,7 @@ export default function App() {
                 <button
                   id="home-view-deals-btn"
                   onClick={() => handleNavigate('deals')}
-                  className="px-5 py-3.5 rounded-2xl bg-white hover:bg-surface text-text-heading border border-border font-bold text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                  className="px-5 py-3.5 rounded-2xl bg-base hover:bg-surface text-text-heading border border-border font-bold text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                 >
                   <Percent className="w-4 h-4 text-accent" />
                   <span>Browse Deals & Sales</span>
@@ -406,7 +406,7 @@ export default function App() {
                 return (
                   <div
                     key={pillar.id}
-                    className="bg-white p-5 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all group flex flex-col justify-between"
+                    className="bg-base p-5 rounded-2xl border border-border shadow-xs hover:shadow-md hover:border-brand transition-all group flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
@@ -463,7 +463,7 @@ export default function App() {
                 <button
                   id="home-view-all-news-btn"
                   onClick={() => handleNavigate('news')}
-                  className="px-4 py-2 rounded-xl bg-[#5A5A40] hover:bg-[#4A4A40] text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-inverse hover:bg-[#4A4A40] text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-center shadow-xs"
                 >
                   <span>View All News & Patch Notes</span>
                   <ArrowRight className="w-4 h-4" />
@@ -476,7 +476,7 @@ export default function App() {
                   <article
                     key={article.id}
                     onClick={() => setSelectedArticle(article)}
-                    className="group bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
+                    className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all duration-300 flex flex-col cursor-pointer"
                   >
                     <div className="relative aspect-[16/9] bg-surface overflow-hidden">
                       <img
@@ -484,7 +484,7 @@ export default function App() {
                         alt={article.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-3 left-3 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs">
+                      <div className="absolute top-3 left-3 bg-inverse/90 backdrop-blur-xs text-inverse text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs">
                         {article.source}
                       </div>
                     </div>
@@ -542,7 +542,7 @@ export default function App() {
                     <div
                       key={game.id}
                       onClick={() => setSelectedGame(game)}
-                      className="group bg-white rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
+                      className="group bg-base rounded-2xl border border-border overflow-hidden shadow-xs hover:shadow-md hover:border-brand transition-all cursor-pointer flex flex-col justify-between"
                     >
                       <div className="relative aspect-[16/10] bg-surface overflow-hidden">
                         <img
@@ -550,7 +550,7 @@ export default function App() {
                           alt={game.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute top-2.5 left-2.5 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-[10px] font-bold px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
+                        <div className="absolute top-2.5 left-2.5 bg-inverse/90 backdrop-blur-xs text-inverse text-[10px] font-bold px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
                           <Star className="w-3 h-3 fill-[#E6A07D] text-accent" />
                           <span>{game.cozyScore}/10</span>
                         </div>

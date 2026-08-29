@@ -48,7 +48,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
   const isSaved = isWishlisted(activeGame.id);
 
   return (
-    <section className="relative overflow-hidden bg-white text-text-main rounded-3xl border border-border shadow-xs my-6">
+    <section className="relative overflow-hidden bg-base text-text-main rounded-3xl border border-border shadow-xs my-6">
       {/* Background Ambient Glow & Image */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <img
@@ -112,7 +112,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
               />
               
               {/* Cozy Score Pill */}
-              <div className="absolute top-3 left-3 bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
+              <div className="absolute top-3 left-3 bg-inverse/90 backdrop-blur-xs text-inverse text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 fill-[#E6A07D] text-accent" />
                 <span>Cozy Scale: {activeGame.cozyScore} / 10</span>
               </div>
@@ -125,7 +125,7 @@ export const HeroFeaturedSection: React.FC<HeroFeaturedSectionProps> = ({
 
               {/* Price Tag & Demo */}
               <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                <span className="bg-[#5A5A40] text-white text-xs font-bold px-3 py-1 rounded-lg shadow-xs">
+                <span className="bg-inverse text-white text-xs font-bold px-3 py-1 rounded-lg shadow-xs">
                   {activeGame.price}
                 </span>
                 {activeGame.demoAvailable && (

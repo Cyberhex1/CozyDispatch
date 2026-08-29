@@ -78,7 +78,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-start justify-center p-4 sm:p-6 animate-in fade-in duration-150">
-      <div className="relative bg-white text-text-main rounded-3xl border border-border shadow-2xl max-w-2xl w-full overflow-hidden mt-12 mb-8">
+      <div className="relative bg-base text-text-main rounded-3xl border border-border shadow-2xl max-w-2xl w-full overflow-hidden mt-12 mb-8">
         {/* Search Bar Input */}
         <div className="p-4 sm:p-5 border-b border-border flex items-center gap-3 bg-base">
           <Search className="w-5 h-5 text-brand shrink-0" />
@@ -100,7 +100,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           )}
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-white hover:bg-surface text-text-muted hover:text-text-main border border-border cursor-pointer"
+            className="p-1.5 rounded-lg bg-base hover:bg-surface text-text-muted hover:text-text-main border border-border cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

@@ -168,7 +168,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
       {/* Section Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
+      <div className="bg-base rounded-3xl p-6 sm:p-8 border border-border shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface text-text-muted text-xs font-semibold uppercase tracking-wider border border-border">
@@ -200,7 +200,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
           return (
             <div 
               key={cat.id}
-              className="group bg-white rounded-2xl p-6 border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+              className="group bg-base rounded-2xl p-6 border border-border hover:border-brand shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
             >
               <div className="space-y-4">
                 {/* Header row */}

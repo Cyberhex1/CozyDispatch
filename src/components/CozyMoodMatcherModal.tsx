@@ -112,7 +112,7 @@ export const CozyMoodMatcherModal: React.FC<CozyMoodMatcherModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-      <div className="relative bg-white text-text-main rounded-3xl border border-border shadow-xl max-w-2xl w-full overflow-hidden my-8">
+      <div className="relative bg-base text-text-main rounded-3xl border border-border shadow-xl max-w-2xl w-full overflow-hidden my-8">
         {/* Header */}
         <div className="p-6 bg-base border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -131,7 +131,7 @@ export const CozyMoodMatcherModal: React.FC<CozyMoodMatcherModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white hover:bg-surface text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
+            className="p-2 rounded-full bg-base hover:bg-surface text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
           >
             <X className="w-5 h-5" />
           </button>
@@ -319,7 +319,7 @@ export const CozyMoodMatcherModal: React.FC<CozyMoodMatcherModalProps> = ({
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                      <div className="p-2.5 rounded-xl bg-white border border-border">
+                      <div className="p-2.5 rounded-xl bg-base border border-border">
                         <strong className="text-brand block text-[10px] uppercase font-bold">First Cozy Activity:</strong>
                         <span className="text-text-muted">{rec.suggestedActivity}</span>
                       </div>

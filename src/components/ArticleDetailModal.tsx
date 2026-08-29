@@ -39,7 +39,7 @@ export const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-      <div className="relative bg-white text-text-main rounded-3xl border border-border shadow-xl max-w-3xl w-full overflow-hidden my-8">
+      <div className="relative bg-base text-text-main rounded-3xl border border-border shadow-xl max-w-3xl w-full overflow-hidden my-8">
         {/* Header Image */}
         <div className="relative h-52 sm:h-64 bg-surface">
           <img
@@ -52,7 +52,7 @@ export const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
+            className="absolute top-4 right-4 p-2 rounded-full bg-base/80 hover:bg-base text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
           >
             <X className="w-5 h-5" />
           </button>
@@ -62,7 +62,7 @@ export const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
             <span className="bg-brand text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-md shadow-xs">
               {article.source} Coverage
             </span>
-            <span className="bg-[#5A5A40]/80 backdrop-blur-xs text-inverse text-xs font-medium px-2.5 py-1 rounded-md flex items-center gap-1">
+            <span className="bg-inverse/80 backdrop-blur-xs text-inverse text-xs font-medium px-2.5 py-1 rounded-md flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-inverse" />
               <span>{article.readTimeMinutes} min read</span>
             </span>

@@ -57,14 +57,14 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/90 hover:bg-white text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
+            className="absolute top-4 right-4 p-2 rounded-full bg-base/90 hover:bg-base text-text-muted hover:text-text-main transition-colors cursor-pointer border border-border shadow-xs"
           >
             <X className="w-5 h-5" />
           </button>
 
           {/* Floating Badges */}
           <div className="absolute bottom-4 left-6 flex flex-wrap items-center gap-2">
-            <div className="bg-[#5A5A40]/90 backdrop-blur-xs text-inverse text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
+            <div className="bg-inverse/90 backdrop-blur-xs text-inverse text-xs font-bold px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
               <Star className="w-3.5 h-3.5 fill-[#E6A07D] text-accent" />
               <span>Cozy Score: {game.cozyScore} / 10</span>
             </div>
@@ -84,7 +84,7 @@ export const GameDetailModal: React.FC<GameDetailModalProps> = ({
             )}
 
             {game.isHistoricalLow && (
-              <div className="bg-[#5A5A40] text-white text-xs font-bold px-3 py-1 rounded-full shadow-xs">
+              <div className="bg-inverse text-white text-xs font-bold px-3 py-1 rounded-full shadow-xs">
                 ★ Historical Low
               </div>
             )}
