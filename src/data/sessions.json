@@ -18,5 +18,35 @@
     "userId": "usr_abfe960b-216e-4c08-9380-967241075e96",
     "createdAt": "2026-08-29T22:04:46.697Z",
     "lastActiveAt": "2026-08-29T22:04:46.703Z"
+  },
+  "bad02a9354de188e85c9d7feb84c52ea8ff9215bc9923f40b567075597fe878a": {
+    "userId": "usr_37678084-0f32-4889-94a6-afa38c513a05",
+    "createdAt": "2026-08-30T00:21:10.867Z",
+    "lastActiveAt": "2026-08-30T00:21:11.081Z"
+  },
+  "059d6e85f5f6240836125ba3805e567a3a70effe969cd1551aa74fe69544b211": {
+    "userId": "usr_ae466cf9-97ce-435b-b59e-7d3e52ffb098",
+    "createdAt": "2026-08-30T00:21:11.045Z",
+    "lastActiveAt": "2026-08-30T00:21:11.053Z"
+  },
+  "2a524ab6bf17ce8b1b1b821c485beae2cf0cd543ca85c1c6b2a397446b999a81": {
+    "userId": "usr_fc4c4f3f-1321-4cb9-a850-f403f1e5452b",
+    "createdAt": "2026-08-30T00:21:28.457Z",
+    "lastActiveAt": "2026-08-30T00:21:28.637Z"
+  },
+  "ee34459fd2e55dcf5f7b05743e40c6da896be5a25b440751b343f6e96ea7531a": {
+    "userId": "usr_c1d5d9c7-a3c6-4c95-bbde-5590088615cb",
+    "createdAt": "2026-08-30T00:21:28.612Z",
+    "lastActiveAt": "2026-08-30T00:21:28.618Z"
+  },
+  "4964f9c5eaf9eec8aad507ad3ebc4f57ad8148fff7dc9e202199c30bfd0e7957": {
+    "userId": "usr_a886a9ea-e1bb-4365-9d1b-2516777d10b2",
+    "createdAt": "2026-08-30T00:21:31.830Z",
+    "lastActiveAt": "2026-08-30T00:21:31.967Z"
+  },
+  "ef490c76da7be356beb151225be5087753b0490ce6508ecf3a0b11e41a105ff9": {
+    "userId": "usr_2bec859c-e69e-441c-b0ae-478ccd0ada7d",
+    "createdAt": "2026-08-30T00:21:31.940Z",
+    "lastActiveAt": "2026-08-30T00:21:31.946Z"
   }
 }

@@ -123,7 +123,7 @@ export async function sendEmail(options: {
   text: string;
   template: 'welcome' | 'newsletter' | 'custom';
 }): Promise<{ success: boolean; provider: string; messageId: string; error?: string }> {
-  const fromEmail = process.env.EMAIL_FROM || 'Cozy Dispatch <newsletter@cozydispatch.com>';
+  const fromEmail = process.env.EMAIL_FROM || (process.env.RESEND_API_KEY ? 'Cozy Dispatch <onboarding@resend.dev>' : 'Cozy Dispatch <newsletter@cozydispatch.com>');
   const messageId = `msg_${crypto.randomUUID()}`;
 
   // 1. Resend Integration (if RESEND_API_KEY is configured)

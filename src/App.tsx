@@ -306,6 +306,9 @@ export default function App() {
     }
   };
 
+  // Multi-Device Cloud Hydration State
+  const [isCloudHydrated, setIsCloudHydrated] = useState(false);
+
   // Multi-Device Cloud Hydration on App Mount
   useEffect(() => {
     const token = getStoredAuthToken();
@@ -322,14 +325,21 @@ export default function App() {
           if (Array.isArray(cloudUser.notifications) && cloudUser.notifications.length > 0) {
             setNotifications(cloudUser.notifications);
           }
+        } else {
+          setUserProfile((prev) => ({ ...prev, isLoggedIn: false }));
         }
+        setIsCloudHydrated(true);
+      }).catch(() => {
+        setIsCloudHydrated(true);
       });
+    } else {
+      setIsCloudHydrated(true);
     }
   }, []);
 
-  // Multi-Device Cloud Sync (Debounced Auto-Save when Logged In)
+  // Multi-Device Cloud Sync (Debounced Auto-Save when Logged In and fully Hydrated)
   useEffect(() => {
-    if (!userProfile.isLoggedIn) return;
+    if (!isCloudHydrated || !userProfile.isLoggedIn) return;
 
     const timer = setTimeout(() => {
       pushCloudUserData({
@@ -341,7 +351,7 @@ export default function App() {
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [userProfile, wishlistedGameIds, bookmarkedArticleIds, notifications]);
+  }, [isCloudHydrated, userProfile, wishlistedGameIds, bookmarkedArticleIds, notifications]);
 
   // Auth Handlers
   const handleLoginSuccess = (userData: UserAccountData) => {
@@ -355,6 +365,7 @@ export default function App() {
     if (Array.isArray(userData.notifications) && userData.notifications.length > 0) {
       setNotifications(userData.notifications);
     }
+    setIsCloudHydrated(true);
   };
 
   const handleLogoutSuccess = () => {

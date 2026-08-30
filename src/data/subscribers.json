@@ -20,5 +20,38 @@
     "welcomeEmailSentAt": "2026-08-29T22:04:48.468Z",
     "unsubscribeToken": "e2a6301ccd72f1de75c1a07db8b50ceb",
     "lastNewsletterSentAt": "2026-08-29T22:04:48.502Z"
+  },
+  {
+    "id": "sub_11a6139b-43ad-4f17-906a-6de576877e54",
+    "email": "newsletter_reader_1788049270606@example.com",
+    "subscribedAt": "2026-08-30T00:21:11.087Z",
+    "source": "footer_signup",
+    "status": "unsubscribed",
+    "welcomeEmailSent": true,
+    "welcomeEmailSentAt": "2026-08-30T00:21:11.090Z",
+    "unsubscribeToken": "d4f35492ec631d4b219d18239cce2cf1",
+    "lastNewsletterSentAt": "2026-08-30T00:21:11.181Z"
+  },
+  {
+    "id": "sub_f0c9261a-371f-4b9f-9c4f-009e594a25e9",
+    "email": "newsletter_reader_1788049288376@example.com",
+    "subscribedAt": "2026-08-30T00:21:28.642Z",
+    "source": "footer_signup",
+    "status": "unsubscribed",
+    "welcomeEmailSent": true,
+    "welcomeEmailSentAt": "2026-08-30T00:21:28.644Z",
+    "unsubscribeToken": "c17a6cde42c938e6a0b0fa992a9b92d7",
+    "lastNewsletterSentAt": "2026-08-30T00:21:28.668Z"
+  },
+  {
+    "id": "sub_8817e942-1483-48c2-bd98-feaa24a46f22",
+    "email": "cozy_reader_1788049293439@example.com",
+    "subscribedAt": "2026-08-30T00:21:33.462Z",
+    "source": "footer_signup",
+    "status": "unsubscribed",
+    "welcomeEmailSent": true,
+    "welcomeEmailSentAt": "2026-08-30T00:21:33.464Z",
+    "unsubscribeToken": "c18993c6df991e9f42cd1786c47f7ee6",
+    "lastNewsletterSentAt": "2026-08-30T00:21:33.483Z"
   }
 ]

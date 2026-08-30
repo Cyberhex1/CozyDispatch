@@ -23,11 +23,12 @@ export function clearStoredAuthToken(): void {
 }
 
 export async function loginAccount(email: string, password: string): Promise<AuthResponse> {
+  const normalizedEmail = (email || '').trim().toLowerCase();
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email: normalizedEmail, password })
     });
     const data: AuthResponse = await res.json();
     if (data.success && data.token) {
@@ -51,11 +52,12 @@ export async function signupAccount(
     notifications?: NotificationAlert[];
   }
 ): Promise<AuthResponse> {
+  const normalizedEmail = (email || '').trim().toLowerCase();
   try {
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, username, initialData })
+      body: JSON.stringify({ email: normalizedEmail, password, username, initialData })
     });
     const data: AuthResponse = await res.json();
     if (data.success && data.token) {

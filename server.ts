@@ -4,6 +4,20 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import crypto from 'crypto';
 import { GoogleGenAI, Type } from '@google/genai';
+import { 
+  subscribeUser, 
+  getSubscribers, 
+  broadcastNewsletter, 
+  getOutbox, 
+  unsubscribeUserByToken 
+} from './src/services/emailService';
+import { 
+  syncNewsIncremental, 
+  syncRankingsIncremental, 
+  syncCatalogIncremental, 
+  runAllIncrementalSyncs,
+  loadIngestionState 
+} from './src/services/incrementalSyncService';
 
 dotenv.config();
 
@@ -227,7 +241,6 @@ app.post('/api/catalog/invalidate', (req, res) => {
 // GET /api/sync/status - Inspect sync metadata, timestamps & error states
 app.get('/api/sync/status', async (req, res) => {
   try {
-    const { loadIngestionState } = await import('./src/services/incrementalSyncService');
     const state = loadIngestionState();
     return res.json({
       success: true,
@@ -241,7 +254,6 @@ app.get('/api/sync/status', async (req, res) => {
 // POST /api/sync/news - Trigger incremental news sync
 app.post('/api/sync/news', async (req, res) => {
   try {
-    const { syncNewsIncremental } = await import('./src/services/incrementalSyncService');
     const result = await syncNewsIncremental(process.env.GEMINI_API_KEY);
     cachedNews = loadNewsFromFile();
     return res.json({ success: result.success, result });
@@ -253,7 +265,6 @@ app.post('/api/sync/news', async (req, res) => {
 // POST /api/sync/catalog - Trigger incremental game discovery
 app.post('/api/sync/catalog', async (req, res) => {
   try {
-    const { syncCatalogIncremental } = await import('./src/services/incrementalSyncService');
     const result = await syncCatalogIncremental();
     return res.json({ success: result.success, result });
   } catch (err: any) {
@@ -264,7 +275,6 @@ app.post('/api/sync/catalog', async (req, res) => {
 // POST /api/sync/rankings - Trigger incremental rankings & deals refresh
 app.post('/api/sync/rankings', async (req, res) => {
   try {
-    const { syncRankingsIncremental } = await import('./src/services/incrementalSyncService');
     const result = await syncRankingsIncremental();
     return res.json({ success: result.success, result });
   } catch (err: any) {
@@ -275,7 +285,6 @@ app.post('/api/sync/rankings', async (req, res) => {
 // POST /api/sync/all - Run all scheduled syncs in sequence
 app.post('/api/sync/all', async (req, res) => {
   try {
-    const { runAllIncrementalSyncs } = await import('./src/services/incrementalSyncService');
     const result = await runAllIncrementalSyncs(process.env.GEMINI_API_KEY);
     cachedNews = loadNewsFromFile();
     return res.json({ success: true, result });
@@ -652,7 +661,6 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
       });
     }
 
-    const { subscribeUser, getSubscribers } = await import('./src/services/emailService');
     const result = await subscribeUser(email, source);
 
     if (!result.success) {
@@ -691,7 +699,6 @@ app.post('/api/newsletter/broadcast', async (req, res) => {
       });
     }
 
-    const { broadcastNewsletter } = await import('./src/services/emailService');
     const result = await broadcastNewsletter({
       headline,
       intro,
@@ -717,7 +724,6 @@ app.post('/api/newsletter/broadcast', async (req, res) => {
 // GET /api/newsletter/outbox - Inspect sent emails and delivery logs
 app.get('/api/newsletter/outbox', async (req, res) => {
   try {
-    const { getOutbox } = await import('./src/services/emailService');
     const outbox = getOutbox();
     return res.json({
       success: true,
@@ -732,7 +738,6 @@ app.get('/api/newsletter/outbox', async (req, res) => {
 // GET /api/newsletter/unsubscribe - 1-Click unsubscribe handler
 app.get('/api/newsletter/unsubscribe', async (req, res) => {
   const token = req.query.token as string;
-  const { unsubscribeUserByToken } = await import('./src/services/emailService');
   const result = unsubscribeUserByToken(token);
 
   return res.send(`<!DOCTYPE html>
@@ -1069,7 +1074,6 @@ function startScheduledSyncJobs() {
   setInterval(async () => {
     try {
       console.log('[Scheduler] Executing scheduled incremental news update...');
-      const { syncNewsIncremental } = await import('./src/services/incrementalSyncService');
       await syncNewsIncremental(process.env.GEMINI_API_KEY);
       cachedNews = loadNewsFromFile();
     } catch (err: any) {
@@ -1082,7 +1086,6 @@ function startScheduledSyncJobs() {
   setInterval(async () => {
     try {
       console.log('[Scheduler] Executing scheduled incremental rankings update...');
-      const { syncRankingsIncremental } = await import('./src/services/incrementalSyncService');
       await syncRankingsIncremental();
     } catch (err: any) {
       console.error('[Scheduler] Scheduled rankings update error:', err.message);
@@ -1094,7 +1097,6 @@ function startScheduledSyncJobs() {
   setInterval(async () => {
     try {
       console.log('[Scheduler] Executing scheduled incremental catalog discovery...');
-      const { syncCatalogIncremental } = await import('./src/services/incrementalSyncService');
       await syncCatalogIncremental();
       // Invalidate in-memory catalog cache so /api/catalog serves fresh data immediately
       cachedCatalog = null;
