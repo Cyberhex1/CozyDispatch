@@ -17,7 +17,11 @@
     "sync:all": "tsx scripts/syncContent.ts --target=all",
     "sync:news": "tsx scripts/syncContent.ts --target=news",
     "sync:catalog": "tsx scripts/syncContent.ts --target=catalog",
-    "sync:rankings": "tsx scripts/syncContent.ts --target=rankings",
+    "db:migrate": "tsx scripts/migrateJsonToD1.ts",
+    "test:auth": "tsx scripts/verifyAuthAndNewsletter.ts",
+    "test:persistence": "tsx scripts/testAccountPersistence.ts",
+    "test:newsletter": "tsx scripts/testNewsletterSystem.ts",
+    "test:all": "tsx scripts/testAccountPersistence.ts && tsx scripts/testNewsletterSystem.ts && tsx scripts/verifyAuthAndNewsletter.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

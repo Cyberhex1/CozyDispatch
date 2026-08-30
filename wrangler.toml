@@ -1,0 +1,13 @@
+name = "cozydispatch"
+compatibility_date = "2024-09-01"
+pages_build_output_dir = "./dist"
+
+# Cloudflare D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "cozydispatch-db"
+database_id = "cozydispatch-d1-prod"
+
+[vars]
+EMAIL_FROM = "Cozy Dispatch <newsletter@cozydispatch.com>"
+APP_URL = "https://cozydispatch.pages.dev"

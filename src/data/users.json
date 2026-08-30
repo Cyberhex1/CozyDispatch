@@ -531,5 +531,58 @@
       }
     ],
     "lastSyncedAt": "2026-08-30T00:21:31.939Z"
+  },
+  {
+    "id": "usr_6504efe6-24fe-49c8-84e2-68be58dd65fb",
+    "email": "cozy_player_1788049899193@dispatch.test",
+    "passwordHash": "ac29546404feda4e3662f4ae3c9ff3bbc7fb34feb656c7a0fe9878e32e4afec18f9691b7bb80836d3b94746803f8e33a41cf814d72435ace83e09499e2c33fd9",
+    "salt": "78933997e3f9d02c16d51e99e1cd3e9f",
+    "createdAt": "2026-08-30T00:31:39.247Z",
+    "profile": {
+      "id": "usr_6504efe6-24fe-49c8-84e2-68be58dd65fb",
+      "email": "cozy_player_1788049899193@dispatch.test",
+      "isLoggedIn": true,
+      "username": "FernGamer_193",
+      "gamerTag": "FernGamer_193#7610",
+      "avatarIcon": "sprout",
+      "bio": "Cozy botanist and tea enthusiast",
+      "favoriteVibe": "Rainy Day Greenhouse",
+      "memberSince": "August 2026",
+      "preferences": {
+        "notifyOnPriceDrops": true,
+        "notifyOnReleases": true,
+        "notifyOnPatches": true,
+        "preferredGenres": [
+          "Farming Sim",
+          "Gridless Builder",
+          "Atmospheric",
+          "Cozy Castle",
+          "Roguelike Deckbuilder"
+        ],
+        "preferredStore": "all",
+        "steamDeckOnly": false,
+        "minCozyScore": 8.5,
+        "dailyDigestOptIn": true
+      }
+    },
+    "wishlistedGameIds": [
+      "fields-of-mistria",
+      "tiny-glade"
+    ],
+    "wishlistItems": [],
+    "bookmarkedArticleIds": [
+      "art-1"
+    ],
+    "notifications": [
+      {
+        "id": "notif-welcome",
+        "type": "wishlist",
+        "title": "Welcome to Cozy Dispatch Cloud!",
+        "message": "Your profile and wishlist are now securely synchronized across all your devices.",
+        "timestamp": "Just now",
+        "isRead": false
+      }
+    ],
+    "lastSyncedAt": "2026-08-30T00:31:39.248Z"
   }
 ]

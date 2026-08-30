@@ -134,8 +134,8 @@
       "steam-2527500-1815034432888995": "37a6df91330aa0d7",
       "steam-2379780-1792116353353619": "a3da40d8a3a24245"
     },
-    "lastRunAt": "2026-08-30T00:21:39.902Z",
-    "lastSuccessAt": "2026-08-30T00:21:40.918Z"
+    "lastRunAt": "2026-08-30T00:33:09.611Z",
+    "lastSuccessAt": "2026-08-30T00:33:10.756Z"
   },
   "catalog": {
     "status": "success",
@@ -2155,7 +2155,7 @@
     "updatedItemsCount": 15,
     "skippedCount": 0,
     "knownIds": [],
-    "lastRunAt": "2026-08-30T00:21:37.877Z",
-    "lastSuccessAt": "2026-08-30T00:21:39.890Z"
+    "lastRunAt": "2026-08-30T00:33:07.505Z",
+    "lastSuccessAt": "2026-08-30T00:33:09.589Z"
   }
 }

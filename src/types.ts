@@ -78,7 +78,7 @@ export interface Game {
   storeUrl: string;
   trailerVideoUrl?: string;
   vibes: string[]; // e.g. ["Warm Lighting", "No Death Penalty", "Satisfying Sounds", "Wholesome NPCs"]
-  isFeaturedThisWeek: boolean;
+  isFeaturedThisWeek?: boolean;
   featuredReason?: string;
   isNewlyReleased?: boolean;
   isNewlyUpdated?: boolean;
