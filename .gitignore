@@ -10,3 +10,6 @@ scripts/.cache/
 .cache/
 .data/
 *.sqlite*
+dist-server/
+.wrangler/
+.dev.vars

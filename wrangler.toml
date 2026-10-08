@@ -1,13 +1,18 @@
+# Cloudflare Pages configuration for CozyDispatch.
+# Pages builds with `npm run build` and serves ./dist; functions/ handles /api/*.
 name = "cozydispatch"
-compatibility_date = "2024-09-01"
+compatibility_date = "2026-09-01"
 pages_build_output_dir = "./dist"
 
-# Cloudflare D1 Database Binding
 [[d1_databases]]
 binding = "DB"
 database_name = "cozydispatch-db"
-database_id = "cozydispatch-d1-prod"
+database_id = "e8574478-bf2c-4d1c-9873-e83ad3408abe"
+migrations_dir = "d1/migrations"
 
 [vars]
-EMAIL_FROM = "Cozy Dispatch <newsletter@cozydispatch.com>"
 APP_URL = "https://cozydispatch.pages.dev"
+
+# Secrets (set in the Cloudflare dashboard → Pages → Settings → Variables, type "Secret"):
+#   ADMIN_TOKEN     - enables /api/admin/* (newsletter sending)
+#   RESEND_API_KEY  - enables email; also set EMAIL_FROM as a plain variable

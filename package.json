@@ -1,45 +1,28 @@
 {
-  "name": "react-example",
+  "name": "cozydispatch",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
-    "start": "node dist/server.cjs",
-    "clean": "rm -rf dist server.js",
-    "fetch:catalog": "tsx scripts/fetchCatalog.ts",
-    "fetch:catalog:quick": "tsx scripts/fetchCatalog.ts --mode=quick --max=100",
-    "fetch:catalog:deep": "tsx scripts/fetchCatalog.ts --mode=deep --max=2500",
-    "fetch:catalog:resume": "tsx scripts/fetchCatalog.ts --resume",
-    "fetch:showcases": "tsx scripts/fetchShowcases.ts",
-    "fetch:news": "tsx scripts/fetchNews.ts",
-    "sync:all": "tsx scripts/syncContent.ts --target=all",
-    "sync:news": "tsx scripts/syncContent.ts --target=news",
-    "sync:catalog": "tsx scripts/syncContent.ts --target=catalog",
-    "db:migrate": "tsx scripts/migrateJsonToD1.ts",
-    "test:auth": "tsx scripts/verifyAuthAndNewsletter.ts",
-    "test:persistence": "tsx scripts/testAccountPersistence.ts",
-    "test:newsletter": "tsx scripts/testNewsletterSystem.ts",
-    "test:all": "tsx scripts/testAccountPersistence.ts && tsx scripts/testNewsletterSystem.ts && tsx scripts/verifyAuthAndNewsletter.ts",
+    "build": "vite build",
+    "build:server": "esbuild server.ts --bundle --platform=node --format=cjs --packages=external --outfile=dist-server/server.cjs",
+    "start": "NODE_ENV=production node dist-server/server.cjs",
+    "sync": "tsx scripts/sync.ts",
+    "sync:remote": "tsx scripts/sync.ts --remote",
+    "db:migrate:remote": "wrangler d1 migrations apply cozydispatch-db --remote",
+    "check:functions": "wrangler pages functions build --outdir=.wrangler/functions-check",
+    "test": "tsx scripts/testAccount.ts && tsx scripts/testNewsletter.ts && tsx scripts/testSync.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@google/genai": "^2.18.0",
     "@tailwindcss/vite": "^4.1.14",
-    "@types/node-fetch": "^2.6.13",
     "@vitejs/plugin-react": "^5.0.4",
-    "axios": "^1.19.0",
-    "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "lucide-react": "^0.546.0",
-    "motion": "^12.23.24",
-    "node-fetch": "^3.3.2",
     "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "ts-node": "^10.9.2",
-    "uuid": "^14.0.2"
+    "react-dom": "^19.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
@@ -49,6 +32,7 @@
     "tailwindcss": "^4.1.14",
     "tsx": "^4.23.12",
     "typescript": "~5.8.2",
-    "vite": "^6.4.3"
+    "vite": "^6.4.3",
+    "wrangler": "^4.148.0"
   }
 }

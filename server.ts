@@ -1,92 +1,68 @@
+/**
+ * Local development / self-hosted server. Serves the Vite app and bridges
+ * /api/* to the same router Cloudflare runs, using a local SQLite database
+ * (.data/cozydispatch.sqlite) in place of D1.
+ */
+import 'dotenv/config';
 import express from 'express';
-import path from 'path';
-import dotenv from 'dotenv';
-import { handleApiRequest } from './src/server/apiRouter';
-import { getDb } from './src/server/db/d1Client';
+import path from 'node:path';
+import { handleApiRequest, type Env } from './src/server/apiRouter';
+import { createLocalD1 } from './src/server/db/localSqlite';
 
-dotenv.config();
+const PORT = Number(process.env.PORT) || 3000;
+const env: Env = {
+  DB: createLocalD1(),
+  APP_URL: process.env.APP_URL,
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  EMAIL_FROM: process.env.EMAIL_FROM,
+  ADMIN_TOKEN: process.env.ADMIN_TOKEN
+};
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+app.disable('x-powered-by');
+app.set('trust proxy', 'loopback');
 
-app.use(express.json({ limit: '10mb' }));
-
-// Bridge Express /api routes to the universal Cloudflare D1 API Router
-app.all('/api/{*splat}', async (req, res) => {
-  try {
-    const protocol = req.protocol || 'http';
-    const host = req.get('host') || `localhost:${PORT}`;
-    const url = `${protocol}://${host}${req.originalUrl}`;
-
-    const headers = new Headers();
-    for (const [key, value] of Object.entries(req.headers)) {
-      if (value) {
-        if (Array.isArray(value)) {
-          value.forEach((v) => headers.append(key, v));
-        } else {
-          headers.set(key, value);
-        }
-      }
-    }
-
-    const init: RequestInit = {
-      method: req.method,
-      headers
-    };
-
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
-      init.body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-    }
-
-    const webRequest = new Request(url, init);
-    const webResponse = await handleApiRequest(webRequest);
-
-    res.status(webResponse.status);
-    webResponse.headers.forEach((val, key) => {
-      res.setHeader(key, val);
-    });
-
-    const contentType = webResponse.headers.get('Content-Type') || '';
-    if (contentType.includes('application/json')) {
-      const json = await webResponse.json();
-      return res.json(json);
-    } else {
-      const text = await webResponse.text();
-      return res.send(text);
-    }
-  } catch (err: any) {
-    console.error('[Server API Proxy Error]:', err);
-    return res.status(500).json({ success: false, error: err.message || 'Internal server error' });
+// Pass the raw body through untouched so the router sees exactly what the browser sent.
+app.all('/api/{*splat}', express.raw({ type: '*/*', limit: '1mb' }), async (req, res) => {
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (Array.isArray(value)) value.forEach((v) => headers.append(key, v));
+    else if (value !== undefined) headers.set(key, value);
   }
+  const hasBody = req.method !== 'GET' && req.method !== 'HEAD' && Buffer.isBuffer(req.body) && req.body.length > 0;
+  const request = new Request(`${req.protocol}://${req.get('host')}${req.originalUrl}`, {
+    method: req.method,
+    headers,
+    body: hasBody ? req.body : undefined
+  });
+
+  const response = await handleApiRequest(request, env);
+  res.status(response.status);
+  response.headers.forEach((value, key) => {
+    if (key.toLowerCase() !== 'set-cookie') res.setHeader(key, value);
+  });
+  const cookies = response.headers.getSetCookie();
+  if (cookies.length) res.setHeader('Set-Cookie', cookies);
+  res.send(Buffer.from(await response.arrayBuffer()));
 });
 
-// Vite Middleware for development vs static production serve
-async function setupViteMiddleware() {
-  // Ensure local D1 SQLite database and schema are initialized
-  await getDb();
-
-  if (process.env.NODE_ENV !== 'production') {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa'
-    });
-    app.use(vite.middlewares);
+async function start() {
+  if (process.env.NODE_ENV === 'production') {
+    const dist = path.join(process.cwd(), 'dist');
+    app.use(express.static(dist, { maxAge: '1h', index: false }));
+    app.get('/{*splat}', (_req, res) => res.sendFile(path.join(dist, 'index.html')));
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('/{*splat}', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+    const { createServer } = await import('vite');
+    const vite = await createServer({ server: { middlewareMode: true }, appType: 'spa' });
+    app.use(vite.middlewares);
   }
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`CozyDispatch server running on http://localhost:${PORT}`);
-    console.log(`Persistent Database: Cloudflare D1 / Local SQLite (.data/cozydispatch.sqlite)`);
-    console.log(`Pages Functions Gateway: Ready (functions/api/[[route]].ts)`);
+  app.listen(PORT, () => {
+    console.log(`CozyDispatch running at http://localhost:${PORT}`);
+    console.log('Using the local database in .data/ — run `npm run sync` to fill it with games and news.');
   });
 }
 
-setupViteMiddleware().catch((err) => {
+start().catch((err) => {
   console.error('Failed to start server:', err);
+  process.exit(1);
 });

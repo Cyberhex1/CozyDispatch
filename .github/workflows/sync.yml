@@ -1,0 +1,45 @@
+# Keeps the catalog and news fresh by writing straight to the production D1
+# database. Needs three repository secrets (Settings → Secrets → Actions):
+#   CLOUDFLARE_API_TOKEN   (token with "D1 Edit" permission)
+#   CLOUDFLARE_ACCOUNT_ID
+#   D1_DATABASE_ID         (e8574478-bf2c-4d1c-9873-e83ad3408abe)
+name: Sync games and news
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'   # catalog + news every 6 hours
+    - cron: '47 1-23/2 * * *' # news only, on the odd hours in between
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'What to sync'
+        type: choice
+        options: [all, catalog, news]
+        default: all
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Sync
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+        run: |
+          TARGET="${{ github.event.inputs.target }}"
+          if [ -z "$TARGET" ]; then
+            if [ "${{ github.event.schedule }}" = "47 1-23/2 * * *" ]; then TARGET=news; else TARGET=all; fi
+          fi
+          npx tsx scripts/sync.ts --remote --target="$TARGET"
