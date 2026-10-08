@@ -65,6 +65,11 @@ function methodNotAllowed(): never {
 
 function notSignedIn(request: Request): Response {
   const headers: HeadersInit = hasSessionCookie(request) ? { 'Set-Cookie': clearSessionCookie(request) } : {};
+  // Checking "am I signed in?" is a normal question, not an error: answer with an
+  // empty 204 so signed-out visitors don't get a failed request on every page.
+  if (request.method === 'GET' && new URL(request.url).pathname === '/api/me') {
+    return new Response(null, { status: 204, headers: { ...headers, 'Cache-Control': 'no-store' } });
+  }
   return json({ error: 'Not signed in.' }, 401, headers);
 }
 

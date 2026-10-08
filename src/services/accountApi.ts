@@ -34,10 +34,10 @@ export async function apiRequest<T>(method: string, path: string, body?: unknown
   return data as T;
 }
 
-/** Current account, or null when signed out. */
+/** Current account, or null when signed out (the API answers 204). */
 export async function fetchMe(signal?: AbortSignal): Promise<AccountState | null> {
   try {
-    return await apiRequest<AccountState>('GET', '/api/me', undefined, signal);
+    return (await apiRequest<AccountState | null>('GET', '/api/me', undefined, signal)) ?? null;
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) return null;
     throw err;

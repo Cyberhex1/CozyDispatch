@@ -13,3 +13,4 @@ scripts/.cache/
 dist-server/
 .wrangler/
 .dev.vars
+.vs/

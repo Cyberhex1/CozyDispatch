@@ -37,7 +37,7 @@ function tagObjs(names: string[]) {
   });
 }
 
-function candidate(over: Partial<Candidate['item']> & { tags: string[] }, upcomingRank: number | null = null): Candidate {
+function candidate(over: Omit<Partial<Candidate['item']>, 'tags'> & { tags: string[] }, upcomingRank: number | null = null): Candidate {
   const { tags, ...rest } = over;
   return {
     popularity: 10,

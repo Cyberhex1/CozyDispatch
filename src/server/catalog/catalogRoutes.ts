@@ -132,7 +132,9 @@ export async function queryGames(db: ID1Database, q: GameQuery) {
   if (q.deck === 'playable') where.push('deck_compat >= 2');
   if (q.sale) where.push('discount_pct > 0');
   if (q.free) where.push('is_free = 1');
-  where.push(q.sort === 'upcoming' ? 'is_coming_soon = 1' : 'is_coming_soon = 0');
+  // Searches include upcoming games; browsing lists separate them.
+  if (q.sort === 'upcoming') where.push('is_coming_soon = 1');
+  else if (!q.q) where.push('is_coming_soon = 0');
 
   const clause = `WHERE ${where.join(' AND ')}`;
   const limit = q.limit ?? 24;

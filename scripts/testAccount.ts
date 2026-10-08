@@ -94,8 +94,8 @@ async function main() {
     assert.equal(out.status, 200);
     assert.match(out.setCookie!, /Max-Age=0/);
     const after = await call('/api/me', { cookie: token });
-    assert.equal(after.status, 401);
-    assert.equal(after.data.error, 'Not signed in.');
+    assert.equal(after.status, 204);
+    assert.equal(after.data, null);
     assert.match(after.setCookie!, /Max-Age=0/, 'stale cookie is cleared');
   });
 
@@ -103,7 +103,7 @@ async function main() {
     const { token } = await signup('header@example.com');
     const url = new URL(`https://cozy.test/api/me?token=${token}`);
     const res = await handleAccountRoutes(new Request(url, { headers: { Authorization: `Bearer ${token}` } }), env, url);
-    assert.equal(res!.status, 401);
+    assert.equal(res!.status, 204);
   });
 
   await test('duplicate email -> 409', async () => {
@@ -153,7 +153,7 @@ async function main() {
     const hash = await sha256Hex(token);
     await DB.prepare('UPDATE sessions SET expires_at = ? WHERE token_hash = ?').bind('2000-01-01T00:00:00.000Z', hash).run();
     const r = await call('/api/me', { cookie: token });
-    assert.equal(r.status, 401);
+    assert.equal(r.status, 204);
     const left = await DB.prepare('SELECT COUNT(*) AS n FROM sessions WHERE token_hash = ?').bind(hash).first<number>('n');
     assert.equal(left, 0);
   });
@@ -275,7 +275,7 @@ async function main() {
     const ok = await call('/api/me/password', { method: 'POST', cookie: a, body: { currentPassword: 'first password', newPassword: 'second password' } });
     assert.equal(ok.status, 200);
     assert.equal((await call('/api/me', { cookie: a })).status, 200, 'current session kept');
-    assert.equal((await call('/api/me', { cookie: b })).status, 401, 'other session revoked');
+    assert.equal((await call('/api/me', { cookie: b })).status, 204, 'other session revoked');
     assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: 'pw@example.com', password: 'first password' }, ip: freshIp() })).status, 401);
     assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: 'pw@example.com', password: 'second password' }, ip: freshIp() })).status, 200);
   });
@@ -291,7 +291,7 @@ async function main() {
       const n = await DB.prepare(`SELECT COUNT(*) AS n FROM ${table}`).bind(state.user.id).first<number>('n');
       assert.equal(n, 0, table);
     }
-    assert.equal((await call('/api/me', { cookie: token })).status, 401);
+    assert.equal((await call('/api/me', { cookie: token })).status, 204);
   });
 
   await test('unknown routes return null; wrong methods 405', async () => {

@@ -2,121 +2,124 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-base: var(--theme-base);
-  --color-surface: var(--theme-surface);
-  --color-surface-brand: var(--theme-surface-brand);
-  --color-border: var(--theme-border);
-  --color-border-hover: var(--theme-border-hover);
-  --color-text-main: var(--theme-text-main);
-  --color-text-heading: var(--theme-text-heading);
-  --color-text-muted: var(--theme-text-muted);
-  --color-text-faint: var(--theme-text-faint);
-  --color-text-alt: var(--theme-text-alt);
-  --color-text-on-inverse: var(--theme-text-on-inverse);
-  --color-brand: var(--theme-brand);
-  --color-brand-hover: var(--theme-brand-hover);
-  --color-accent: var(--theme-accent);
-  --color-accent-hover: var(--theme-accent-hover);
-  --color-inverse: var(--theme-inverse);
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Libre Franklin', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-cozy: var(--cozy);
+  --color-cozy-wash: var(--cozy-wash);
+  --color-indie: var(--indie);
+  --color-indie-wash: var(--indie-wash);
+  --color-deal: var(--deal);
+  --color-deal-wash: var(--deal-wash);
+  --color-on-accent: var(--on-accent);
 }
 
 :root {
-  --theme-base: #FDFBF7;
-  --theme-surface: #FFFFFF;
-  --theme-surface-brand: #EBF0EA;
-  --theme-border: #E6E2D3;
-  --theme-border-hover: #D6D2C4;
-  --theme-text-main: #4A4A40;
-  --theme-text-heading: #5A5A40;
-  --theme-text-muted: #707060;
-  --theme-text-faint: #A0A090;
-  --theme-text-alt: #888870;
-  --theme-text-on-inverse: #FDFBF7;
-  --theme-brand: #8BA888;
-  --theme-brand-hover: #7A9977;
-  --theme-accent: #E6A07D;
-  --theme-accent-hover: #D98A65;
-  --theme-inverse: #2C2C24;
+  --paper: #FBF8F2;
+  --surface: #FFFFFF;
+  --ink: #22201B;
+  --ink-soft: #57534A;
+  --ink-faint: #6F695E;
+  --rule: #E3DCCD;
+  --rule-strong: #22201B;
+  --cozy: #2F5D46;      /* forest green: the Cozy section */
+  --cozy-wash: #E6EEE6;
+  --indie: #4A3F86;     /* ink violet: the Indie section */
+  --indie-wash: #ECE9F6;
+  --deal: #A3441F;      /* terracotta: prices and sales */
+  --deal-wash: #F7E7DD;
+  --on-accent: #FFFFFF;
+  color-scheme: light;
 }
 
 .dark {
-  --theme-base: #141410;
-  --theme-surface: #24241E;
-  --theme-surface-brand: #222C21;
-  --theme-border: #32322A;
-  --theme-border-hover: #4A4A40;
-  --theme-text-main: #EAE6D8;
-  --theme-text-heading: #F5F1E4;
-  --theme-text-muted: #A5A595;
-  --theme-text-faint: #707060;
-  --theme-text-alt: #A0A090;
-  --theme-text-on-inverse: #141410;
-  --theme-brand: #96B593;
-  --theme-brand-hover: #8BA888;
-  --theme-accent: #EBA886;
-  --theme-accent-hover: #E6A07D;
-  --theme-inverse: #EAE6D8;
+  --paper: #16150F;
+  --surface: #1F1E17;
+  --ink: #EFE9DC;
+  --ink-soft: #C2BBAC;
+  --ink-faint: #9C9586;
+  --rule: #37352B;
+  --rule-strong: #EFE9DC;
+  --cozy: #8FC4A5;
+  --cozy-wash: #1F2C24;
+  --indie: #B2A9EC;
+  --indie-wash: #26233A;
+  --deal: #EE9D72;
+  --deal-wash: #36231A;
+  --on-accent: #16150F;
+  color-scheme: dark;
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: var(--theme-base);
-    color: var(--theme-text-main);
+    @apply bg-paper text-ink font-sans antialiased;
+    font-feature-settings: 'kern', 'liga';
   }
-
-  h1, h2, h3, .font-display {
-    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  ::selection {
+    background: color-mix(in srgb, var(--cozy) 25%, transparent);
   }
-
-  .font-serif-natural, .font-serif-cozy {
-    font-family: 'Fraunces', serif;
+  :focus-visible {
+    outline: 2px solid var(--cozy);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  button {
+    cursor: pointer;
   }
 }
 
-/* Custom subtle natural tones scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Shared component styles (Tailwind v4 utilities so they can be composed with @apply) */
+@utility kicker {
+  @apply text-[11px] font-semibold uppercase tracking-[0.14em];
+}
+@utility headline {
+  @apply font-display text-ink;
+  font-variation-settings: 'opsz' 72;
+  letter-spacing: -0.01em;
+}
+@utility link-underline {
+  @apply underline decoration-rule decoration-1 underline-offset-4 transition-colors hover:decoration-current;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-4 min-h-11 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed;
+}
+@utility btn-primary {
+  @apply btn bg-ink text-paper hover:bg-ink-soft;
+}
+@utility btn-quiet {
+  @apply btn border border-rule bg-surface text-ink hover:border-ink-faint;
+}
+@utility field {
+  @apply w-full rounded-md border border-rule bg-surface px-3 min-h-11 text-[15px] text-ink placeholder:text-ink-faint focus:border-ink-faint focus:outline-none;
+}
+@utility chip {
+  @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-rule px-3 min-h-9 text-[13px] font-medium text-ink-soft transition-colors hover:border-ink-faint hover:text-ink;
+  &[aria-pressed='true'],
+  &[aria-current='page'] {
+    @apply border-ink bg-ink text-paper;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: var(--theme-surface);
+.no-scrollbar {
+  scrollbar-width: none;
 }
-
-::-webkit-scrollbar-thumb {
-  background: var(--theme-border-hover);
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--theme-brand);
-}
-
-/* Mobile & Touch Utility Helpers */
-.no-scrollbar::-webkit-scrollbar,
-.scrollbar-none::-webkit-scrollbar {
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-.no-scrollbar,
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.safe-bottom {
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
-}
-
-.safe-top {
-  padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
-}
-
-/* Touch active state enhancement */
-@media (hover: none) and (pointer: coarse) {
-  button, a {
-    -webkit-tap-highlight-color: transparent;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
