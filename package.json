@@ -12,7 +12,7 @@
     "sync:remote": "tsx scripts/sync.ts --remote",
     "db:migrate:remote": "wrangler d1 migrations apply cozydispatch-db --remote",
     "check:functions": "wrangler pages functions build --outdir=.wrangler/functions-check",
-    "test": "tsx scripts/testAccount.ts && tsx scripts/testNewsletter.ts && tsx scripts/testSync.ts",
+    "test": "tsx scripts/testAccount.ts && tsx scripts/testNewsletter.ts && tsx scripts/testSync.ts && tsx scripts/testFeatures.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

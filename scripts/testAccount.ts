@@ -209,7 +209,7 @@ async function main() {
 
   await test('wishlist add/remove/dedupe/order and validation', async () => {
     const { token } = await signup('wish@example.com');
-    assert.deepEqual((await call('/api/me/wishlist/413150', { method: 'PUT', cookie: token })).data, { wishlist: [413150] });
+    assert.deepEqual((await call('/api/me/wishlist/413150', { method: 'PUT', cookie: token })).data, { wishlist: [413150], shelf: {} });
     await call('/api/me/wishlist/1145360', { method: 'PUT', cookie: token });
     const again = await call('/api/me/wishlist/413150', { method: 'PUT', cookie: token });
     assert.deepEqual(again.data.wishlist, [1145360, 413150], 'newest first, no duplicates');
@@ -219,6 +219,43 @@ async function main() {
     assert.equal((await call('/api/me/wishlist/0', { method: 'PUT', cookie: token })).status, 400);
     assert.equal((await call('/api/me/wishlist/-5', { method: 'PUT', cookie: token })).status, 400);
     assert.equal((await call('/api/me/wishlist/5', { method: 'PUT' })).status, 401);
+  });
+
+  await test('shelf status and note: patch, validation, saved implicitly, cleared on remove', async () => {
+    const { token } = await signup('shelf@example.com');
+    let r = await call('/api/me/wishlist/413150', { method: 'PATCH', cookie: token, body: { status: 'playing' } });
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.data.wishlist, [413150], 'patching an unsaved game saves it');
+    assert.deepEqual(r.data.shelf, { 413150: { status: 'playing', note: '' } });
+    r = await call('/api/me/wishlist/413150', { method: 'PATCH', cookie: token, body: { note: '  with my sister \r\n on Sundays ' } });
+    assert.deepEqual(r.data.shelf[413150], { status: 'playing', note: 'with my sister \n on Sundays' });
+    assert.equal((await call('/api/me/wishlist/413150', { method: 'PATCH', cookie: token, body: { status: 'dropped' } })).status, 400);
+    assert.equal((await call('/api/me/wishlist/413150', { method: 'PATCH', cookie: token, body: { note: 'x'.repeat(281) } })).status, 400);
+    assert.equal((await call('/api/me/wishlist/413150', { method: 'PATCH', cookie: token, body: {} })).status, 400);
+    assert.equal((await call('/api/me/wishlist/413150', { method: 'PATCH', body: { status: 'want' } })).status, 401);
+    r = await call('/api/me/wishlist/413150', { method: 'PATCH', cookie: token, body: { status: 'want', note: '' } });
+    assert.deepEqual(r.data.shelf, {}, 'defaults are not listed');
+    await call('/api/me/wishlist/413150', { method: 'PATCH', cookie: token, body: { status: 'finished' } });
+    r = await call('/api/me/wishlist/413150', { method: 'DELETE', cookie: token });
+    assert.deepEqual(r.data, { wishlist: [], shelf: {} });
+    r = await call('/api/me/wishlist/413150', { method: 'PUT', cookie: token });
+    assert.deepEqual(r.data.shelf, {}, 're-saving starts fresh');
+    assert.deepEqual((await call('/api/me', { cookie: token })).data.shelf, {});
+  });
+
+  await test('merge carries device statuses without overwriting the account', async () => {
+    const { token } = await signup('shelfmerge@example.com');
+    await call('/api/me/wishlist/1', { method: 'PATCH', cookie: token, body: { status: 'finished' } });
+    const r = await call('/api/me/merge', {
+      method: 'POST',
+      cookie: token,
+      body: {
+        wishlist: [1, 2, 3],
+        shelf: { 1: { status: 'playing', note: 'device' }, 2: { status: 'playing', note: 'cozy' }, 3: { status: 'bogus' }, 4: { status: 'playing' } }
+      }
+    });
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.data.shelf, { 1: { status: 'finished', note: '' }, 2: { status: 'playing', note: 'cozy' } });
   });
 
   await test('bookmarks: URL-decoded ids, length limit', async () => {

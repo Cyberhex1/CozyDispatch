@@ -12,6 +12,8 @@ import { BrowsePage } from './pages/BrowsePage';
 import { GamePage } from './pages/GamePage';
 import { NewsPage } from './pages/NewsPage';
 import { ShelfPage } from './pages/ShelfPage';
+import { CalendarPage } from './pages/CalendarPage';
+import { ListPage } from './pages/ListPage';
 
 /** Old single-page URLs (?view=deals etc.) from the previous version of the site. */
 function redirectLegacyUrl() {
@@ -25,6 +27,7 @@ function redirectLegacyUrl() {
 function Routes({ openAccount }: { openAccount: () => void }) {
   const { path } = useLocation();
   const game = path.match(/^\/game\/(\d+)(?:\/[^/]*)?$/);
+  const list = path.match(/^\/list\/([A-Za-z0-9]{12})$/);
   if (path === '/') return <HomePage />;
   if (path === '/cozy' || path === '/indie' || path === '/deals' || path === '/upcoming' || path === '/search') {
     return <BrowsePage key={path} mode={path.slice(1) as 'cozy'} />;
@@ -32,6 +35,8 @@ function Routes({ openAccount }: { openAccount: () => void }) {
   if (game) return <GamePage key={game[1]} appId={Number(game[1])} />;
   if (path === '/news') return <NewsPage />;
   if (path === '/shelf') return <ShelfPage onAccount={openAccount} />;
+  if (path === '/calendar') return <CalendarPage />;
+  if (list) return <ListPage key={list[1]} id={list[1]} />;
   return (
     <EmptyState title="Page not found">
       That page isn’t here. Try the sections above, or search for a game.
@@ -60,8 +65,13 @@ function Shell() {
         setDialog((d) => (d === 'search' ? null : 'search'));
       }
     };
+    const onOpenAccount = () => setDialog('account');
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('cd:open-account', onOpenAccount);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('cd:open-account', onOpenAccount);
+    };
   }, []);
 
   return (

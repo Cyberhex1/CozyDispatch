@@ -14,6 +14,7 @@ const NAV: { href: string; label: string; accent?: string }[] = [
   { href: '/indie', label: 'Indie', accent: 'after:bg-indie' },
   { href: '/deals', label: 'Deals', accent: 'after:bg-deal' },
   { href: '/upcoming', label: 'Upcoming' },
+  { href: '/calendar', label: 'Calendar' },
   { href: '/news', label: 'News' }
 ];
 

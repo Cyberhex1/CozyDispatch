@@ -7,10 +7,12 @@ import { assertSameOrigin, errorResponse, HttpError, json, type Env } from './ht
 import { handleAccountRoutes } from './auth/accountRoutes';
 import { handleNewsletterRoutes } from './newsletter/newsletterRoutes';
 import { handleCatalogRoutes } from './catalog/catalogRoutes';
+import { handleListRoutes } from './lists/listRoutes';
 
 export type { Env } from './http';
 
-const HANDLERS = [handleCatalogRoutes, handleAccountRoutes, handleNewsletterRoutes];
+// Lists run before accounts so /api/me/lists isn't treated as an unknown /api/me path.
+const HANDLERS = [handleCatalogRoutes, handleListRoutes, handleAccountRoutes, handleNewsletterRoutes];
 
 export async function handleApiRequest(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);

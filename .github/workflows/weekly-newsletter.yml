@@ -1,0 +1,73 @@
+# Weekly newsletter. Every Monday it builds a draft from the catalog and
+# shows it on the run's summary page. Nothing is sent automatically:
+# to send it, open Actions → "Weekly newsletter" → Run workflow → mode "send".
+#
+# Needs two repository secrets (Settings → Secrets → Actions):
+#   SITE_URL      e.g. https://cozydispatch.pages.dev (no trailing slash)
+#   ADMIN_TOKEN   the same value as ADMIN_TOKEN in Cloudflare Pages
+name: Weekly newsletter
+
+on:
+  schedule:
+    - cron: '0 14 * * 1' # Mondays, 14:00 UTC: preview only
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preview shows the draft; send emails it to every confirmed subscriber'
+        type: choice
+        options: [preview, send]
+        default: preview
+
+concurrency:
+  group: weekly-newsletter
+  cancel-in-progress: false
+
+jobs:
+  newsletter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Build or send the weekly issue
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          MODE: ${{ github.event.inputs.mode || 'preview' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SITE_URL:-}" ] || [ -z "${ADMIN_TOKEN:-}" ]; then
+            echo "::error::Add the SITE_URL and ADMIN_TOKEN repository secrets first."
+            exit 1
+          fi
+          if [ "$MODE" = "send" ]; then
+            code=$(curl -sS -o out.json -w '%{http_code}' -X POST "$SITE_URL/api/admin/newsletter/weekly" \
+              -H "Authorization: Bearer $ADMIN_TOKEN" -H 'Content-Type: application/json' -d '{}')
+          else
+            code=$(curl -sS -o out.json -w '%{http_code}' "$SITE_URL/api/admin/newsletter/weekly" \
+              -H "Authorization: Bearer $ADMIN_TOKEN")
+          fi
+          if [ "$code" -ge 400 ]; then
+            echo "::error::$(jq -r '.error // "Request failed"' out.json) (HTTP $code)"
+            exit 1
+          fi
+          {
+            if [ "$MODE" = "send" ]; then
+              echo "## Sent: $(jq -r '.draft.subject' out.json)"
+              echo
+              echo "Sent to $(jq -r '.sent' out.json) of $(jq -r '.recipients' out.json) subscribers ($(jq -r '.failed' out.json) failed)."
+            else
+              echo "## Draft: $(jq -r '.draft.subject' out.json)"
+              echo
+              if [ "$(jq -r '.mailerConfigured' out.json)" != "true" ]; then
+                echo "> Email isn't switched on in Cloudflare yet, so this can't be sent."
+                echo
+              fi
+              echo "To send this, run this workflow again with mode **send**."
+            fi
+            echo
+            echo '### Intro'
+            echo
+            jq -r '.draft.intro' out.json | sed 's/^/> /'
+            echo
+            jq -r '.draft.sections[] | "### \(.title)\n\n" + ([.games[] | "- \(.title) (\(.reason))"] | join("\n")) + "\n"' out.json
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat "$GITHUB_STEP_SUMMARY"

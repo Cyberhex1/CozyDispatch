@@ -10,14 +10,17 @@ import {
   BIO_MAX,
   DEFAULT_AVATAR,
   SAVED_ITEMS_CAP,
+  ShelfEntry,
   isAvatar,
+  isShelfStatus,
   isValidAppId,
   isValidArticleId,
   isValidEmail,
   normalizeEmail,
   validateBio,
   validateDisplayName,
-  validatePassword
+  validatePassword,
+  validateShelfNote
 } from '../../shared/account';
 import { dummyVerify, hashPassword, verifyPassword } from './passwords';
 import {
@@ -77,12 +80,26 @@ async function getUserRow(db: ID1Database, userId: string): Promise<UserRow | nu
   return db.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first<UserRow>();
 }
 
-async function loadWishlist(db: ID1Database, userId: string): Promise<number[]> {
+interface WishlistState {
+  wishlist: number[];
+  shelf: Record<number, ShelfEntry>;
+}
+
+async function loadWishlist(db: ID1Database, userId: string): Promise<WishlistState> {
   const { results } = await db
-    .prepare('SELECT app_id FROM user_wishlist WHERE user_id = ? ORDER BY added_at DESC, rowid DESC')
+    .prepare('SELECT app_id, status, note FROM user_wishlist WHERE user_id = ? ORDER BY added_at DESC, rowid DESC')
     .bind(userId)
-    .all<{ app_id: number }>();
-  return results.map((r) => Number(r.app_id));
+    .all<{ app_id: number; status: string; note: string }>();
+  const shelf: Record<number, ShelfEntry> = {};
+  for (const r of results) {
+    const status = isShelfStatus(r.status) ? r.status : 'want';
+    if (status !== 'want' || r.note) shelf[Number(r.app_id)] = { status, note: r.note || '' };
+  }
+  return { wishlist: results.map((r) => Number(r.app_id)), shelf };
+}
+
+function cleanNote(value: string): string {
+  return value.replace(/\r\n/g, '\n').trim();
 }
 
 async function loadBookmarks(db: ID1Database, userId: string): Promise<string[]> {
@@ -94,7 +111,7 @@ async function loadBookmarks(db: ID1Database, userId: string): Promise<string[]>
 }
 
 async function loadState(db: ID1Database, user: UserRow): Promise<AccountState> {
-  const [wishlist, bookmarks] = await Promise.all([loadWishlist(db, user.id), loadBookmarks(db, user.id)]);
+  const [{ wishlist, shelf }, bookmarks] = await Promise.all([loadWishlist(db, user.id), loadBookmarks(db, user.id)]);
   return {
     user: {
       id: user.id,
@@ -105,6 +122,7 @@ async function loadState(db: ID1Database, user: UserRow): Promise<AccountState> 
       memberSince: user.created_at
     },
     wishlist,
+    shelf,
     bookmarks
   };
 }
@@ -257,6 +275,7 @@ async function deleteAccount(request: Request, db: ID1Database, user: UserRow): 
     db.prepare('DELETE FROM sessions WHERE user_id = ?').bind(user.id),
     db.prepare('DELETE FROM user_wishlist WHERE user_id = ?').bind(user.id),
     db.prepare('DELETE FROM user_bookmarks WHERE user_id = ?').bind(user.id),
+    db.prepare('DELETE FROM game_lists WHERE user_id = ?').bind(user.id),
     db.prepare('DELETE FROM users WHERE id = ?').bind(user.id)
   ]);
   return json({ ok: true }, 200, { 'Set-Cookie': clearSessionCookie(request) });
@@ -266,17 +285,42 @@ async function deleteAccount(request: Request, db: ID1Database, user: UserRow): 
 // Saved items
 // ---------------------------------------------------------------------------
 
-async function putWishlist(db: ID1Database, userId: string, appId: number): Promise<Response> {
+async function ensureWishlisted(db: ID1Database, userId: string, appId: number): Promise<void> {
   const exists = await db.prepare('SELECT 1 AS x FROM user_wishlist WHERE user_id = ? AND app_id = ?').bind(userId, appId).first();
-  if (!exists) {
-    const count = await db.prepare('SELECT COUNT(*) AS n FROM user_wishlist WHERE user_id = ?').bind(userId).first<number>('n');
-    if ((count ?? 0) >= SAVED_ITEMS_CAP) badRequest(`Your wishlist is full (${SAVED_ITEMS_CAP} games).`);
-    await db
-      .prepare('INSERT OR IGNORE INTO user_wishlist (user_id, app_id, added_at) VALUES (?, ?, ?)')
-      .bind(userId, appId, new Date().toISOString())
-      .run();
+  if (exists) return;
+  const count = await db.prepare('SELECT COUNT(*) AS n FROM user_wishlist WHERE user_id = ?').bind(userId).first<number>('n');
+  if ((count ?? 0) >= SAVED_ITEMS_CAP) badRequest(`Your wishlist is full (${SAVED_ITEMS_CAP} games).`);
+  await db
+    .prepare('INSERT OR IGNORE INTO user_wishlist (user_id, app_id, added_at) VALUES (?, ?, ?)')
+    .bind(userId, appId, new Date().toISOString())
+    .run();
+}
+
+async function putWishlist(db: ID1Database, userId: string, appId: number): Promise<Response> {
+  await ensureWishlisted(db, userId, appId);
+  return json(await loadWishlist(db, userId));
+}
+
+/** PATCH /api/me/wishlist/:id { status?, note? }: saves the game too if it wasn't. */
+async function patchWishlist(request: Request, db: ID1Database, userId: string, appId: number): Promise<Response> {
+  const body = await readJson(request);
+  const sets: string[] = [];
+  const values: unknown[] = [];
+  if (body.status !== undefined) {
+    if (!isShelfStatus(body.status)) badRequest('Status must be want, playing or finished.');
+    sets.push('status = ?');
+    values.push(body.status);
   }
-  return json({ wishlist: await loadWishlist(db, userId) });
+  if (body.note !== undefined) {
+    const err = validateShelfNote(body.note);
+    if (err) badRequest(err);
+    sets.push('note = ?');
+    values.push(cleanNote(body.note as string));
+  }
+  if (!sets.length) badRequest('Nothing to update.');
+  await ensureWishlisted(db, userId, appId);
+  await db.prepare(`UPDATE user_wishlist SET ${sets.join(', ')} WHERE user_id = ? AND app_id = ?`).bind(...values, userId, appId).run();
+  return json(await loadWishlist(db, userId));
 }
 
 async function putBookmark(db: ID1Database, userId: string, articleId: string): Promise<Response> {
@@ -293,15 +337,16 @@ async function putBookmark(db: ID1Database, userId: string, articleId: string): 
 }
 
 async function merge(request: Request, db: ID1Database, user: UserRow): Promise<Response> {
-  const body = await readJson<{ wishlist?: unknown; bookmarks?: unknown }>(request);
+  const body = await readJson<{ wishlist?: unknown; bookmarks?: unknown; shelf?: unknown }>(request);
   if (body.wishlist !== undefined && !Array.isArray(body.wishlist)) badRequest('wishlist must be an array.');
   if (body.bookmarks !== undefined && !Array.isArray(body.bookmarks)) badRequest('bookmarks must be an array.');
   const inWishlist = (body.wishlist as unknown[] | undefined) ?? [];
   const inBookmarks = (body.bookmarks as unknown[] | undefined) ?? [];
   if (inWishlist.length > SAVED_ITEMS_CAP || inBookmarks.length > SAVED_ITEMS_CAP) badRequest('Too many items to merge.');
 
-  const [wishlist, bookmarks] = await Promise.all([loadWishlist(db, user.id), loadBookmarks(db, user.id)]);
+  const [{ wishlist, shelf }, bookmarks] = await Promise.all([loadWishlist(db, user.id), loadBookmarks(db, user.id)]);
   const haveApps = new Set(wishlist);
+  const inShelf = body.shelf && typeof body.shelf === 'object' && !Array.isArray(body.shelf) ? (body.shelf as Record<string, any>) : {};
   const haveArticles = new Set(bookmarks);
   // Incoming lists are newest first; descending timestamps keep that order.
   // They were saved recently (while signed out), so they sort ahead of
@@ -320,6 +365,18 @@ async function merge(request: Request, db: ID1Database, user: UserRow): Promise<
     );
   });
 
+  // Statuses and notes made on this device fill in where the account has none yet.
+  for (const [key, entry] of Object.entries(inShelf).slice(0, SAVED_ITEMS_CAP)) {
+    const appId = Number(key);
+    if (!isValidAppId(appId) || !haveApps.has(appId) || shelf[appId] || !entry || typeof entry !== 'object') continue;
+    const status = isShelfStatus(entry.status) ? entry.status : 'want';
+    const note = typeof entry.note === 'string' && !validateShelfNote(entry.note) ? cleanNote(entry.note) : '';
+    if (status === 'want' && !note) continue;
+    statements.push(
+      db.prepare('UPDATE user_wishlist SET status = ?, note = ? WHERE user_id = ? AND app_id = ?').bind(status, note, user.id, appId)
+    );
+  }
+
   room = SAVED_ITEMS_CAP - bookmarks.length;
   inBookmarks.forEach((value, i) => {
     if (room <= 0 || !isValidArticleId(value) || haveArticles.has(value)) return;
@@ -331,7 +388,10 @@ async function merge(request: Request, db: ID1Database, user: UserRow): Promise<
     );
   });
 
-  if (statements.length) await db.batch(statements);
+  if (statements.length) {
+    // Inserts come before the shelf updates that refer to them.
+    for (let i = 0; i < statements.length; i += 100) await db.batch(statements.slice(i, i + 100));
+  }
   return json(await loadState(db, user));
 }
 
@@ -408,9 +468,10 @@ export async function handleAccountRoutes(request: Request, env: Env, url: URL):
   if (wishMatch) {
     const appId = parseAppId(wishMatch[1]);
     if (method === 'PUT') return putWishlist(db, user.id, appId);
+    if (method === 'PATCH') return patchWishlist(request, db, user.id, appId);
     if (method === 'DELETE') {
       await db.prepare('DELETE FROM user_wishlist WHERE user_id = ? AND app_id = ?').bind(user.id, appId).run();
-      return json({ wishlist: await loadWishlist(db, user.id) });
+      return json(await loadWishlist(db, user.id));
     }
     methodNotAllowed();
   }

@@ -7,7 +7,7 @@
  * on sign-out so the next person on a shared computer starts fresh.
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { AccountState } from '../shared/account';
+import { isShelfStatus, type AccountState, type ShelfEntry, type ShelfStatus } from '../shared/account';
 import {
   addBookmark,
   addToWishlist,
@@ -15,7 +15,8 @@ import {
   logout,
   mergeSaved,
   removeBookmark,
-  removeFromWishlist
+  removeFromWishlist,
+  updateShelfEntry
 } from '../services/accountApi';
 
 const LOCAL_KEY = 'cd_saved_v2';
@@ -24,6 +25,29 @@ const LEGACY_KEYS = ['cozy_wishlist', 'cozy_bookmarks', 'cozy_user_profile', 'co
 interface LocalSaved {
   wishlist: number[];
   bookmarks: string[];
+  shelf: Record<number, ShelfEntry>;
+}
+
+const EMPTY_LOCAL: LocalSaved = { wishlist: [], bookmarks: [], shelf: {} };
+const DEFAULT_ENTRY: ShelfEntry = { status: 'want', note: '' };
+
+function readShelf(value: unknown): Record<number, ShelfEntry> {
+  const out: Record<number, ShelfEntry> = {};
+  if (!value || typeof value !== 'object') return out;
+  for (const [k, v] of Object.entries(value as Record<string, any>)) {
+    const id = Number(k);
+    if (!Number.isInteger(id) || id <= 0 || !v || typeof v !== 'object') continue;
+    out[id] = { status: isShelfStatus(v.status) ? v.status : 'want', note: typeof v.note === 'string' ? v.note.slice(0, 280) : '' };
+  }
+  return out;
+}
+
+/** Drops default entries so storage and payloads only carry what the reader set. */
+function setEntry(shelf: Record<number, ShelfEntry>, appId: number, entry: ShelfEntry | null): Record<number, ShelfEntry> {
+  const next = { ...shelf };
+  if (!entry || (entry.status === 'want' && !entry.note)) delete next[appId];
+  else next[appId] = entry;
+  return next;
 }
 
 function readLocal(): LocalSaved {
@@ -32,10 +56,11 @@ function readLocal(): LocalSaved {
     const v = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}');
     return {
       wishlist: Array.isArray(v.wishlist) ? v.wishlist.filter((n: unknown) => Number.isInteger(n) && (n as number) > 0) : [],
-      bookmarks: Array.isArray(v.bookmarks) ? v.bookmarks.filter((s: unknown) => typeof s === 'string') : []
+      bookmarks: Array.isArray(v.bookmarks) ? v.bookmarks.filter((s: unknown) => typeof s === 'string') : [],
+      shelf: readShelf(v.shelf)
     };
   } catch {
-    return { wishlist: [], bookmarks: [] };
+    return EMPTY_LOCAL;
   }
 }
 
@@ -57,6 +82,10 @@ interface SavedContextValue {
   isArticleSaved: (id: string) => boolean;
   toggleGame: (appId: number) => void;
   toggleArticle: (id: string) => void;
+  /** Status and note for a saved game (defaults when none was set). */
+  shelfEntry: (appId: number) => ShelfEntry;
+  /** Changes a game's status or note; saves the game if it wasn't saved. */
+  setShelfEntry: (appId: number, patch: { status?: ShelfStatus; note?: string }) => void;
   onSignedIn: (state: AccountState) => Promise<void>;
   setAccount: (state: AccountState) => void;
   signOut: () => Promise<void>;
@@ -92,21 +121,27 @@ export function SavedProvider({ children }: { children: ReactNode }) {
 
   const wishlist = account ? account.wishlist : local.wishlist;
   const bookmarks = account ? account.bookmarks : local.bookmarks;
+  const shelf = account ? account.shelf ?? {} : local.shelf;
 
   const toggleGame = useCallback(
     (appId: number) => {
       if (!account) {
-        setLocal((s) => ({
-          ...s,
-          wishlist: s.wishlist.includes(appId) ? s.wishlist.filter((id) => id !== appId) : [appId, ...s.wishlist]
-        }));
+        setLocal((s) =>
+          s.wishlist.includes(appId)
+            ? { ...s, wishlist: s.wishlist.filter((id) => id !== appId), shelf: setEntry(s.shelf, appId, null) }
+            : { ...s, wishlist: [appId, ...s.wishlist] }
+        );
         return;
       }
       const saved = account.wishlist.includes(appId);
       const previous = account;
-      setAccountState({ ...account, wishlist: saved ? account.wishlist.filter((id) => id !== appId) : [appId, ...account.wishlist] });
+      setAccountState({
+        ...account,
+        wishlist: saved ? account.wishlist.filter((id) => id !== appId) : [appId, ...account.wishlist],
+        shelf: saved ? setEntry(account.shelf ?? {}, appId, null) : account.shelf
+      });
       (saved ? removeFromWishlist(appId) : addToWishlist(appId))
-        .then(({ wishlist }) => setAccountState((a) => (a ? { ...a, wishlist } : a)))
+        .then(({ wishlist, shelf }) => setAccountState((a) => (a ? { ...a, wishlist, shelf } : a)))
         .catch((err) => {
           setAccountState(previous);
           showNotice(err?.message || 'Couldn’t update your shelf.');
@@ -137,13 +172,40 @@ export function SavedProvider({ children }: { children: ReactNode }) {
     [account, showNotice]
   );
 
+  const setShelfEntry = useCallback(
+    (appId: number, patch: { status?: ShelfStatus; note?: string }) => {
+      if (!account) {
+        setLocal((s) => ({
+          ...s,
+          wishlist: s.wishlist.includes(appId) ? s.wishlist : [appId, ...s.wishlist],
+          shelf: setEntry(s.shelf, appId, { ...DEFAULT_ENTRY, ...s.shelf[appId], ...patch })
+        }));
+        return;
+      }
+      const previous = account;
+      const current = account.shelf ?? {};
+      setAccountState({
+        ...account,
+        wishlist: account.wishlist.includes(appId) ? account.wishlist : [appId, ...account.wishlist],
+        shelf: setEntry(current, appId, { ...DEFAULT_ENTRY, ...current[appId], ...patch })
+      });
+      updateShelfEntry(appId, patch)
+        .then(({ wishlist, shelf }) => setAccountState((a) => (a ? { ...a, wishlist, shelf } : a)))
+        .catch((err) => {
+          setAccountState(previous);
+          showNotice(err?.message || 'Couldn’t update your shelf.');
+        });
+    },
+    [account, showNotice]
+  );
+
   const onSignedIn = useCallback(
     async (state: AccountState) => {
       setAccountState(state);
       if (local.wishlist.length || local.bookmarks.length) {
         try {
           setAccountState(await mergeSaved(local));
-          setLocal({ wishlist: [], bookmarks: [] });
+          setLocal(EMPTY_LOCAL);
           writeLocal(null);
         } catch {
           showNotice('Signed in, but we couldn’t move this device’s saved games into your account yet.');
@@ -158,7 +220,7 @@ export function SavedProvider({ children }: { children: ReactNode }) {
       await logout();
     } finally {
       setAccountState(null);
-      setLocal({ wishlist: [], bookmarks: [] });
+      setLocal(EMPTY_LOCAL);
       writeLocal(null);
     }
   }, []);
@@ -172,13 +234,15 @@ export function SavedProvider({ children }: { children: ReactNode }) {
       isArticleSaved: (id) => bookmarks.includes(id),
       toggleGame,
       toggleArticle,
+      shelfEntry: (id) => shelf[id] ?? DEFAULT_ENTRY,
+      setShelfEntry,
       onSignedIn,
       setAccount: setAccountState,
       signOut,
       notice,
       showNotice
     }),
-    [account, wishlist, bookmarks, toggleGame, toggleArticle, onSignedIn, signOut, notice, showNotice]
+    [account, wishlist, bookmarks, shelf, toggleGame, toggleArticle, setShelfEntry, onSignedIn, signOut, notice, showNotice]
   );
 
   return <SavedContext.Provider value={value}>{children}</SavedContext.Provider>;

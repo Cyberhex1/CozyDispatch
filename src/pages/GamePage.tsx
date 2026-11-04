@@ -9,6 +9,9 @@ import { GENRE_BY_ID } from '../shared/genres';
 import { GameTile } from '../components/GameCard';
 import { WireItem } from '../components/ArticleItem';
 import { EmptyState, ErrorState, PriceTag, SaveGameButton, SectionHeader, Skeleton } from '../components/ui';
+import { AddToListButton } from '../components/AddToListDialog';
+import { ShelfNote, StatusSelect } from '../components/ShelfControls';
+import { useSaved } from '../lib/saved';
 
 interface GameResponse {
   game: Game;
@@ -58,6 +61,7 @@ function DeveloperUpdates({ appId }: { appId: number }) {
 
 export function GamePage({ appId }: { appId: number }) {
   const { data, error, retry } = useApi<GameResponse>(`/api/games/${appId}`);
+  const { isGameSaved } = useSaved();
   const game = data?.game;
 
   useEffect(() => {
@@ -131,7 +135,14 @@ export function GamePage({ appId }: { appId: number }) {
               View on Steam <ExternalLink className="h-4 w-4" aria-hidden />
             </a>
             <SaveGameButton game={game} variant="full" />
+            <AddToListButton game={game} />
           </div>
+          {isGameSaved(game.appId) && (
+            <div className="mt-4 flex max-w-md flex-col gap-2 border-l-2 border-rule pl-4">
+              <StatusSelect appId={game.appId} title={game.title} />
+              <ShelfNote appId={game.appId} title={game.title} />
+            </div>
+          )}
         </header>
 
         <aside aria-label="At a glance" className="lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
