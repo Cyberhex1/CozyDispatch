@@ -1,4 +1,4 @@
-# Keeps the catalog (every two weeks) and news (every two hours) fresh by writing straight to the production D1
+# Keeps the catalog (every two weeks) and news (daily) fresh by writing straight to the production D1
 # database. Needs three repository secrets (Settings → Secrets → Actions):
 #   CLOUDFLARE_API_TOKEN   (token with "D1 Edit" permission)
 #   CLOUDFLARE_ACCOUNT_ID
@@ -8,9 +8,9 @@ name: Sync games and news
 on:
   schedule:
     # D1's free plan allows 100,000 rows written per day, so the 7,000-game
-    # catalog is checked every two weeks (1st and 15th); news is small and runs every two hours.
+    # catalog is checked every two weeks (1st and 15th); news updates once a day.
     - cron: '17 5 1,15 * *'   # catalog + news, every two weeks
-    - cron: '47 1-23/2 * * *' # news only, on the odd hours
+    - cron: '47 6 * * *'      # news only, once a day
   workflow_dispatch:
     inputs:
       target:
