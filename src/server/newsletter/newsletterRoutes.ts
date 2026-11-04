@@ -8,6 +8,8 @@
  *   GET  /api/admin/newsletter/stats
  *   POST /api/admin/newsletter/send
  *   POST /api/admin/newsletter/send-pending-confirmations
+ *   GET  /api/admin/newsletter/weekly          (draft built from the catalog)
+ *   POST /api/admin/newsletter/weekly          (build and send it; refuses within 5 days of the last issue unless force)
  */
 import type { ID1Database } from '../db/d1Client';
 import { clientIp, Env, escapeHtml, html, HttpError, json, randomToken, rateLimit, readJson, sha256Hex, siteOrigin } from '../http';
@@ -15,6 +17,7 @@ import { isValidAppId, isValidEmail, normalizeEmail, NewsletterSubscribeResult }
 import { steamAssetUrl, steamStoreUrl } from '../../shared/steam';
 import { timingSafeEqualString } from '../auth/passwords';
 import { confirmationEmail, issueEmail, IssueGame, simplePage } from './emailTemplates';
+import { buildWeeklyDraft } from './weeklyDigest';
 import { mailerConfigured, maskEmail, OutgoingEmail, sendEmail, sendEmailBatch } from './mailer';
 
 const CONFIRM_VALID_MS = 7 * 24 * 60 * 60 * 1000;
@@ -302,8 +305,26 @@ async function loadGames(db: ID1Database, appIds: number[]): Promise<IssueGame[]
 
 async function sendIssue(request: Request, env: Env): Promise<Response> {
   if (!mailerConfigured(env)) throw new HttpError(503, 'Email delivery is not configured (RESEND_API_KEY / EMAIL_FROM).');
+  return deliverIssue(request, env, await readJson(request));
+}
+
+async function sendWeekly(request: Request, env: Env): Promise<Response> {
+  if (!mailerConfigured(env)) throw new HttpError(503, 'Email delivery is not configured (RESEND_API_KEY / EMAIL_FROM).');
+  const body = await readJson(request).catch(() => ({} as Record<string, unknown>));
+  if (body.force !== true) {
+    const last = await env.DB.prepare('SELECT created_at FROM newsletter_issues ORDER BY created_at DESC LIMIT 1').first<string>('created_at');
+    if (last && Date.now() - new Date(last).getTime() < 5 * 24 * 60 * 60 * 1000) {
+      throw new HttpError(409, `An issue already went out on ${last.slice(0, 10)}. Send with "force": true to send another anyway.`);
+    }
+  }
+  const draft = await buildWeeklyDraft(env.DB);
+  if (!draft.appIds.length) throw new HttpError(409, 'Nothing new to feature this week, so no issue was sent.');
+  const res = await deliverIssue(request, env, { subject: draft.subject, intro: draft.intro, appIds: draft.appIds });
+  return json({ ...(await res.json() as object), draft });
+}
+
+async function deliverIssue(request: Request, env: Env, body: Record<string, unknown>): Promise<Response> {
   const db = env.DB;
-  const body = await readJson(request);
   const subject = typeof body.subject === 'string' ? body.subject.trim() : '';
   const intro = typeof body.intro === 'string' ? body.intro.replace(/\r\n/g, '\n').trim() : '';
   if (subject.length < 1 || subject.length > 120 || /[\u0000-\u001f\u007f]/.test(subject)) {
@@ -412,6 +433,11 @@ export async function handleNewsletterRoutes(request: Request, env: Env, url: UR
       await requireAdmin(request, env);
       only(method, 'POST');
       return sendIssue(request, env);
+    case '/api/admin/newsletter/weekly':
+      await requireAdmin(request, env);
+      if (method === 'GET') return json({ mailerConfigured: mailerConfigured(env), draft: await buildWeeklyDraft(env.DB) });
+      only(method, 'POST');
+      return sendWeekly(request, env);
     case '/api/admin/newsletter/send-pending-confirmations':
       await requireAdmin(request, env);
       only(method, 'POST');

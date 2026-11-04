@@ -2,7 +2,9 @@
  * Typed browser client for the account API. Cookie-based (HttpOnly session),
  * same-origin only. No UI concerns here.
  */
-import type { AccountState, Avatar } from '../shared/account';
+import type { AccountState, Avatar, ShelfEntry, ShelfStatus } from '../shared/account';
+
+export type WishlistResponse = Pick<AccountState, 'wishlist' | 'shelf'>;
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -60,12 +62,17 @@ export function updateProfile(patch: { displayName?: string; avatar?: Avatar; bi
   return apiRequest('PATCH', '/api/me', patch);
 }
 
-export function addToWishlist(appId: number): Promise<{ wishlist: number[] }> {
+export function addToWishlist(appId: number): Promise<WishlistResponse> {
   return apiRequest('PUT', `/api/me/wishlist/${appId}`);
 }
 
-export function removeFromWishlist(appId: number): Promise<{ wishlist: number[] }> {
+export function removeFromWishlist(appId: number): Promise<WishlistResponse> {
   return apiRequest('DELETE', `/api/me/wishlist/${appId}`);
+}
+
+/** Sets a saved game's status and/or note (saving it first if needed). */
+export function updateShelfEntry(appId: number, patch: { status?: ShelfStatus; note?: string }): Promise<WishlistResponse> {
+  return apiRequest('PATCH', `/api/me/wishlist/${appId}`, patch);
 }
 
 export function addBookmark(articleId: string): Promise<{ bookmarks: string[] }> {
@@ -77,7 +84,7 @@ export function removeBookmark(articleId: string): Promise<{ bookmarks: string[]
 }
 
 /** Folds items saved while signed out into the account (union, server-validated). */
-export function mergeSaved(input: { wishlist?: number[]; bookmarks?: string[] }): Promise<AccountState> {
+export function mergeSaved(input: { wishlist?: number[]; bookmarks?: string[]; shelf?: Record<number, ShelfEntry> }): Promise<AccountState> {
   return apiRequest('POST', '/api/me/merge', input);
 }
 

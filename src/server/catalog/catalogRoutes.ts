@@ -203,6 +203,23 @@ export async function getHomeFeed(db: ID1Database): Promise<HomeFeed> {
   };
 }
 
+/**
+ * Release calendar: everything out since the start of this month plus every
+ * upcoming game, soonest first. Games with only a vague date ("Q2 2027",
+ * "To be announced") come last; the page groups them.
+ */
+export async function getCalendar(db: ID1Database, section?: 'cozy' | 'indie'): Promise<Game[]> {
+  const now = new Date();
+  const monthStart = Math.floor(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1) / 1000);
+  const sectionSql = section === 'cozy' ? 'AND is_cozy = 1' : section === 'indie' ? 'AND is_indie = 1' : '';
+  return gamesWhere(
+    db,
+    `(is_coming_soon = 1 OR release_ts >= ?) ${sectionSql}
+     ORDER BY (release_ts IS NULL), release_ts ASC, popularity ASC LIMIT 600`,
+    monthStart
+  );
+}
+
 /** Recent official announcements for one game, straight from Steam (cached at the edge). */
 async function liveAnnouncements(game: Game): Promise<Article[]> {
   try {
@@ -235,7 +252,7 @@ async function liveAnnouncements(game: Game): Promise<Article[]> {
   }
 }
 
-const TOP_LEVEL = new Set(['/api/home', '/api/genres', '/api/news', '/api/status']);
+const TOP_LEVEL = new Set(['/api/home', '/api/genres', '/api/news', '/api/status', '/api/calendar']);
 
 export async function handleCatalogRoutes(request: Request, env: Env, url: URL): Promise<Response | null> {
   const path = url.pathname;
@@ -245,6 +262,10 @@ export async function handleCatalogRoutes(request: Request, env: Env, url: URL):
 
   if (path === '/api/home') return cachedJson(await getHomeFeed(db));
   if (path === '/api/status') return json(await getStats(db));
+  if (path === '/api/calendar') {
+    const section = url.searchParams.get('section');
+    return cachedJson({ items: await getCalendar(db, section === 'cozy' || section === 'indie' ? section : undefined) });
+  }
 
   if (path === '/api/genres') {
     const section = url.searchParams.get('section');
