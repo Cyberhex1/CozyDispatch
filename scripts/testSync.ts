@@ -4,7 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import { classifyTags } from '../src/shared/genres';
-import { releaseLabel, toGameRow, GAME_COLUMNS, type Candidate } from '../src/sync/catalogSync';
+import { gameUpdateCondition, releaseLabel, toGameRow, GAME_COLUMNS, type Candidate } from '../src/sync/catalogSync';
 import { buildTitleMatchers, cleanSteamAnnouncement, parseFeed, type CatalogTitle } from '../src/sync/newsSync';
 import { sqlLiteral, upsertRows } from '../src/sync/sqlWrite';
 import { createLocalD1 } from '../src/server/db/localSqlite';
@@ -164,8 +164,8 @@ async function main() {
       toGameRow({ ...candidate({ tags: ['Cozy', 'Farming Sim', 'Indie'], name: "Bramble's Farm", appid: 10, id: 10 }) }, tagIds, 'now', NOW)!,
       toGameRow({ ...candidate({ tags: ['Indie', 'Horror'], name: 'Night Shift', appid: 11, id: 11 }) }, tagIds, 'now', NOW)!
     ];
-    await upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', rows.map((r) => r.values), ['first_seen_at']);
-    await upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', rows.map((r) => r.values), ['first_seen_at']); // idempotent
+    await upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', rows.map((r) => r.values), { keepOnUpdate: ['first_seen_at'] });
+    await upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', rows.map((r) => r.values), { keepOnUpdate: ['first_seen_at'] }); // idempotent
     assert.equal((await queryGames(db, { section: 'cozy' })).total, 1);
     assert.equal((await queryGames(db, { section: 'indie' })).total, 2);
     assert.equal((await queryGames(db, { genre: 'horror' })).items[0].title, 'Night Shift');
@@ -174,6 +174,33 @@ async function main() {
     const g = (await queryGames(db, { section: 'cozy' })).items[0];
     assert.equal(g.headerImage, 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1/header.jpg?t=99');
     assert.equal(g.deck, 'verified');
+  });
+
+  await test('catalog upsert skips unchanged games to save D1 writes', async () => {
+    const db = createLocalD1(':memory:');
+    const day1 = '2026-10-01T00:00:00.000Z';
+    const make = (iso: string, over: Omit<Partial<Candidate['item']>, 'tags'> = {}, popularity = 100) =>
+      [toGameRow({ ...candidate({ tags: ['Cozy', 'Indie'], name: 'Quiet Pond', appid: 20, id: 20, ...over }), popularity }, tagIds, iso, NOW)!.values];
+    const opts = (iso: string) => ({
+      keepOnUpdate: ['first_seen_at'],
+      updateWhen: gameUpdateCondition(new Date(Date.parse(iso) - 1 * 86400_000).toISOString())
+    });
+    const write = (iso: string, over?: Omit<Partial<Candidate['item']>, 'tags'>, popularity?: number) =>
+      upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', make(iso, over, popularity), opts(iso));
+
+    assert.equal((await write(day1)).changed, 1, 'new game is inserted');
+    const sixHoursLater = '2026-10-01T06:00:00.000Z';
+    assert.equal((await write(sixHoursLater)).changed, 0, 'identical data is not rewritten');
+    assert.equal((await write(sixHoursLater, {}, 110)).changed, 0, 'small popularity drift is not rewritten');
+    assert.equal((await write(sixHoursLater, {}, 400)).changed, 1, 'big popularity move is written');
+    const sale = { best_purchase_option: { final_price_in_cents: '499', original_price_in_cents: '1999', discount_pct: 75 } };
+    assert.equal((await write(sixHoursLater, sale, 400)).changed, 1, 'price change is written');
+    assert.equal((await write('2026-10-01T20:00:00.000Z', sale, 400)).changed, 0, 'still fresh the same day');
+    assert.equal((await write('2026-10-04T00:00:00.000Z', sale, 400)).changed, 1, 'last-seen refreshed on the next scheduled run');
+    const row = await db.prepare('SELECT first_seen_at, updated_at, discount_pct FROM games WHERE app_id = 20').first<any>();
+    assert.equal(row.first_seen_at, day1);
+    assert.equal(row.updated_at, '2026-10-04T00:00:00.000Z');
+    assert.equal(row.discount_pct, 75);
   });
 
   console.log(`\n${passed} passed, ${failures.length} failed`);

@@ -21,30 +21,58 @@ export function sqlLiteral(value: SqlValue): string {
 
 const MAX_STATEMENT_BYTES = 90_000; // D1 limit is 100 KB per statement
 
+export interface UpsertOptions {
+  /** Columns left untouched on update (e.g. first_seen_at). */
+  keepOnUpdate?: string[];
+  /**
+   * SQL condition (using `<table>.col` for the stored row and `excluded.col`
+   * for the incoming one) that must hold for an existing row to be updated.
+   * Rows that fail it are skipped and cost no D1 row writes. Without it every
+   * conflicting row is rewritten, which on a 7,000-game catalog (plus its
+   * indexes) burns tens of thousands of D1 "rows written" per run.
+   */
+  updateWhen?: string;
+}
+
+export interface UpsertResult {
+  /** Rows offered to the upsert. */
+  offered: number;
+  /** Rows actually inserted or updated. */
+  changed: number;
+  /** D1's own "rows written" meter for these statements (includes index writes), when reported. */
+  rowsWritten: number | null;
+}
+
+/** `(t.a IS NOT excluded.a OR t.b IS NOT excluded.b ...)`: true when any listed column differs. */
+export function anyColumnChanged(table: string, columns: string[]): string {
+  return `(${columns.map((c) => `${table}.${c} IS NOT excluded.${c}`).join(' OR ')})`;
+}
+
 export async function upsertRows(
   db: ID1Database,
   table: string,
   columns: string[],
   conflictKey: string,
   rows: SqlValue[][],
-  /** Columns left untouched on update (e.g. first_seen_at). */
-  keepOnUpdate: string[] = []
-): Promise<number> {
-  if (rows.length === 0) return 0;
+  options: UpsertOptions = {}
+): Promise<UpsertResult> {
+  const result: UpsertResult = { offered: rows.length, changed: 0, rowsWritten: null };
+  if (rows.length === 0) return result;
+  const keep = options.keepOnUpdate ?? [];
   const head = `INSERT INTO ${table} (${columns.join(', ')}) VALUES `;
   const updates = columns
-    .filter((c) => c !== conflictKey && !keepOnUpdate.includes(c))
+    .filter((c) => c !== conflictKey && !keep.includes(c))
     .map((c) => `${c} = excluded.${c}`)
     .join(', ');
-  const tail = ` ON CONFLICT(${conflictKey}) DO UPDATE SET ${updates}`;
+  const tail = ` ON CONFLICT(${conflictKey}) DO UPDATE SET ${updates}${options.updateWhen ? ` WHERE ${options.updateWhen}` : ''}`;
 
-  let written = 0;
   let chunk: string[] = [];
   let size = head.length + tail.length;
   const flush = async () => {
     if (chunk.length === 0) return;
-    await db.prepare(head + chunk.join(', ') + tail).run();
-    written += chunk.length;
+    const res = await db.prepare(head + chunk.join(', ') + tail).run();
+    result.changed += Number(res.meta?.changes ?? 0);
+    if (typeof res.meta?.rows_written === 'number') result.rowsWritten = (result.rowsWritten ?? 0) + res.meta.rows_written;
     chunk = [];
     size = head.length + tail.length;
   };
@@ -56,7 +84,7 @@ export async function upsertRows(
     size += tuple.length + 2;
   }
   await flush();
-  return written;
+  return result;
 }
 
 export async function recordSyncRun(
