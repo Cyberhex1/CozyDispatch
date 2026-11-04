@@ -97,11 +97,14 @@ export const GAME_COLUMNS = [
  *  - any stored Steam fact (price, discount, release, tags, art, ...), or
  *  - popularity / review count moved by a meaningful amount, or
  *  - its `updated_at` ("last seen in a sync") is older than SEEN_REFRESH_MS,
- *    which keeps the 7-day stale-game cleanup working.
+ *    which keeps the stale-game cleanup working.
  */
 const VOLATILE_COLUMNS = ['popularity', 'review_count', 'first_seen_at', 'updated_at'];
-const SEEN_REFRESH_MS = 2 * 86400_000;
-const STALE_AFTER_MS = 7 * 86400_000;
+// The catalog sync runs every two weeks (see .github/workflows/sync.yml), so
+// every run refreshes last-seen, and a game is only dropped after it has been
+// missing from two runs in a row.
+const SEEN_REFRESH_MS = 1 * 86400_000;
+const STALE_AFTER_MS = 35 * 86400_000;
 
 export function gameUpdateCondition(refreshBeforeIso: string): string {
   const stable = GAME_COLUMNS.filter((c) => c !== 'app_id' && !VOLATILE_COLUMNS.includes(c));
@@ -305,7 +308,7 @@ export async function syncCatalog(db: ID1Database, log: (msg: string) => void = 
     log(`  Wrote ${upsert.changed} of ${rows.length} games${upsert.rowsWritten !== null ? ` (${upsert.rowsWritten} D1 rows written)` : ''}`);
 
     // Games that dropped out of every list (delisted, fell below the bar) are
-    // removed once they've been missing for a week, so one bad run can't empty the site.
+    // removed once they've been missing from two runs in a row, so one bad run can't empty the site.
     const cutoff = new Date(startedAt.getTime() - STALE_AFTER_MS).toISOString();
     const removed = await db.prepare('DELETE FROM games WHERE updated_at < ?').bind(cutoff).run();
 

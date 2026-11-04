@@ -1,4 +1,4 @@
-# Keeps the catalog (daily) and news (every two hours) fresh by writing straight to the production D1
+# Keeps the catalog (every two weeks) and news (every two hours) fresh by writing straight to the production D1
 # database. Needs three repository secrets (Settings → Secrets → Actions):
 #   CLOUDFLARE_API_TOKEN   (token with "D1 Edit" permission)
 #   CLOUDFLARE_ACCOUNT_ID
@@ -8,8 +8,8 @@ name: Sync games and news
 on:
   schedule:
     # D1's free plan allows 100,000 rows written per day, so the 7,000-game
-    # catalog syncs once a day; news is small and runs every two hours.
-    - cron: '17 5 * * *'      # catalog + news, once a day
+    # catalog is checked every two weeks (1st and 15th); news is small and runs every two hours.
+    - cron: '17 5 1,15 * *'   # catalog + news, every two weeks
     - cron: '47 1-23/2 * * *' # news only, on the odd hours
   workflow_dispatch:
     inputs:
@@ -42,6 +42,6 @@ jobs:
         run: |
           TARGET="${{ github.event.inputs.target }}"
           if [ -z "$TARGET" ]; then
-            if [ "${{ github.event.schedule }}" = "17 5 * * *" ]; then TARGET=all; else TARGET=news; fi
+            if [ "${{ github.event.schedule }}" = "17 5 1,15 * *" ]; then TARGET=all; else TARGET=news; fi
           fi
           npx tsx scripts/sync.ts --remote --target="$TARGET"

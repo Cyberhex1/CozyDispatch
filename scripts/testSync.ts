@@ -183,7 +183,7 @@ async function main() {
       [toGameRow({ ...candidate({ tags: ['Cozy', 'Indie'], name: 'Quiet Pond', appid: 20, id: 20, ...over }), popularity }, tagIds, iso, NOW)!.values];
     const opts = (iso: string) => ({
       keepOnUpdate: ['first_seen_at'],
-      updateWhen: gameUpdateCondition(new Date(Date.parse(iso) - 2 * 86400_000).toISOString())
+      updateWhen: gameUpdateCondition(new Date(Date.parse(iso) - 1 * 86400_000).toISOString())
     });
     const write = (iso: string, over?: Omit<Partial<Candidate['item']>, 'tags'>, popularity?: number) =>
       upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', make(iso, over, popularity), opts(iso));
@@ -195,8 +195,8 @@ async function main() {
     assert.equal((await write(sixHoursLater, {}, 400)).changed, 1, 'big popularity move is written');
     const sale = { best_purchase_option: { final_price_in_cents: '499', original_price_in_cents: '1999', discount_pct: 75 } };
     assert.equal((await write(sixHoursLater, sale, 400)).changed, 1, 'price change is written');
-    assert.equal((await write('2026-10-02T00:00:00.000Z', sale, 400)).changed, 0, 'still fresh after a day');
-    assert.equal((await write('2026-10-04T00:00:00.000Z', sale, 400)).changed, 1, 'last-seen refreshed after two days');
+    assert.equal((await write('2026-10-01T20:00:00.000Z', sale, 400)).changed, 0, 'still fresh the same day');
+    assert.equal((await write('2026-10-04T00:00:00.000Z', sale, 400)).changed, 1, 'last-seen refreshed on the next scheduled run');
     const row = await db.prepare('SELECT first_seen_at, updated_at, discount_pct FROM games WHERE app_id = 20').first<any>();
     assert.equal(row.first_seen_at, day1);
     assert.equal(row.updated_at, '2026-10-04T00:00:00.000Z');
