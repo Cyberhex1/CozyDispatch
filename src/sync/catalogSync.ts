@@ -15,7 +15,7 @@ import {
   type SteamStoreItem,
   type TagQuery
 } from './steamStore';
-import { recordSyncRun, upsertRows, type SqlValue } from './sqlWrite';
+import { anyColumnChanged, recordSyncRun, upsertRows, type SqlValue } from './sqlWrite';
 
 const TAG = {
   cozy: 97376,
@@ -89,6 +89,29 @@ export const GAME_COLUMNS = [
   'review_count', 'review_percent', 'review_label', 'deck_compat', 'tags_json',
   'is_cozy', 'is_indie', 'is_horror', 'genres_json', 'popularity', 'first_seen_at', 'updated_at'
 ] as const;
+
+/**
+ * D1's free plan allows 100,000 rows written per day, and every index on
+ * `games` that a write touches counts as another row. So an existing game is
+ * only rewritten when something a reader would notice changed:
+ *  - any stored Steam fact (price, discount, release, tags, art, ...), or
+ *  - popularity / review count moved by a meaningful amount, or
+ *  - its `updated_at` ("last seen in a sync") is older than SEEN_REFRESH_MS,
+ *    which keeps the 7-day stale-game cleanup working.
+ */
+const VOLATILE_COLUMNS = ['popularity', 'review_count', 'first_seen_at', 'updated_at'];
+const SEEN_REFRESH_MS = 2 * 86400_000;
+const STALE_AFTER_MS = 7 * 86400_000;
+
+export function gameUpdateCondition(refreshBeforeIso: string): string {
+  const stable = GAME_COLUMNS.filter((c) => c !== 'app_id' && !VOLATILE_COLUMNS.includes(c));
+  return [
+    anyColumnChanged('games', stable),
+    'abs(games.popularity - excluded.popularity) > max(25, games.popularity / 5)',
+    'abs(games.review_count - excluded.review_count) > max(20, games.review_count / 20)',
+    `games.updated_at < '${refreshBeforeIso}'`
+  ].join(' OR ');
+}
 
 export interface GameRow {
   appId: number;
@@ -231,6 +254,10 @@ export interface CatalogSyncResult {
   cozy: number;
   indie: number;
   removedStale: number;
+  /** Games actually inserted or updated this run (the rest were unchanged). */
+  written: number;
+  /** D1's "rows written" meter for the upsert (includes index writes), when reported. */
+  d1RowsWritten: number | null;
   queries: Record<string, number>;
 }
 
@@ -271,11 +298,15 @@ export async function syncCatalog(db: ID1Database, log: (msg: string) => void = 
       throw new Error(`Only ${rows.length} games passed the filters; refusing to write a partial catalog.`);
     }
 
-    await upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', rows.map((r) => r.values), ['first_seen_at']);
+    const upsert = await upsertRows(db, 'games', [...GAME_COLUMNS], 'app_id', rows.map((r) => r.values), {
+      keepOnUpdate: ['first_seen_at'],
+      updateWhen: gameUpdateCondition(new Date(startedAt.getTime() - SEEN_REFRESH_MS).toISOString())
+    });
+    log(`  Wrote ${upsert.changed} of ${rows.length} games${upsert.rowsWritten !== null ? ` (${upsert.rowsWritten} D1 rows written)` : ''}`);
 
     // Games that dropped out of every list (delisted, fell below the bar) are
     // removed once they've been missing for a week, so one bad run can't empty the site.
-    const cutoff = new Date(startedAt.getTime() - 7 * 86400_000).toISOString();
+    const cutoff = new Date(startedAt.getTime() - STALE_AFTER_MS).toISOString();
     const removed = await db.prepare('DELETE FROM games WHERE updated_at < ?').bind(cutoff).run();
 
     const result: CatalogSyncResult = {
@@ -284,6 +315,8 @@ export async function syncCatalog(db: ID1Database, log: (msg: string) => void = 
       cozy: rows.filter((r) => r.isCozy).length,
       indie: rows.filter((r) => r.isIndie).length,
       removedStale: Number(removed.meta?.changes ?? 0),
+      written: upsert.changed,
+      d1RowsWritten: upsert.rowsWritten,
       queries
     };
     await recordSyncRun(db, 'catalog', startedAt, 'success', { ...result });

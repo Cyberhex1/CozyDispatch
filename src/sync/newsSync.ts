@@ -6,7 +6,7 @@
 import type { ID1Database } from '../server/db/d1Client';
 import { sha256Hex } from '../server/http';
 import { fetchWithRetry, getAppAnnouncements } from './steamStore';
-import { recordSyncRun, upsertRows, type SqlValue } from './sqlWrite';
+import { anyColumnChanged, recordSyncRun, upsertRows, type SqlValue } from './sqlWrite';
 
 export interface FeedSource {
   name: string;
@@ -296,11 +296,16 @@ export async function syncNews(db: ID1Database, log: (msg: string) => void = () 
 
     // De-duplicate by id (the same story can appear in two feeds).
     const unique = [...new Map(rows.map((r) => [r[0] as string, r])).values()];
-    await upsertRows(db, 'articles', ARTICLE_COLUMNS, 'id', unique, ['created_at']);
+    // Most stories are already stored from an earlier run; only write the ones that changed.
+    const upsert = await upsertRows(db, 'articles', ARTICLE_COLUMNS, 'id', unique, {
+      keepOnUpdate: ['created_at'],
+      updateWhen: anyColumnChanged('articles', ARTICLE_COLUMNS.filter((c) => c !== 'id' && c !== 'created_at'))
+    });
+    log(`  Wrote ${upsert.changed} of ${unique.length} articles${upsert.rowsWritten !== null ? ` (${upsert.rowsWritten} D1 rows written)` : ''}`);
 
     const removed = await db.prepare('DELETE FROM articles WHERE published_ts < ?').bind(nowTs - 120 * 86400).run();
     const result: NewsSyncResult = { feeds, updates, removedOld: Number(removed.meta?.changes ?? 0) };
-    await recordSyncRun(db, 'news', startedAt, 'success', { ...result, articles: unique.length });
+    await recordSyncRun(db, 'news', startedAt, 'success', { ...result, articles: unique.length, written: upsert.changed, d1RowsWritten: upsert.rowsWritten });
     return result;
   } catch (err: any) {
     await recordSyncRun(db, 'news', startedAt, 'error', {}, String(err?.message || err)).catch(() => {});
